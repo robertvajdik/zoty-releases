@@ -1,0 +1,161 @@
+/* Zoty admin – login screen (matches login.png) */
+:root {
+  --auth-accent: #6a6ff5;
+  --auth-accent-hover: #5a5fe6;
+  --auth-text: #2b2b33;
+  --auth-muted: #b9b3b0;
+  --auth-line: #e6e4ea;
+  --auth-icon: #3a3a42;
+  --auth-error-bg: #fdecef;
+  --auth-error: #b4233a;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+body.auth {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font: 300 16px/1.5 Roboto, Arial, Helvetica, sans-serif;
+  color: var(--auth-text);
+  background-color: #6c7ae0;
+  background-image: linear-gradient(180deg, #6b79de 0%, #707ce2 18%, #8d89f2 38%, #a093fb 50%, #c7a3d9 68%, #e1aeb6 85%, #f2b4a4 100%);
+  background-attachment: fixed;
+}
+
+.auth__wrap {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+
+.auth__card {
+  width: 100%;
+  max-width: 560px;
+  background: #fff;
+  border-radius: 28px;
+  padding: 40px 40px 40px;
+  box-shadow: 0 30px 80px rgba(80, 70, 160, .12);
+}
+
+/* Wordmark: the PNG contains the icon + "ZOTY"; show only the wordmark like the reference */
+.auth__logo {
+  width: 114px;
+  height: 39px;
+  margin: 0 auto 96px;
+  overflow: hidden;
+  position: relative;
+}
+.auth__logo img {
+  position: absolute;
+  left: -53px;
+  top: 0;
+  width: 166px;
+  height: auto;
+  filter: grayscale(1) brightness(.35);
+}
+
+.auth__note { margin: -64px 0 32px; text-align: center; color: #77727a; font-size: 15px; }
+
+.auth__msg:empty { display: none; }
+.auth__msg {
+  margin: -64px 0 32px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--auth-error-bg);
+  color: var(--auth-error);
+  font-size: 14px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.auth__field {
+  display: flex;
+  align-items: stretch;
+  height: 52px;
+  border: 1px solid var(--auth-line);
+  border-radius: 10px;
+  background: #fff;
+  margin-bottom: 20px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.auth__field:focus-within { border-color: var(--auth-accent); box-shadow: 0 0 0 3px rgba(106, 111, 245, .15); }
+
+.auth__icon {
+  flex: none;
+  width: 61px;
+  display: grid;
+  place-items: center;
+  color: var(--auth-icon);
+  border-right: 1px solid var(--auth-line);
+}
+
+.auth__field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 0 20px;
+  font: 300 19px Roboto, Arial, Helvetica, sans-serif;
+  color: var(--auth-text);
+  border-radius: 0 10px 10px 0;
+}
+.auth__field input::placeholder { color: var(--auth-muted); opacity: 1; }
+/* keep Chrome autofill from painting the field yellow */
+.auth__field input:-webkit-autofill { -webkit-box-shadow: 0 0 0 40px #fff inset; -webkit-text-fill-color: var(--auth-text); }
+
+.auth__eye {
+  flex: none;
+  width: 50px;
+  border: 0;
+  background: transparent;
+  color: #6f6f78;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  border-radius: 0 10px 10px 0;
+}
+.auth__eye:hover { color: var(--auth-accent); }
+.auth__eye:focus-visible { outline: 2px solid var(--auth-accent); outline-offset: -4px; }
+.auth__eye .eye-on { display: none; }
+.auth__eye[aria-pressed="true"] .eye-on { display: block; }
+.auth__eye[aria-pressed="true"] .eye-off { display: none; }
+
+.auth__submit {
+  display: block;
+  width: 100%;
+  height: 62px;
+  margin-top: 42px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--auth-accent);
+  color: #fff;
+  font: 500 21px Montserrat, Roboto, Arial, Helvetica, sans-serif;
+  cursor: pointer;
+  transition: background .15s, transform .05s;
+}
+.auth__submit:hover { background: var(--auth-accent-hover); }
+.auth__submit:active { transform: translateY(1px); }
+.auth__submit:focus-visible { outline: 3px solid rgba(106, 111, 245, .45); outline-offset: 3px; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .auth__card { padding: 32px 20px 28px; border-radius: 22px; }
+  .auth__logo { margin-bottom: 64px; }
+  .auth__note, .auth__msg { margin-top: -40px; margin-bottom: 24px; }
+  .auth__icon { width: 52px; }
+  .auth__field input { padding: 0 14px; font-size: 17px; }
+  .auth__submit { height: 56px; margin-top: 32px; font-size: 19px; }
+}
+.auth__note + .auth__msg { margin-top: -16px; }
