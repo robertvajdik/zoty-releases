@@ -3,8 +3,6 @@
 A changelog site in PHP. The layout follows docs.aris.com/release notes, and the look comes from zoty.cz.
 The changelog and admin accounts are stored in a database (MySQL/MariaDB through PDO).
 
-Author: Robert Vajdik
-
 ## Install
 
 1. Create a MySQL/MariaDB database and a user for it.
@@ -43,9 +41,13 @@ Alternatively, the environment variable `ZOTY_CONFIG` can point to a different c
 
 ## TXT export
 
-`export` accepts the same filters as the page, e.g. `export?version=v1.42.07&type=fixed`.
+`export` accepts the same filters as the page, e.g. `export?version=2.4.0&type=fixed`.
 
 ## Security
 
 On Apache, `.htaccess` blocks web access to `config.php`, `lib.php`, `*.sql`, `data/` and `partials/`.
 On nginx, add the same rules yourself.
+
+
+- Email: zoty@idsa.cz 
+- Heslo: kHkzmqCAWAbUHxIB

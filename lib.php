@@ -832,7 +832,7 @@ function build_txt(array $entries, array $filters = []): string
         $out .= $head . $nl . str_repeat('-', mb_strlen($head)) . $nl;
         if (trim($g['summary']) !== '') {
             foreach (preg_split('/\R/u', trim($g['summary'])) as $line) {
-                $out .= rtrim($line) . $nl;
+                $out .= txt_line(rtrim($line)) . $nl;
             }
         }
         foreach ($g['entries'] as $e) {
@@ -842,18 +842,28 @@ function build_txt(array $entries, array $filters = []): string
             if (empty($e['published'])) $out .= '  (KONCEPT)';
             $out .= $nl;
             foreach (preg_split('/\R/u', trim($e['body'])) as $line) {
-                $line = trim($line);
-                // strip markdown markers for plain text
-                $line = preg_replace('/\*\*(.+?)\*\*/u', '$1', $line);
-                $line = preg_replace('/`(.+?)`/u', '$1', $line);
-                $line = preg_replace('/\[(.+?)\]\((https?:\/\/[^\s)]+)\)/u', '$1 ($2)', $line);
-                $line = preg_replace('/^[-*•]\s+/u', '* ', $line);
+                $line = txt_line(trim($line));
                 $out .= ($line === '' ? '' : '    ' . $line) . $nl;
             }
         }
         $out .= $nl . $nl;
     }
     return rtrim($out) . $nl;
+}
+
+/** One line of markdown as plain text; images and links become full URLs. */
+function txt_line(string $line): string
+{
+    // ![popis](uploads/...) -> https://site/uploads/... (the alt text is kept unless it is only a number)
+    $line = preg_replace_callback('/!\[([^\]]*)\]\((https?:\/\/[^\s)]+|uploads\/[\w\/.\-]+)\)/u', function ($m) {
+        $url = str_starts_with($m[2], 'uploads/') ? site_url($m[2]) : $m[2];
+        $alt = trim($m[1]);
+        return ($alt === '' || ctype_digit($alt) ? '' : $alt . ': ') . $url;
+    }, $line);
+    $line = preg_replace('/\*\*(.+?)\*\*/u', '$1', $line);
+    $line = preg_replace('/`(.+?)`/u', '$1', $line);
+    $line = preg_replace('/\[(.+?)\]\((https?:\/\/[^\s)]+)\)/u', '$1 ($2)', $line);
+    return preg_replace('/^[-*•]\s+/u', '* ', $line);
 }
 
 function send_txt(array $entries, array $filters, string $suffix = ''): void
