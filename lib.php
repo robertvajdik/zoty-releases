@@ -308,6 +308,7 @@ function migrate(PDO $pdo, string $driver): void
             $ins->execute([$n, date('Y-m-d H:i:s')]);
         }
     }
+    migrate_tickets($pdo, $driver);
     // Guard against a table left over from the earlier schema (version stored as text on entries).
     try {
         $pdo->query("SELECT version_id FROM $e WHERE 1 = 0");
@@ -1325,3 +1326,5 @@ function atom_feed(int $limit = 30): string
     }
     return $out . "</feed>\n";
 }
+
+require __DIR__ . '/lib-tickets.php';

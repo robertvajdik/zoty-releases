@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "assets/tickets.css"
+        ],
+        "createdAt": "2026-11-06T18:11:34.344Z",
+        "reason": "model triage: L184 is .md blockquote in rendered ticket markdown; a left rule is the conventional quote marker, not a card side-tab"
+      }
+    ]
+  }
+}

@@ -30,6 +30,13 @@ return [
         // when the SMTP connection or login fails, try the hosting's PHP mail() instead
         'fallback_mail' => true,
     ],
+    // Customer support portal (/portal/).
+    'support' => [
+        // who gets an e-mail about new requests and customer comments
+        'notify' => ['podpora@example.cz'],
+        // choices for "Operating System" on the request form ("Jiné" / "Other" is always added)
+        'os' => ['Windows 11', 'Windows 10', 'Windows Server 2022', 'Windows Server 2019', 'Linux', 'macOS'],
+    ],
     // Klíčová slova (meta keywords + JSON-LD). Module names are added automatically.
     'keywords' => ['Zoty', 'přehled změn', 'release notes', 'changelog', 'novinky', 'aktualizace', 'vylepšení', 'opravy', 'verze'],
 ];

@@ -40,6 +40,8 @@ mail          e-mail for subscriptions: transport ('smtp' or 'mail'),
               host, port, secure ('ssl' / 'tls' / 'none'), user, pass,
               from, from_name, reply_to,
               fallback_mail (use PHP mail() when SMTP fails)
+support       customer portal: notify (staff e-mails for new requests and
+              customer comments), os (Operating System choices)
 keywords      meta keywords / JSON-LD; module names are added automatically
 
 The environment variable ZOTY_CONFIG can point to a different config file.
@@ -59,6 +61,16 @@ changelog_users        id, username, password_hash, created_at
 changelog_subscribers  id, email, token, confirmed, created_at,
                        confirmed_at, ip
 changelog_mailings     id, version_id, recipients, created_at
+changelog_customers    id, name, code (ticket key prefix, unique), created_at
+changelog_customer_users  id, customer_id, email (unique), name,
+                       password_hash, active, lang, created_at, last_login
+changelog_tickets      id, customer_id, number (per customer), user_id, type,
+                       product, product_version, os, summary, description,
+                       severity, status, created_at, updated_at
+changelog_ticket_comments  id, ticket_id, user_id (NULL = support),
+                       staff_name, body, event, created_at
+changelog_ticket_files id, ticket_id, comment_id, name, path, mime, size,
+                       created_at (files in data/tickets/<ticket_id>/)
 
 
 ADMINISTRATION (/admin/)
@@ -76,6 +88,15 @@ Moduly       Add, rename and delete modules (e.g. DataLink, Audit,
              Reporty). Renaming also updates the entries that use it.
              A module can be deleted only when no entry uses it.
 Odběratelé   List of e-mail subscribers.
+Požadavky    Support queue: all customer requests with tabs by status and
+             filters (customer, type, severity, text or key ACME-12).
+             Detail: reply to the customer (with attachments), change
+             status and severity, delete. The customer is e-mailed about
+             replies and status changes.
+Zákazníci    Customers and their portal users. Each customer has a key
+             (ACME) used for request numbers and its own space: its users
+             see all requests of that customer and nothing else. Add users
+             with a password (optionally e-mailed to them), block, delete.
 Export       Markdown (.md) export of published entries, or including drafts.
              The current filter is applied.
 
@@ -90,6 +111,10 @@ PUBLIC SITE
                   (version, type, module, date range)
 /export           Markdown export, same filters as the page,
                   e.g. export?version=v1.42.07&type=fixed
+/portal/          customer support portal (sign-in for customer users):
+                  list of the customer's requests, new request
+                  (Support Incident / Question / Feature Request),
+                  request detail with comments and attachments
 /feed.xml         Atom feed
 /sitemap.xml      sitemap
 /robots.txt       robots

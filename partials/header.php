@@ -2,6 +2,8 @@
 /** @var string $pageTitle */
 $base = $base_path ?? '';   // '' for root pages, '../' for admin pages
 $isAdminArea = !empty($admin_area);
+$isPortal = !empty($portal_area);
+$portalUser = $isPortal ? portal_user() : null;
 $self = basename($_SERVER['SCRIPT_NAME'] ?? '');
 $L = $isAdminArea ? 'cs' : lang();
 ?><!doctype html>
@@ -19,15 +21,16 @@ $L = $isAdminArea ? 'cs' : lang();
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= $base ?>assets/style.css?v=9">
+  <?php if ($isAdminArea || $isPortal): ?><link rel="stylesheet" href="<?= $base ?>assets/tickets.css?v=1"><?php endif; ?>
   <link rel="alternate" type="application/atom+xml" title="<?= h(tr('site.name')) ?>" href="<?= $base ?>feed.xml">
   <?= $headExtra ?? '' ?>
 </head>
-<body class="<?= $isAdminArea ? 'is-admin' : '' ?>">
+<body class="<?= $isAdminArea ? 'is-admin' : ($isPortal ? 'is-portal' : '') ?>">
 <header class="header">
   <nav class="navbar container">
-    <a class="navbar__logo" href="<?= $isAdminArea && is_admin() ? $base . 'admin/' : $base . './' ?>">
+    <a class="navbar__logo" href="<?= $isAdminArea && is_admin() ? $base . 'admin/' : ($isPortal ? $base . 'portal/' : $base . './') ?>">
       <img src="<?= $base ?>assets/img/zoty-logo.png" width="130" alt="<?= h(tr('nav.logo_alt')) ?>">
-      <span class="navbar__product"><?= $isAdminArea ? 'Administrace' : h(tr('site.product')) ?></span>
+      <span class="navbar__product"><?= $isAdminArea ? 'Administrace' : ($isPortal ? h(tr('portal.product')) : h(tr('site.product'))) ?></span>
     </a>
     <button class="navbar__toggle" type="button" aria-controls="nav-links" aria-expanded="false" aria-label="<?= h(tr('nav.menu')) ?>">
       <span></span><span></span><span></span>
@@ -38,10 +41,24 @@ $L = $isAdminArea ? 'cs' : lang();
         <li><a href="<?= $base ?>admin/versions" <?= $self === 'versions.php' ? 'aria-current="page"' : '' ?>>Verze</a></li>
         <li><a href="<?= $base ?>admin/modules" <?= $self === 'modules.php' ? 'aria-current="page"' : '' ?>>Moduly</a></li>
         <li><a href="<?= $base ?>admin/subscribers" <?= $self === 'subscribers.php' ? 'aria-current="page"' : '' ?>>Odběratelé</a></li>
+        <li><a href="<?= $base ?>admin/tickets" <?= in_array($self, ['tickets.php', 'ticket.php'], true) ? 'aria-current="page"' : '' ?>>Požadavky<?php $openN = ticket_stats()['open']; if ($openN): ?> <span class="nav-count"><?= $openN ?></span><?php endif; ?></a></li>
+        <li><a href="<?= $base ?>admin/customers" <?= $self === 'customers.php' ? 'aria-current="page"' : '' ?>>Zákazníci</a></li>
         <li><a href="<?= $base ?>./" target="_blank">Veřejný web</a></li>
         <li><a href="<?= $base ?>admin/logout">Odhlásit</a></li>
         <li><a class="button button--green" href="<?= $base ?>admin/edit">+ Nový záznam</a></li>
+      <?php elseif ($isPortal && $portalUser): ?>
+        <li><a href="<?= $base ?>portal/" <?= in_array($self, ['index.php', 'ticket.php'], true) ? 'aria-current="page"' : '' ?>><?= h(tr('portal.my_requests')) ?></a></li>
+        <li><a href="<?= $base ?>./"><?= h(tr('site.product')) ?></a></li>
+        <li class="lang-switch" role="group" aria-label="<?= h(tr('lang.switch')) ?>">
+          <?php foreach (LANGS as $code): ?>
+            <a href="<?= h(lang_url($code)) ?>" hreflang="<?= $code ?>" lang="<?= $code ?>" title="<?= h(tr('lang.name', [], $code)) ?>"
+               <?= $code === $L ? 'aria-current="true"' : '' ?>><?= strtoupper($code) ?></a>
+          <?php endforeach; ?>
+        </li>
+        <li class="nav-user"><span title="<?= h($portalUser['email']) ?>"><?= h($portalUser['customer_name']) ?></span> <a href="<?= $base ?>portal/logout"><?= h(tr('portal.logout')) ?></a></li>
+        <li><a class="button button--green" href="<?= $base ?>portal/new"><?= h(tr('portal.new_request')) ?></a></li>
       <?php else: ?>
+        <li><a href="<?= $base ?>portal/"><?= h(tr('nav.support')) ?></a></li>
         <li><a href="https://zoty.cz/nase-reseni/"><?= h(tr('nav.solutions')) ?></a></li>
         <li><a href="https://zoty.cz/kontakt/"><?= h(tr('nav.contact')) ?></a></li>
         <?php if (!$isAdminArea): ?>

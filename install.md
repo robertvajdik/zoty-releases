@@ -39,6 +39,18 @@ Alternatively, the environment variable `ZOTY_CONFIG` can point to a different c
   module, title and description (simple markdown).
 - Markdown (.md) export of published entries only, or including drafts. The current filter applies.
 
+## Customer support portal
+
+- Admin → **Zákazníci**: create a customer with a key (e.g. `ACME`), then add its users (e-mail + password).
+- Customers sign in at `/portal/`. Each customer has its own space: its users see only that customer's requests.
+- New request: pick a type (Support Incident, Question, Feature Request), then fill in Product, Product Version,
+  Operating System, Summary, description (editor with formatting toolbar), attachments (drag & drop, paste
+  screenshots, browse) and Severity. Requests are numbered per customer: `ACME-1`, `ACME-2`…
+- Admin → **Požadavky**: the support queue. Reply, change status/severity; the customer gets an e-mail.
+- Config: `'support' => ['notify' => [...], 'os' => [...]]` in `config.php` (see `config.sample.php`).
+- Attachments are stored in `data/tickets/` (not web-accessible) and served only to the customer's users and admins.
+  Max 10 MB per file – make sure PHP `upload_max_filesize` / `post_max_size` allow it.
+
 ## Markdown export
 
 `export` accepts the same filters as the page, e.g. `export?version=2.4.0&type=fixed`.
