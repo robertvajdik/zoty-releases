@@ -36,6 +36,7 @@ $L = $isAdminArea ? 'cs' : lang();
       <?php if ($isAdminArea && is_admin()): ?>
         <li><a href="<?= $base ?>admin/" <?= $self === 'index.php' ? 'aria-current="page"' : '' ?>>Záznamy</a></li>
         <li><a href="<?= $base ?>admin/versions" <?= $self === 'versions.php' ? 'aria-current="page"' : '' ?>>Verze</a></li>
+        <li><a href="<?= $base ?>admin/modules" <?= $self === 'modules.php' ? 'aria-current="page"' : '' ?>>Moduly</a></li>
         <li><a href="<?= $base ?>admin/subscribers" <?= $self === 'subscribers.php' ? 'aria-current="page"' : '' ?>>Odběratelé</a></li>
         <li><a href="<?= $base ?>./" target="_blank">Veřejný web</a></li>
         <li><a href="<?= $base ?>admin/logout">Odhlásit</a></li>

@@ -55,3 +55,13 @@ CREATE TABLE IF NOT EXISTS `changelog_mailings` (
   `created_at` DATETIME     NOT NULL,
   KEY `idx_version_id` (`version_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
+
+CREATE TABLE IF NOT EXISTS `changelog_modules` (
+  `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `name`       VARCHAR(80)  NOT NULL,
+  `created_at` DATETIME     NOT NULL,
+  UNIQUE KEY `uq_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
+
+INSERT IGNORE INTO `changelog_modules` (`name`, `created_at`) VALUES
+  ('DataLink', NOW()), ('Audit', NOW()), ('Reporty', NOW());

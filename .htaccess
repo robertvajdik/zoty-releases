@@ -1,6 +1,6 @@
 Options -Indexes
 AddDefaultCharset UTF-8
-<FilesMatch "^(lib|config|config\.sample)\.php$|\.(sql|sqlite|md|properties|log)$">
+<FilesMatch "^(lib|config|config\.sample)\.php$|^readme\.txt$|\.(sql|sqlite|md|properties|log)$">
   Require all denied
 </FilesMatch>
 

@@ -19,7 +19,7 @@ const TYPES = [
     'new'      => ['label' => 'Novinka',    'txt' => 'NOVINKA'],
     'improved' => ['label' => 'Vylepšení',  'txt' => 'VYLEPŠENÍ'],
     'fixed'    => ['label' => 'Oprava',     'txt' => 'OPRAVA'],
-    'security' => ['label' => 'Bezpečnost', 'txt' => 'BEZPEČNOST'],
+    'security' => ['label' => 'Zranitelnosti', 'txt' => 'ZRANITELNOSTI'],
 ];
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -178,6 +178,13 @@ function migrate(PDO $pdo, string $driver): void
     $u = t('changelog_users');
     $s = t('changelog_subscribers');
     $m = t('changelog_mailings');
+    $md = t('changelog_modules');
+    try {
+        $pdo->query("SELECT 1 FROM $md WHERE 1 = 0");
+        $modulesExisted = true;
+    } catch (PDOException $ex) {
+        $modulesExisted = false;
+    }
     if ($driver === 'sqlite') {
         $pdo->exec("CREATE TABLE IF NOT EXISTS $s (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -217,6 +224,10 @@ function migrate(PDO $pdo, string $driver): void
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
             password_hash TEXT NOT NULL,
+            created_at TEXT NOT NULL)");
+        $pdo->exec("CREATE TABLE IF NOT EXISTS $md (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
             created_at TEXT NOT NULL)");
     } else {
         $pdo->exec("CREATE TABLE IF NOT EXISTS `$v` (
@@ -269,6 +280,25 @@ function migrate(PDO $pdo, string $driver): void
             password_hash VARCHAR(255) NOT NULL,
             created_at DATETIME NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci");
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `$md` (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(80) NOT NULL,
+            created_at DATETIME NOT NULL,
+            UNIQUE KEY uq_name (name)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci");
+    }
+    // First run: seed the default modules plus any module names already used by entries.
+    if (!$modulesExisted) {
+        $names = array_merge(DEFAULT_MODULES, $pdo->query("SELECT DISTINCT module FROM $e WHERE module <> ''")->fetchAll(PDO::FETCH_COLUMN));
+        $ins = $pdo->prepare("INSERT INTO $md (name, created_at) VALUES (?, ?)");
+        $seen = [];
+        foreach ($names as $n) {
+            $n = trim((string)$n);
+            $key = mb_strtolower($n);
+            if ($n === '' || isset($seen[$key])) continue;
+            $seen[$key] = true;
+            $ins->execute([$n, date('Y-m-d H:i:s')]);
+        }
     }
     // Guard against a table left over from the earlier schema (version stored as text on entries).
     try {
@@ -486,6 +516,72 @@ function distinct_values(string $field, bool $publishedOnly = true): array
     return [];
 }
 
+/* ----------------------------------------------------------------- modules */
+
+const DEFAULT_MODULES = ['DataLink', 'Audit', 'Reporty'];
+
+/** Modules managed in admin, alphabetically, with the number of entries using each. */
+function fetch_modules(): array
+{
+    try {
+        $rows = db()->query('SELECT m.id, m.name, (SELECT COUNT(*) FROM ' . t('changelog_entries') . ' e WHERE e.module = m.name) AS entry_count FROM '
+            . t('changelog_modules') . ' m')->fetchAll();
+    } catch (PDOException $ex) {
+        return [];   // table missing (auto_migrate off and schema.sql not applied)
+    }
+    foreach ($rows as &$r) {
+        $r['id'] = (int)$r['id'];
+        $r['entry_count'] = (int)$r['entry_count'];
+    }
+    unset($r);
+    usort($rows, fn($a, $b) => strnatcasecmp($a['name'], $b['name']));
+    return $rows;
+}
+
+function module_names(): array
+{
+    return array_column(fetch_modules(), 'name');
+}
+
+function get_module(int $id): ?array
+{
+    foreach (fetch_modules() as $m) if ($m['id'] === $id) return $m;
+    return null;
+}
+
+function validate_module(string $name, int $id = 0): array
+{
+    if ($name === '') return ['Vyplňte název modulu.'];
+    if (mb_strlen($name) > 80) return ['Název modulu je příliš dlouhý (max. 80 znaků).'];
+    foreach (fetch_modules() as $m) {
+        if ($m['id'] !== $id && mb_strtolower($m['name']) === mb_strtolower($name)) return ['Modul „' . $m['name'] . '“ už existuje.'];
+    }
+    return [];
+}
+
+/** Insert (no id) or rename (with id – the new name is also applied to its entries). */
+function save_module(string $name, int $id = 0): void
+{
+    if ($id) {
+        $old = get_module($id);
+        db()->prepare('UPDATE ' . t('changelog_modules') . ' SET name = ? WHERE id = ?')->execute([$name, $id]);
+        if ($old && $old['name'] !== $name) {
+            db()->prepare('UPDATE ' . t('changelog_entries') . ' SET module = ? WHERE module = ?')->execute([$name, $old['name']]);
+        }
+        return;
+    }
+    db()->prepare('INSERT INTO ' . t('changelog_modules') . ' (name, created_at) VALUES (?, ?)')->execute([$name, date('Y-m-d H:i:s')]);
+}
+
+/** Deletes a module only when no entry uses it. */
+function delete_module(int $id): bool
+{
+    $m = get_module($id);
+    if (!$m || $m['entry_count'] > 0) return false;
+    db()->prepare('DELETE FROM ' . t('changelog_modules') . ' WHERE id = ?')->execute([$id]);
+    return true;
+}
+
 /** Group sorted entries into releases (one group per version). */
 function group_by_version(array $entries): array
 {
@@ -618,6 +714,8 @@ function render_body(string $text): string
         $s = h($s);
         $s = preg_replace('/\*\*(.+?)\*\*/u', '<strong>$1</strong>', $s);
         $s = preg_replace('/`(.+?)`/u', '<code>$1</code>', $s);
+        // Bug numbers such as #20261101 (#YYYYMMNN) – bold; not inside URLs or HTML entities
+        $s = preg_replace('/(?<![\w&\/#])#\d{8}(?!\d)/u', '<strong class="bug-ref">$0</strong>', $s);
         // ![popis](uploads/... nebo https://...) – image; only uploaded files or http(s) URLs
         $s = preg_replace_callback('/!\[([^\]]*)\]\((https?:\/\/[^\s)]+|uploads\/[\w\/.\-]+)\)/u', function ($m) {
             return '<img src="' . $m[2] . '" alt="' . $m[1] . '" loading="lazy" decoding="async">';

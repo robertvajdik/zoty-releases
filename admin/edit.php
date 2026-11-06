@@ -10,7 +10,7 @@ if ($id && !$existing) {
 }
 
 $versions = fetch_versions();
-$modules  = distinct_values('module', false);
+$modules  = module_names();
 
 $e = $existing ?? [
     'id' => 0,
@@ -35,7 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($e['title'] === '') $errors[] = 'Vyplňte název změny.';
     if (mb_strlen($e['title']) > 255) $errors[] = 'Název je příliš dlouhý (max. 255 znaků).';
-    if (mb_strlen($e['module']) > 80) $errors[] = 'Modul je příliš dlouhý (max. 80 znaků).';
+    if ($e['module'] !== '' && !in_array($e['module'], $modules, true) && $e['module'] !== ($existing['module'] ?? null)) {
+        $errors[] = 'Neznámý modul. Moduly spravujete v sekci Moduly.';
+    }
     if (!isset(TYPES[$e['type']])) $errors[] = 'Neplatný typ změny.';
 
     if ($choice === 'new') {
@@ -132,8 +134,12 @@ require __DIR__ . '/../partials/header.php';
       </div>
       <div class="field">
         <label for="module">Modul / oblast</label>
-        <input id="module" name="module" list="modules" maxlength="80" value="<?= h($e['module']) ?>" placeholder="např. Audit, Dashboard">
-        <datalist id="modules"><?php foreach ($modules as $m): ?><option value="<?= h($m) ?>"><?php endforeach; ?></datalist>
+        <select id="module" name="module">
+          <option value="">— bez modulu —</option>
+          <?php if ($e['module'] !== '' && !in_array($e['module'], $modules, true)): ?><option value="<?= h($e['module']) ?>" selected><?= h($e['module']) ?> (není v seznamu)</option><?php endif; ?>
+          <?php foreach ($modules as $m): ?><option value="<?= h($m) ?>" <?= $e['module'] === $m ? 'selected' : '' ?>><?= h($m) ?></option><?php endforeach; ?>
+        </select>
+        <small><a href="modules">Spravovat moduly</a></small>
       </div>
       <div class="field full">
         <label for="body">Popis</label>
@@ -143,7 +149,7 @@ require __DIR__ . '/../partials/header.php';
           <input type="file" id="img-file" accept="image/jpeg,image/png,image/gif,image/webp" multiple hidden>
           <span id="img-status" class="upload-status" aria-live="polite"></span>
         </div>
-        <small>Formátování: prázdný řádek = nový odstavec, <code>- </code> na začátku řádku = odrážka, <code>**tučně**</code>, <code>`kód`</code>, <code>[text](https://odkaz)</code>, obrázek <code>![popis](adresa)</code>. Obrázek můžete do pole i přetáhnout nebo vložit (Ctrl+V). JPG/PNG/GIF/WebP, max. 5 MB.</small>
+        <small>Formátování: prázdný řádek = nový odstavec, <code>- </code> na začátku řádku = odrážka, <code>**tučně**</code>, číslo chyby <code>#20261101</code> se zvýrazní tučně, <code>`kód`</code>, <code>[text](https://odkaz)</code>, obrázek <code>![popis](adresa)</code>. Obrázek můžete do pole i přetáhnout nebo vložit (Ctrl+V). JPG/PNG/GIF/WebP, max. 5 MB.</small>
       </div>
       <div class="field full">
         <label class="check"><input type="checkbox" name="published" value="1" <?= !empty($e['published']) ? 'checked' : '' ?>> Publikovat na veřejném changelogu</label>
