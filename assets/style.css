@@ -184,6 +184,9 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--purple-300)
 .field small { color: var(--muted); }
 .check { display: flex; align-items: center; gap: 8px; font-weight: 400; }
 .check input { width: auto; }
+.field .label { display: block; font: 600 13px var(--font-head); margin-bottom: 6px; }
+.check-list { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 6px; }
+.check-list .check { display: flex; margin: 0; font: 400 14px var(--font-body); }
 .form-actions { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
 
 

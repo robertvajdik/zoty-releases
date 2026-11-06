@@ -16,8 +16,8 @@ date_default_timezone_set('Europe/Prague');
 const APP_NAME = 'Zoty – přehled změn';
 
 const TYPES = [
-    'new'      => ['label' => 'Novinka',    'txt' => 'NOVINKA'],
-    'improved' => ['label' => 'Vylepšení',  'txt' => 'VYLEPŠENÍ'],
+    'new'      => ['label' => 'Vylepšení',  'txt' => 'VYLEPŠENÍ'],
+    'improved' => ['label' => 'Úprava',     'txt' => 'ÚPRAVA'],
     'fixed'    => ['label' => 'Oprava',     'txt' => 'OPRAVA'],
     'security' => ['label' => 'Zranitelnosti', 'txt' => 'ZRANITELNOSTI'],
 ];
@@ -246,7 +246,7 @@ function migrate(PDO $pdo, string $driver): void
             id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
             version_id INT UNSIGNED NOT NULL,
             type VARCHAR(20) NOT NULL,
-            module VARCHAR(80) NOT NULL DEFAULT '',
+            module VARCHAR(255) NOT NULL DEFAULT '',
             title VARCHAR(255) NOT NULL,
             body TEXT NOT NULL,
             published TINYINT(1) NOT NULL DEFAULT 1,
@@ -287,9 +287,17 @@ function migrate(PDO $pdo, string $driver): void
             UNIQUE KEY uq_name (name)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci");
     }
+    // Several modules per entry are stored as "A, B" – widen the column from the original VARCHAR(80).
+    if ($driver !== 'sqlite') {
+        $col = $pdo->query("SHOW COLUMNS FROM `$e` LIKE 'module'")->fetch();
+        if ($col && stripos((string)$col['Type'], 'varchar(80)') !== false) {
+            $pdo->exec("ALTER TABLE `$e` MODIFY module VARCHAR(255) NOT NULL DEFAULT ''");
+        }
+    }
     // First run: seed the default modules plus any module names already used by entries.
     if (!$modulesExisted) {
-        $names = array_merge(DEFAULT_MODULES, $pdo->query("SELECT DISTINCT module FROM $e WHERE module <> ''")->fetchAll(PDO::FETCH_COLUMN));
+        $used = $pdo->query("SELECT DISTINCT module FROM $e WHERE module <> ''")->fetchAll(PDO::FETCH_COLUMN);
+        $names = array_merge(DEFAULT_MODULES, ...array_map('split_modules', $used));
         $ins = $pdo->prepare("INSERT INTO $md (name, created_at) VALUES (?, ?)");
         $seen = [];
         foreach ($names as $n) {
@@ -420,8 +428,13 @@ function fetch_entries(array $f = [], bool $includeDrafts = false): array
     $where = [];
     $args  = [];
     if (!$includeDrafts) $where[] = 'e.published = 1 AND v.published = 1';
-    foreach (['type' => 'e.type', 'version' => 'v.version', 'module' => 'e.module'] as $key => $col) {
+    foreach (['type' => 'e.type', 'version' => 'v.version'] as $key => $col) {
         if (($f[$key] ?? '') !== '') { $where[] = "$col = ?"; $args[] = $f[$key]; }
+    }
+    if (($f['module'] ?? '') !== '') {
+        $m = strtr($f['module'], ['!' => '!!', '%' => '!%', '_' => '!_']);
+        $where[] = "(e.module = ? OR e.module LIKE ? ESCAPE '!' OR e.module LIKE ? ESCAPE '!' OR e.module LIKE ? ESCAPE '!')";
+        array_push($args, $f['module'], $m . MODULE_SEP . '%', '%' . MODULE_SEP . $m, '%' . MODULE_SEP . $m . MODULE_SEP . '%');
     }
     if (($f['from'] ?? '') !== '') { $where[] = 'v.release_date >= ?'; $args[] = $f['from']; }
     if (($f['to'] ?? '') !== '')   { $where[] = 'v.release_date <= ?'; $args[] = $f['to']; }
@@ -509,7 +522,11 @@ function distinct_values(string $field, bool $publishedOnly = true): array
     }
     if ($field === 'module') {
         $sql = 'SELECT DISTINCT e.module FROM ' . t('changelog_entries') . ' e JOIN ' . t('changelog_versions') . " v ON v.id = e.version_id WHERE e.module <> ''" . $pub;
-        $vals = db()->query($sql)->fetchAll(PDO::FETCH_COLUMN);
+        $vals = [];
+        foreach (db()->query($sql)->fetchAll(PDO::FETCH_COLUMN) as $v) {
+            foreach (split_modules($v) as $name) $vals[$name] = $name;
+        }
+        $vals = array_values($vals);
         sort($vals, SORT_NATURAL | SORT_FLAG_CASE);
         return $vals;
     }
@@ -519,19 +536,47 @@ function distinct_values(string $field, bool $publishedOnly = true): array
 /* ----------------------------------------------------------------- modules */
 
 const DEFAULT_MODULES = ['DataLink', 'Audit', 'Reporty'];
+/** An entry can belong to several modules; they are stored in entries.module as "Audit, Reporty". */
+const MODULE_SEP = ', ';
+
+/** "Audit, Reporty" -> ['Audit', 'Reporty'] */
+function split_modules(string $value): array
+{
+    $out = [];
+    foreach (explode(',', $value) as $m) {
+        $m = trim($m);
+        if ($m !== '' && !in_array($m, $out, true)) $out[] = $m;
+    }
+    return $out;
+}
+
+function join_modules(array $names): string
+{
+    return implode(MODULE_SEP, split_modules(implode(',', $names)));
+}
+
+/** Number of entries per module name. */
+function module_usage(): array
+{
+    $counts = [];
+    foreach (db()->query('SELECT module FROM ' . t('changelog_entries') . " WHERE module <> ''")->fetchAll(PDO::FETCH_COLUMN) as $v) {
+        foreach (split_modules($v) as $m) $counts[$m] = ($counts[$m] ?? 0) + 1;
+    }
+    return $counts;
+}
 
 /** Modules managed in admin, alphabetically, with the number of entries using each. */
 function fetch_modules(): array
 {
     try {
-        $rows = db()->query('SELECT m.id, m.name, (SELECT COUNT(*) FROM ' . t('changelog_entries') . ' e WHERE e.module = m.name) AS entry_count FROM '
-            . t('changelog_modules') . ' m')->fetchAll();
+        $rows = db()->query('SELECT id, name FROM ' . t('changelog_modules'))->fetchAll();
     } catch (PDOException $ex) {
         return [];   // table missing (auto_migrate off and schema.sql not applied)
     }
+    $usage = module_usage();
     foreach ($rows as &$r) {
         $r['id'] = (int)$r['id'];
-        $r['entry_count'] = (int)$r['entry_count'];
+        $r['entry_count'] = $usage[$r['name']] ?? 0;
     }
     unset($r);
     usort($rows, fn($a, $b) => strnatcasecmp($a['name'], $b['name']));
@@ -553,6 +598,7 @@ function validate_module(string $name, int $id = 0): array
 {
     if ($name === '') return ['Vyplňte název modulu.'];
     if (mb_strlen($name) > 80) return ['Název modulu je příliš dlouhý (max. 80 znaků).'];
+    if (str_contains($name, ',')) return ['Název modulu nesmí obsahovat čárku.'];
     foreach (fetch_modules() as $m) {
         if ($m['id'] !== $id && mb_strtolower($m['name']) === mb_strtolower($name)) return ['Modul „' . $m['name'] . '“ už existuje.'];
     }
@@ -566,7 +612,13 @@ function save_module(string $name, int $id = 0): void
         $old = get_module($id);
         db()->prepare('UPDATE ' . t('changelog_modules') . ' SET name = ? WHERE id = ?')->execute([$name, $id]);
         if ($old && $old['name'] !== $name) {
-            db()->prepare('UPDATE ' . t('changelog_entries') . ' SET module = ? WHERE module = ?')->execute([$name, $old['name']]);
+            $upd = db()->prepare('UPDATE ' . t('changelog_entries') . ' SET module = ? WHERE id = ?');
+            foreach (db()->query('SELECT id, module FROM ' . t('changelog_entries') . " WHERE module <> ''")->fetchAll() as $row) {
+                $list = split_modules($row['module']);
+                if (!in_array($old['name'], $list, true)) continue;
+                $list = array_map(fn($m) => $m === $old['name'] ? $name : $m, $list);
+                $upd->execute([join_modules($list), (int)$row['id']]);
+            }
         }
         return;
     }

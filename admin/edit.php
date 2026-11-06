@@ -28,16 +28,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $choice         = (string)($_POST['version_id'] ?? '');
     $e['type']      = (string)($_POST['type'] ?? '');
-    $e['module']    = trim((string)($_POST['module'] ?? ''));
+    $e['module']    = join_modules(array_map('strval', (array)($_POST['module'] ?? [])));
     $e['title']     = trim((string)($_POST['title'] ?? ''));
     $e['body']      = str_replace("\r\n", "\n", trim((string)($_POST['body'] ?? '')));
     $e['published'] = !empty($_POST['published']);
 
     if ($e['title'] === '') $errors[] = 'Vyplňte název změny.';
     if (mb_strlen($e['title']) > 255) $errors[] = 'Název je příliš dlouhý (max. 255 znaků).';
-    if ($e['module'] !== '' && !in_array($e['module'], $modules, true) && $e['module'] !== ($existing['module'] ?? null)) {
-        $errors[] = 'Neznámý modul. Moduly spravujete v sekci Moduly.';
+    $allowed = array_merge($modules, split_modules($existing['module'] ?? ''));
+    foreach (split_modules($e['module']) as $m) {
+        if (!in_array($m, $allowed, true)) { $errors[] = 'Neznámý modul ' . $m . '. Moduly spravujete v sekci Moduly.'; break; }
     }
+    if (mb_strlen($e['module']) > 255) $errors[] = 'Vybráno příliš mnoho modulů.';
     if (!isset(TYPES[$e['type']])) $errors[] = 'Neplatný typ změny.';
 
     if ($choice === 'new') {
@@ -133,13 +135,15 @@ require __DIR__ . '/../partials/header.php';
         </select>
       </div>
       <div class="field">
-        <label for="module">Modul / oblast</label>
-        <select id="module" name="module">
-          <option value="">— bez modulu —</option>
-          <?php if ($e['module'] !== '' && !in_array($e['module'], $modules, true)): ?><option value="<?= h($e['module']) ?>" selected><?= h($e['module']) ?> (není v seznamu)</option><?php endif; ?>
-          <?php foreach ($modules as $m): ?><option value="<?= h($m) ?>" <?= $e['module'] === $m ? 'selected' : '' ?>><?= h($m) ?></option><?php endforeach; ?>
-        </select>
-        <small><a href="modules">Spravovat moduly</a></small>
+        <?php $picked = split_modules($e['module']); $legacy = array_diff($picked, $modules); ?>
+        <span class="label" id="module-label">Moduly / oblasti</span>
+        <div class="check-list" role="group" aria-labelledby="module-label">
+          <?php foreach (array_merge($modules, $legacy) as $m): ?>
+            <label class="check"><input type="checkbox" name="module[]" value="<?= h($m) ?>" <?= in_array($m, $picked, true) ? 'checked' : '' ?>> <?= h($m) ?><?= in_array($m, $legacy, true) ? ' <small>(není v seznamu)</small>' : '' ?></label>
+          <?php endforeach; ?>
+          <?php if (!$modules && !$legacy): ?><small>Zatím žádné moduly.</small><?php endif; ?>
+        </div>
+        <small>Můžete vybrat více modulů, nebo žádný. <a href="modules">Spravovat moduly</a></small>
       </div>
       <div class="field full">
         <label for="body">Popis</label>

@@ -79,7 +79,7 @@ Odběratelé   List of e-mail subscribers.
 Export       TXT export of published entries, or including drafts.
              The current filter is applied.
 
-Change types: Novinka (new), Vylepšení (improved), Oprava (fixed),
+Change types: Vylepšení (new, EN: Feature), Úprava (improved), Oprava (fixed),
 Zranitelnosti (security, EN: Vulnerabilities).
 
 

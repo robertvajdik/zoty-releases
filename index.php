@@ -107,7 +107,7 @@ require __DIR__ . '/partials/header.php';
           <article class="entry" property="hasPart" typeof="CreativeWork">
             <div class="entry__tags">
               <span class="tag tag--<?= h($e['type']) ?>" property="genre"><?= h(type_label($e['type'])) ?></span>
-              <?php if ($e['module'] !== ''): ?><span class="tag tag--module" property="keywords"><?= h($e['module']) ?></span><?php endif; ?>
+              <?php foreach (split_modules($e['module']) as $mod): ?><span class="tag tag--module" property="keywords"><?= h($mod) ?></span><?php endforeach; ?>
             </div>
             <h2 class="entry__title" property="name"><?= h($e['title']) ?></h2>
             <?php if (trim($e['body']) !== ''): ?>

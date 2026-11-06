@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `changelog_entries` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `version_id` INT UNSIGNED NOT NULL,
   `type`       VARCHAR(20)  NOT NULL COMMENT 'new | improved | fixed | security',
-  `module`     VARCHAR(80)  NOT NULL DEFAULT '',
+  `module`     VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'one or more modules, "Audit, Reporty"',
   `title`      VARCHAR(255) NOT NULL,
   `body`       TEXT         NOT NULL,
   `published`  TINYINT(1)   NOT NULL DEFAULT 1,
