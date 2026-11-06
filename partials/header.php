@@ -6,6 +6,22 @@ $isPortal = !empty($portal_area);
 $portalUser = $isPortal ? portal_user() : null;
 $self = basename($_SERVER['SCRIPT_NAME'] ?? '');
 $L = $isAdminArea ? 'cs' : lang();
+// Admin has two workspaces: release notes (changelog) and support (customer requests).
+$adminSection = $admin_section ?? (in_array($self, ['tickets.php', 'ticket.php', 'customers.php'], true) ? 'support' : 'releases');
+$adminNav = [];
+if ($isAdminArea && is_admin()) {
+    $tStats = ticket_stats();
+    $waitingOnUs = $tStats['open'];
+    $adminNav = $adminSection === 'support' ? [
+        ['tickets',   'Požadavky', ['tickets.php', 'ticket.php'], $tStats['open'] + $tStats['in_progress'] + $tStats['waiting']],
+        ['customers', 'Zákazníci a přístupy', ['customers.php'], 0],
+    ] : [
+        ['./',          'Záznamy',    ['index.php', 'edit.php'], 0],
+        ['versions',    'Verze',      ['versions.php'], 0],
+        ['modules',     'Moduly',     ['modules.php'], 0],
+        ['subscribers', 'Odběratelé', ['subscribers.php'], 0],
+    ];
+}
 ?><!doctype html>
 <html lang="<?= $L ?>">
 <head>
@@ -21,14 +37,15 @@ $L = $isAdminArea ? 'cs' : lang();
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= $base ?>assets/style.css?v=9">
-  <?php if ($isAdminArea || $isPortal): ?><link rel="stylesheet" href="<?= $base ?>assets/tickets.css?v=1"><?php endif; ?>
+  <?php if ($isAdminArea || $isPortal): ?><link rel="stylesheet" href="<?= $base ?>assets/tickets.css?v=2"><?php endif; ?>
+  <?php if ($isAdminArea): ?><link rel="stylesheet" href="<?= $base ?>assets/admin.css?v=1"><?php endif; ?>
   <link rel="alternate" type="application/atom+xml" title="<?= h(tr('site.name')) ?>" href="<?= $base ?>feed.xml">
   <?= $headExtra ?? '' ?>
 </head>
-<body class="<?= $isAdminArea ? 'is-admin' : ($isPortal ? 'is-portal' : '') ?>">
+<body class="<?= $isAdminArea ? 'is-admin is-admin--' . $adminSection : ($isPortal ? 'is-portal' : '') ?>">
 <header class="header">
   <nav class="navbar container">
-    <a class="navbar__logo" href="<?= $isAdminArea && is_admin() ? $base . 'admin/' : ($isPortal ? $base . 'portal/' : $base . './') ?>">
+    <a class="navbar__logo" href="<?= $isAdminArea && is_admin() ? $base . ($adminSection === 'support' ? 'admin/tickets' : 'admin/') : ($isPortal ? $base . 'portal/' : $base . './') ?>">
       <img src="<?= $base ?>assets/img/zoty-logo.png" width="130" alt="<?= h(tr('nav.logo_alt')) ?>">
       <span class="navbar__product"><?= $isAdminArea ? 'Administrace' : ($isPortal ? h(tr('portal.product')) : h(tr('site.product'))) ?></span>
     </a>
@@ -37,15 +54,12 @@ $L = $isAdminArea ? 'cs' : lang();
     </button>
     <ul class="navbar__links" id="nav-links">
       <?php if ($isAdminArea && is_admin()): ?>
-        <li><a href="<?= $base ?>admin/" <?= $self === 'index.php' ? 'aria-current="page"' : '' ?>>Záznamy</a></li>
-        <li><a href="<?= $base ?>admin/versions" <?= $self === 'versions.php' ? 'aria-current="page"' : '' ?>>Verze</a></li>
-        <li><a href="<?= $base ?>admin/modules" <?= $self === 'modules.php' ? 'aria-current="page"' : '' ?>>Moduly</a></li>
-        <li><a href="<?= $base ?>admin/subscribers" <?= $self === 'subscribers.php' ? 'aria-current="page"' : '' ?>>Odběratelé</a></li>
-        <li><a href="<?= $base ?>admin/tickets" <?= in_array($self, ['tickets.php', 'ticket.php'], true) ? 'aria-current="page"' : '' ?>>Požadavky<?php $openN = ticket_stats()['open']; if ($openN): ?> <span class="nav-count"><?= $openN ?></span><?php endif; ?></a></li>
-        <li><a href="<?= $base ?>admin/customers" <?= $self === 'customers.php' ? 'aria-current="page"' : '' ?>>Zákazníci</a></li>
-        <li><a href="<?= $base ?>./" target="_blank">Veřejný web</a></li>
-        <li><a href="<?= $base ?>admin/logout">Odhlásit</a></li>
-        <li><a class="button button--green" href="<?= $base ?>admin/edit">+ Nový záznam</a></li>
+        <?php if ($adminSection === 'support'): ?>
+          <li><a href="<?= $base ?>portal/" target="_blank" rel="noopener">Zákaznický portál ↗</a></li>
+        <?php else: ?>
+          <li><a href="<?= $base ?>./" target="_blank" rel="noopener">Veřejný web ↗</a></li>
+        <?php endif; ?>
+        <li class="nav-user"><span title="Přihlášený administrátor"><?= h((string)($_SESSION['zoty_admin'] ?? '')) ?></span> <a href="<?= $base ?>admin/logout">Odhlásit</a></li>
       <?php elseif ($isPortal && $portalUser): ?>
         <li><a href="<?= $base ?>portal/" <?= in_array($self, ['index.php', 'ticket.php'], true) ? 'aria-current="page"' : '' ?>><?= h(tr('portal.my_requests')) ?></a></li>
         <li><a href="<?= $base ?>./"><?= h(tr('site.product')) ?></a></li>
@@ -73,6 +87,28 @@ $L = $isAdminArea ? 'cs' : lang();
       <?php endif; ?>
     </ul>
   </nav>
+  <?php if ($adminNav): ?>
+  <div class="subnav">
+    <div class="container subnav__inner">
+      <nav class="ws-switch" aria-label="Sekce administrace">
+        <a href="<?= $base ?>admin/" <?= $adminSection === 'releases' ? 'aria-current="true"' : '' ?>>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Release notes</a>
+        <a href="<?= $base ?>admin/tickets" <?= $adminSection === 'support' ? 'aria-current="true"' : '' ?>>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 13a8 8 0 0 1 16 0v4a2 2 0 0 1-2 2h-1v-6h3M4 13v4a2 2 0 0 0 2 2h1v-6H4"/></svg>Podpora<?php if ($waitingOnUs): ?><span class="nav-count" title="Nové nebo s odpovědí zákazníka"><?= $waitingOnUs ?></span><?php endif; ?></a>
+      </nav>
+      <ul class="subnav__links">
+        <?php foreach ($adminNav as [$href, $label, $pages, $count]): ?>
+          <li><a href="<?= $base ?>admin/<?= $href === './' ? '' : $href ?>" <?= in_array($self, $pages, true) ? 'aria-current="page"' : '' ?>><?= h($label) ?><?php if ($count): ?> <b><?= $count ?></b><?php endif; ?></a></li>
+        <?php endforeach; ?>
+      </ul>
+      <?php if ($adminSection === 'support'): ?>
+        <a class="button button--primary button--sm subnav__cta" href="<?= $base ?>admin/customers#new">+ Nový zákazník</a>
+      <?php else: ?>
+        <a class="button button--green button--sm subnav__cta" href="<?= $base ?>admin/edit">+ Nový záznam</a>
+      <?php endif; ?>
+    </div>
+  </div>
+  <?php endif; ?>
 </header>
 <script>
   document.querySelector('.navbar__toggle').addEventListener('click', function () {

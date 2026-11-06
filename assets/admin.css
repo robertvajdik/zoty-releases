@@ -1,0 +1,59 @@
+/* Zoty admin shell – two workspaces (Release notes / Podpora) with a section bar under the main navbar. */
+.subnav { background: var(--white); border-top: 1px solid var(--line); }
+.subnav__inner { display: flex; align-items: center; gap: 20px; min-height: 52px; }
+
+/* workspace switch */
+.ws-switch { display: inline-flex; flex: none; padding: 3px; gap: 2px; border-radius: 10px; background: var(--purple-50); border: 1px solid var(--line); }
+.ws-switch a {
+  display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 7px;
+  font: 600 13.5px var(--font-head); color: var(--muted); text-decoration: none; white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+.ws-switch a:hover { color: var(--text); }
+.ws-switch a[aria-current="true"] { background: var(--white); color: var(--purple); box-shadow: 0 1px 3px rgba(97, 68, 163, .18); }
+.is-admin--support .ws-switch a[aria-current="true"] { color: var(--blue, #2b5cb8); }
+.ws-switch .nav-count { margin-left: 2px; }
+
+/* section links */
+.subnav__links { display: flex; align-items: stretch; gap: 4px; list-style: none; margin: 0; padding: 0; flex: 1; min-width: 0; align-self: stretch; }
+.subnav__links li { display: flex; }
+.subnav__links a {
+  display: flex; align-items: center; gap: 6px; padding: 0 12px; border-bottom: 2px solid transparent;
+  font: 500 14.5px var(--font-head); color: var(--text); text-decoration: none; white-space: nowrap;
+}
+.subnav__links a:hover { color: var(--purple); }
+.subnav__links a[aria-current="page"] { color: var(--purple); border-bottom-color: var(--purple); }
+.is-admin--support .subnav__links a[aria-current="page"] { color: var(--blue, #2b5cb8); border-bottom-color: var(--blue, #2b5cb8); }
+.subnav__links b { font: 600 11.5px/1.6 var(--font-head); padding: 0 6px; border-radius: 99px; background: var(--purple-50); color: var(--muted); }
+.subnav__cta { flex: none; }
+.is-admin--support .subnav__cta.button--primary { background: var(--blue, #2b5cb8); }
+.is-admin--support .subnav__cta.button--primary:hover { background: #224a96; }
+
+/* sticky offsets below the taller admin header */
+.is-admin .tk__side { top: 140px; }
+
+/* support overview tiles */
+.overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.overview a { text-decoration: none; color: inherit; }
+.ov { display: block; background: var(--white); border-radius: 12px; box-shadow: var(--shadow); padding: 14px 18px; border: 1px solid transparent; transition: border-color .15s; }
+a.ov:hover { border-color: var(--purple-100); }
+.ov b { display: block; font: 600 26px/1.2 var(--font-head); color: var(--text); }
+.ov span { font-size: 13px; color: var(--muted); }
+.ov--alert b { color: #c9372c; }
+.ov--warn b { color: #8a5d05; }
+.ov--ok b { color: #2f7a27; }
+.ov--zero b { color: var(--muted); }
+
+@media (max-width: 900px) {
+  .subnav__inner { flex-wrap: wrap; gap: 0 12px; padding-top: 8px; }
+  .ws-switch { order: 1; }
+  .subnav__cta { order: 2; margin-left: auto; }
+  .subnav__links { order: 3; flex-basis: 100%; overflow-x: auto; scrollbar-width: none; margin: 4px -16px 0; padding: 0 16px; min-height: 44px; }
+  .subnav__links::-webkit-scrollbar { display: none; }
+  .is-admin .tk__side { top: auto; }
+}
+@media (max-width: 480px) {
+  .ws-switch a { padding: 6px 9px; font-size: 13px; }
+  .ws-switch svg { display: none; }
+  .subnav__cta { padding: .4em .8em; }
+}

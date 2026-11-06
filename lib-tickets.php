@@ -179,7 +179,7 @@ function validate_customer(string $name, string $code, int $id = 0): array
 {
     $err = [];
     if ($name === '' || mb_strlen($name) > 160) $err[] = 'Vyplňte název zákazníka (max. 160 znaků).';
-    if (!preg_match('/^[A-Z][A-Z0-9]{1,9}$/', $code)) $err[] = 'Klíč musí mít 2–10 znaků A–Z / 0–9 a začínat písmenem (např. ACME).';
+    if (!preg_match('/^[A-Z][A-Z0-9_]{0,8}[A-Z0-9]$/', $code)) $err[] = 'Klíč musí mít 2–10 znaků A–Z, 0–9 nebo _, začínat písmenem a nekončit _ (např. ACME nebo NBU_ZOTY).';
     $st = db()->prepare('SELECT id FROM ' . t('changelog_customers') . ' WHERE code = ? AND id <> ?');
     $st->execute([$code, $id]);
     if ($st->fetch()) $err[] = 'Klíč ' . $code . ' už používá jiný zákazník.';
@@ -326,7 +326,7 @@ function normalize_ticket(array $r): array
     return $r;
 }
 
-/** Filters: customer_id, status ('' | 'open' = unresolved | 'done' | one status), type, severity, q, user_id. */
+/** Filters: customer_id, status ('' | 'unresolved' | 'done' | one status), type, severity, q, user_id. */
 function fetch_tickets(array $f = []): array
 {
     $where = [];
@@ -334,14 +334,14 @@ function fetch_tickets(array $f = []): array
     if (!empty($f['customer_id'])) { $where[] = 'k.customer_id = ?'; $args[] = (int)$f['customer_id']; }
     if (!empty($f['user_id']))     { $where[] = 'k.user_id = ?';     $args[] = (int)$f['user_id']; }
     $s = (string)($f['status'] ?? '');
-    if ($s === 'open')     $where[] = "k.status NOT IN ('resolved','closed')";
+    if ($s === 'unresolved') $where[] = "k.status NOT IN ('resolved','closed')";
     elseif ($s === 'done') $where[] = "k.status IN ('resolved','closed')";
     elseif (in_array($s, TICKET_STATUSES, true)) { $where[] = 'k.status = ?'; $args[] = $s; }
     if (in_array($f['type'] ?? '', TICKET_TYPES, true))          { $where[] = 'k.type = ?';     $args[] = $f['type']; }
     if (in_array($f['severity'] ?? '', TICKET_SEVERITIES, true)) { $where[] = 'k.severity = ?'; $args[] = $f['severity']; }
     $q = trim((string)($f['q'] ?? ''));
     if ($q !== '') {
-        if (preg_match('/^([A-Za-z][A-Za-z0-9]{1,9})-(\d+)$/', $q, $m)) {
+        if (preg_match('/^([A-Za-z][A-Za-z0-9_]{0,8}[A-Za-z0-9])-(\d+)$/', $q, $m)) {
             $where[] = '(c.code = ? AND k.number = ?)';
             array_push($args, strtoupper($m[1]), (int)$m[2]);
         } else {
@@ -369,7 +369,7 @@ function get_ticket(int $id): ?array
 /** Ticket by its key ("ACME-12"); with $customerId set, only that customer's ticket. */
 function get_ticket_by_key(string $key, int $customerId = 0): ?array
 {
-    if (!preg_match('/^([A-Za-z][A-Za-z0-9]{1,9})-(\d{1,9})$/', trim($key), $m)) return null;
+    if (!preg_match('/^([A-Za-z][A-Za-z0-9_]{0,8}[A-Za-z0-9])-(\d{1,9})$/', trim($key), $m)) return null;
     $st = db()->prepare('SELECT ' . TICKET_COLS . ' FROM ' . ticket_from() . ' WHERE c.code = ? AND k.number = ?');
     $st->execute([strtoupper($m[1]), (int)$m[2]]);
     $r = $st->fetch();
@@ -385,6 +385,19 @@ function ticket_stats(int $customerId = 0): array
     $out = array_fill_keys(TICKET_STATUSES, 0);
     foreach ($st->fetchAll() as $r) $out[$r['status']] = (int)$r['n'];
     return $out;
+}
+
+/** Numbers for the admin support overview. */
+function support_overview(): array
+{
+    $tk = t('changelog_tickets');
+    $one = function (string $sql, array $args = []): int { $st = db()->prepare($sql); $st->execute($args); return (int)$st->fetchColumn(); };
+    return [
+        'crisis'   => $one("SELECT COUNT(*) FROM $tk WHERE severity = 'crisis' AND status NOT IN ('resolved','closed')"),
+        'resolved' => $one("SELECT COUNT(*) FROM $tk WHERE status IN ('resolved','closed') AND updated_at >= ?", [date('Y-m-d H:i:s', time() - 7 * 86400)]),
+        'new_week' => $one("SELECT COUNT(*) FROM $tk WHERE created_at >= ?", [date('Y-m-d H:i:s', time() - 7 * 86400)]),
+        'customers'=> $one('SELECT COUNT(*) FROM ' . t('changelog_customers')),
+    ];
 }
 
 /** Form options: products = modules, versions = published versions, os from config. */

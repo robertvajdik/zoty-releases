@@ -7,7 +7,7 @@ $tab = in_array($_GET['status'] ?? 'open', ['open', 'done', 'all'], true) ? ($_G
 $mine = !empty($_GET['mine']);
 $f = [
     'customer_id' => $me['customer_id'],
-    'status' => $tab === 'all' ? '' : $tab,
+    'status' => $tab === 'all' ? '' : ($tab === 'open' ? 'unresolved' : $tab),
     'type' => (string)($_GET['type'] ?? ''),
     'q' => trim((string)($_GET['q'] ?? '')),
     'user_id' => $mine ? $me['id'] : 0,

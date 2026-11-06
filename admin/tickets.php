@@ -2,7 +2,7 @@
 require __DIR__ . '/../lib.php';
 require_admin();
 
-$status = (string)($_GET['status'] ?? 'open');
+$status = (string)($_GET['status'] ?? 'unresolved');
 $f = [
     'status'      => $status === 'all' ? '' : $status,
     'customer_id' => (int)($_GET['customer'] ?? 0),
@@ -13,9 +13,10 @@ $f = [
 $tickets = fetch_tickets($f);
 $stats = ticket_stats();
 $customers = fetch_customers();
+$ov = support_overview();
 $keep = array_filter(['customer' => $f['customer_id'] ?: '', 'type' => $f['type'], 'severity' => $f['severity'], 'q' => $f['q']]);
 $tabUrl = fn(string $s) => '?' . http_build_query(['status' => $s] + $keep);
-$tabs = ['open' => ['Nevyřešené', $stats['open'] + $stats['in_progress'] + $stats['waiting']]];
+$tabs = ['unresolved' => ['Nevyřešené', $stats['open'] + $stats['in_progress'] + $stats['waiting']]];
 foreach (TICKET_STATUSES as $s) $tabs[$s] = [status_label($s), $stats[$s]];
 $tabs['all'] = ['Vše', array_sum($stats)];
 
@@ -28,10 +29,14 @@ require __DIR__ . '/../partials/header.php';
   <?php if ($m = flash()): ?><div class="flash"><?= h($m) ?></div><?php endif; ?>
   <div class="admin__head">
     <h1>Požadavky zákazníků</h1>
-    <div class="admin__actions">
-      <a class="button button--ghost" href="customers">Zákazníci a přístupy</a>
-      <a class="button button--ghost" href="../portal/" target="_blank">Zákaznický portál ↗</a>
-    </div>
+  </div>
+
+  <div class="overview">
+    <a class="ov<?= $stats['open'] ? ' ov--alert' : ' ov--zero' ?>" href="?status=open"><b><?= $stats['open'] ?></b><span>čeká na podporu (nové / odpověď zákazníka)</span></a>
+    <a class="ov<?= $ov['crisis'] ? ' ov--alert' : ' ov--zero' ?>" href="?status=unresolved&amp;severity=crisis"><b><?= $ov['crisis'] ?></b><span>nevyřešené v závažnosti Krize</span></a>
+    <a class="ov<?= $stats['in_progress'] ? '' : ' ov--zero' ?>" href="?status=in_progress"><b><?= $stats['in_progress'] ?></b><span>řeší se</span></a>
+    <a class="ov<?= $stats['waiting'] ? ' ov--warn' : ' ov--zero' ?>" href="?status=waiting"><b><?= $stats['waiting'] ?></b><span>čeká na zákazníka</span></a>
+    <a class="ov ov--ok" href="?status=done"><b><?= $ov['resolved'] ?></b><span>vyřešeno za 7 dní (nových <?= $ov['new_week'] ?>)</span></a>
   </div>
 
   <?php if (!ticket_staff_emails()): ?>

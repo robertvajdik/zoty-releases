@@ -120,8 +120,6 @@ require __DIR__ . '/../partials/header.php';
       <?php if ($customer): ?>
         <a class="button button--ghost" href="tickets?status=all&amp;customer=<?= $customer['id'] ?>">Požadavky zákazníka</a>
         <a class="button button--ghost" href="customers">← Všichni zákazníci</a>
-      <?php else: ?>
-        <a class="button button--ghost" href="tickets">Požadavky</a>
       <?php endif; ?>
     </div>
   </div>
@@ -148,7 +146,7 @@ require __DIR__ . '/../partials/header.php';
       </div>
     <?php endif; ?>
 
-    <form class="card" method="post">
+    <form class="card" method="post" id="<?= $customer ? 'edit' : 'new' ?>">
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="save_customer">
       <h2 class="card__title"><?= $customer ? 'Údaje zákazníka' : 'Nový zákazník' ?></h2>
@@ -159,9 +157,9 @@ require __DIR__ . '/../partials/header.php';
         </div>
         <div class="field full">
           <label for="code">Klíč požadavků *</label>
-          <input id="code" name="code" required maxlength="10" pattern="[A-Za-z][A-Za-z0-9]{1,9}" value="<?= h($cf['code']) ?>" placeholder="ACME"
+          <input id="code" name="code" required maxlength="10" pattern="[A-Za-z][A-Za-z0-9_]{0,8}[A-Za-z0-9]" title="2–10 znaků A–Z, 0–9 nebo _, např. NBU_ZOTY" value="<?= h($cf['code']) ?>" placeholder="ACME"
                  autocapitalize="characters" autocomplete="off" spellcheck="false" style="text-transform:uppercase">
-          <small>Požadavky se číslují ACME-1, ACME-2… 2–10 znaků, nelze změnit, jakmile existují požadavky.</small>
+          <small>Požadavky se číslují ACME-1, ACME-2… (NBU_ZOTY-1). 2–10 znaků A–Z, 0–9 nebo _, nelze změnit, jakmile existují požadavky.</small>
         </div>
       </div>
       <div class="form-actions">

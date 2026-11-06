@@ -39,7 +39,6 @@ require __DIR__ . '/../partials/header.php';
       <a class="button button--ghost" href="export<?= $qs ? '?' . h($qs) : '' ?>">Stáhnout MD (publikované)</a>
       <a class="button button--ghost" href="export?<?= h(http_build_query($filters + ['drafts' => 1])) ?>">Stáhnout MD (vč. konceptů)</a>
       <a class="button button--ghost" href="versions">Verze</a>
-      <a class="button button--primary" href="edit">+ Nový záznam</a>
     </div>
   </div>
 
