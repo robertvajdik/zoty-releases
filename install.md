@@ -37,9 +37,9 @@ Alternatively, the environment variable `ZOTY_CONFIG` can point to a different c
 - Entries: create, edit, delete, publish or move to drafts. Each entry belongs to a version, picked from a list
   (or create one right in the entry form with "+ Nová verze…"), and has a type,
   module, title and description (simple markdown).
-- TXT export of published entries only, or including drafts. The current filter applies.
+- Markdown (.md) export of published entries only, or including drafts. The current filter applies.
 
-## TXT export
+## Markdown export
 
 `export` accepts the same filters as the page, e.g. `export?version=2.4.0&type=fixed`.
 

@@ -8,7 +8,7 @@ declare(strict_types=1);
 date_default_timezone_set('Europe/Prague');
 
 /**
- * Zoty Release Notes – shared helpers (storage, auth, rendering, export).
+ * Zoty Release Notes – shared helpers (storage, auth, rendering, Markdown export).
  * Storage: database via PDO (MySQL/MariaDB in production, SQLite for local dev).
  * Connection settings live in config.php (or the file given by env ZOTY_CONFIG).
  */
@@ -16,10 +16,10 @@ date_default_timezone_set('Europe/Prague');
 const APP_NAME = 'Zoty – přehled změn';
 
 const TYPES = [
-    'new'      => ['label' => 'Vylepšení',  'txt' => 'VYLEPŠENÍ'],
-    'improved' => ['label' => 'Úprava',     'txt' => 'ÚPRAVA'],
-    'fixed'    => ['label' => 'Oprava',     'txt' => 'OPRAVA'],
-    'security' => ['label' => 'Zranitelnosti', 'txt' => 'ZRANITELNOSTI'],
+    'new'      => ['label' => 'Vylepšení'],
+    'improved' => ['label' => 'Úprava'],
+    'fixed'    => ['label' => 'Oprava'],
+    'security' => ['label' => 'Zranitelnosti'],
 ];
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -804,75 +804,69 @@ function render_body(string $text): string
     return $html;
 }
 
-/* ---------------------------------------------------------------- TXT export */
+/* ---------------------------------------------------------------- Markdown export */
 
-function build_txt(array $entries, array $filters = []): string
+function build_md(array $entries, array $filters = []): string
 {
-    $nl = "\r\n";
-    $out  = 'ZOTY – PŘEHLED ZMĚN' . $nl;
-    $out .= 'Vygenerováno: ' . date('d.m.Y H:i') . $nl;
+    $nl = "\n";
+    $out  = '# ZOTY – Přehled změn' . $nl . $nl;
+    $out .= '_Vygenerováno: ' . date('d.m.Y H:i') . '_' . $nl;
     $desc = [];
     if (!empty($filters['version'])) $desc[] = 'verze ' . $filters['version'];
     if (!empty($filters['type']) && isset(TYPES[$filters['type']])) $desc[] = 'typ ' . TYPES[$filters['type']]['label'];
     if (!empty($filters['module'])) $desc[] = 'modul ' . $filters['module'];
     if (!empty($filters['from'])) $desc[] = 'od ' . $filters['from'];
     if (!empty($filters['to'])) $desc[] = 'do ' . $filters['to'];
-    if (!empty($filters['q'])) $desc[] = 'hledání "' . $filters['q'] . '"';
-    if ($desc) $out .= 'Filtr: ' . implode(', ', $desc) . $nl;
-    $out .= str_repeat('=', 72) . $nl . $nl;
+    if (!empty($filters['q'])) $desc[] = 'hledání „' . $filters['q'] . '“';
+    if ($desc) $out .= $nl . '_Filtr: ' . md_escape(implode(', ', $desc)) . '_' . $nl;
+    $out .= $nl;
 
     if (!$entries) {
         return $out . 'Žádné záznamy.' . $nl;
     }
 
     foreach (group_by_version($entries) as $g) {
-        $head = 'VERZE ' . $g['version'] . '  (' . date('d.m.Y', strtotime($g['date'])) . ')'
-              . ($g['title'] !== '' ? ' – ' . $g['title'] : '')
-              . ($g['published'] ? '' : '  (NEPUBLIKOVÁNO)');
-        $out .= $head . $nl . str_repeat('-', mb_strlen($head)) . $nl;
+        $out .= '## ' . md_escape($g['version']) . ' (' . date('d.m.Y', strtotime($g['date'])) . ')'
+              . ($g['title'] !== '' ? ' – ' . md_escape($g['title']) : '')
+              . ($g['published'] ? '' : ' _(nepublikováno)_') . $nl . $nl;
         if (trim($g['summary']) !== '') {
-            foreach (preg_split('/\R/u', trim($g['summary'])) as $line) {
-                $out .= txt_line(rtrim($line)) . $nl;
-            }
+            $out .= md_body($g['summary']) . $nl . $nl;
         }
         foreach ($g['entries'] as $e) {
-            $tag = TYPES[$e['type']]['txt'] ?? strtoupper($e['type']);
-            $out .= $nl . '[' . $tag . '] ' . $e['title'];
-            if ($e['module'] !== '') $out .= '  {' . $e['module'] . '}';
-            if (empty($e['published'])) $out .= '  (KONCEPT)';
-            $out .= $nl;
-            foreach (preg_split('/\R/u', trim($e['body'])) as $line) {
-                $line = txt_line(trim($line));
-                $out .= ($line === '' ? '' : '    ' . $line) . $nl;
-            }
+            $out .= '### ' . (TYPES[$e['type']]['label'] ?? $e['type']) . ': ' . md_escape($e['title'])
+                  . ($e['module'] !== '' ? ' `' . str_replace('`', "'", $e['module']) . '`' : '')
+                  . (empty($e['published']) ? ' _(koncept)_' : '') . $nl . $nl;
+            if (trim($e['body']) !== '') $out .= md_body($e['body']) . $nl . $nl;
         }
-        $out .= $nl . $nl;
     }
     return rtrim($out) . $nl;
 }
 
-/** One line of markdown as plain text; images and links become full URLs. */
-function txt_line(string $line): string
+/** Escape characters that would turn plain text (titles, filters) into markdown. */
+function md_escape(string $s): string
 {
-    // ![popis](uploads/...) -> https://site/uploads/... (the alt text is kept unless it is only a number)
-    $line = preg_replace_callback('/!\[([^\]]*)\]\((https?:\/\/[^\s)]+|uploads\/[\w\/.\-]+)\)/u', function ($m) {
-        $url = str_starts_with($m[2], 'uploads/') ? site_url($m[2]) : $m[2];
-        $alt = trim($m[1]);
-        return ($alt === '' || ctype_digit($alt) ? '' : $alt . ': ') . $url;
-    }, $line);
-    $line = preg_replace('/\*\*(.+?)\*\*/u', '$1', $line);
-    $line = preg_replace('/`(.+?)`/u', '$1', $line);
-    $line = preg_replace('/\[(.+?)\]\((https?:\/\/[^\s)]+)\)/u', '$1 ($2)', $line);
-    return preg_replace('/^[-*•]\s+/u', '* ', $line);
+    return preg_replace('/([\\\\`*_\[\]<>#|])/u', '\\\\$1', $s);
 }
 
-function send_txt(array $entries, array $filters, string $suffix = ''): void
+/** Entry/version description (already simple markdown): normalise bullets, make uploads/ URLs absolute. */
+function md_body(string $text): string
 {
-    $name = 'zoty-changelog' . (!empty($filters['version']) ? '-' . preg_replace('/[^0-9A-Za-z._-]/', '', $filters['version']) : '') . $suffix . '-' . date('Y-m-d') . '.txt';
-    header('Content-Type: text/plain; charset=utf-8');
+    $lines = [];
+    foreach (preg_split('/\R/u', trim($text)) as $line) {
+        $line = rtrim($line);
+        $line = preg_replace_callback('/(!?\[[^\]]*\]\()(uploads\/[\w\/.\-]+)\)/u', fn($m) => $m[1] . site_url($m[2]) . ')', $line);
+        $lines[] = preg_replace('/^\s*[-*•]\s+/u', '- ', $line);
+    }
+    return implode("\n", $lines);
+}
+
+function send_md(array $entries, array $filters, string $suffix = ''): void
+{
+    $name = 'zoty-changelog' . (!empty($filters['version']) ? '-' . preg_replace('/[^0-9A-Za-z._-]/', '', $filters['version']) : '') . $suffix . '-' . date('Y-m-d') . '.md';
+    header('Content-Type: text/markdown; charset=utf-8');
     header('Content-Disposition: attachment; filename="' . $name . '"');
     header('X-Content-Type-Options: nosniff');
-    echo "\xEF\xBB\xBF" . build_txt($entries, $filters);
+    echo build_md($entries, $filters);
     exit;
 }
 

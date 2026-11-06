@@ -76,7 +76,7 @@ Moduly       Add, rename and delete modules (e.g. DataLink, Audit,
              Reporty). Renaming also updates the entries that use it.
              A module can be deleted only when no entry uses it.
 Odběratelé   List of e-mail subscribers.
-Export       TXT export of published entries, or including drafts.
+Export       Markdown (.md) export of published entries, or including drafts.
              The current filter is applied.
 
 Change types: Vylepšení (new, EN: Feature), Úprava (improved), Oprava (fixed),
@@ -88,7 +88,7 @@ PUBLIC SITE
 
 /                 changelog with search and filters
                   (version, type, module, date range)
-/export           TXT export, same filters as the page,
+/export           Markdown export, same filters as the page,
                   e.g. export?version=v1.42.07&type=fixed
 /feed.xml         Atom feed
 /sitemap.xml      sitemap
