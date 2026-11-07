@@ -216,7 +216,7 @@ It is not public: visitors who aren't signed in are sent to the sign-in page. Ad
 
 ![The manual editor with live preview](img/admin-docs.png)
 
-- **Obnovit výchozí text** replaces the manual with the original file (`MANUAL.md`, `docs/portal.cs.md`, `docs/portal.en.md`).
+- **Obnovit výchozí text** replaces the manual with the original file (`Zoty Release Notes & Customer Support.md`, `docs/portal.cs.md`, `docs/portal.en.md`).
 
 ---
 
@@ -303,6 +303,16 @@ Further actions: **Upravit** (change name/e-mail, set a new password – leave e
 **Smazat zákazníka** works only for customers without requests.
 
 ![A customer with its portal users](img/admin-customer.png)
+
+### 5.1a Administrators (Administrátoři)
+
+**Podpora → Administrátoři** (or click your e-mail in the top bar) lists everyone who can sign in to the administration.
+All administrators have the same rights.
+
+- **Přidat administrátora** – e-mail + password (**Vygenerovat** creates one); tick *Poslat přihlašovací údaje e-mailem* to send them.
+- **E-maily o požadavcích** – the switch decides who gets an e-mail about every new request and every customer reply.
+  New administrators have it on.
+- **Změnit heslo**, **Smazat** – you cannot delete yourself or the last administrator; a deleted administrator loses access immediately.
 
 ### 5.2 Request queue (Požadavky)
 
@@ -435,7 +445,7 @@ Single line breaks are kept. HTML is never interpreted – it's shown as text.
 |---|---|
 | Subscription to news | the subscriber – confirmation link |
 | **✉ Rozeslat** on a version | all confirmed subscribers – version summary and entries |
-| New request | support addresses from `config.php` (`support.notify`) |
+| New request | every administrator with **E-maily o požadavcích** on + the addresses in `config.php` (`support.notify`) |
 | Customer comment, customer resolves/reopens | support addresses |
 | Admin reply | the reporter – the reply text and a link |
 | Admin changes status | the reporter – the new status and a link |
@@ -475,7 +485,7 @@ All settings are in `config.php` (template: `config.sample.php`). Details in `in
 | Customer can't sign in | Check the user exists and isn't **Zablokován** (blocked); set a new password under Zákazníci. |
 | Customer sees "Request not found" | The key belongs to another company, or the request was deleted. |
 | "The upload is too large" | Files exceed the server limit (`post_max_size`); send fewer or smaller files. |
-| Support doesn't get e-mails about requests | Fill in `support.notify` in `config.php`; test sending under **Odběratelé**. |
+| Support doesn't get e-mails about requests | Turn on **E-maily o požadavcích** under **Podpora → Administrátoři** (or fill in `support.notify` in `config.php`); test sending under **Odběratelé**. |
 | Customer key rejected | Use 2–10 characters A–Z, 0–9 or `_`, starting with a letter (e.g. `NBU_ZOTY`). |
 | A ticket key in release notes isn't a link | The customer with that key doesn't exist, or the key is part of a URL or link text. |
 | Old look after an update | Reload with **Ctrl+F5**. |

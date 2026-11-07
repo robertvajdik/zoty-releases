@@ -423,3 +423,7 @@ select.tf__plain { appearance: auto; }
 
 .nav-user .nav-user__name { color: var(--muted); text-decoration: none; }
 .nav-user .nav-user__name:hover { color: var(--purple); text-decoration: underline; }
+
+/* admins: notification switch in the table */
+.admin-notify { display: inline-flex; align-items: center; gap: 10px; }
+.admin-notify__label { font-size: 13px; color: var(--muted); }

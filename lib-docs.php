@@ -3,14 +3,14 @@ declare(strict_types=1);
 /**
  * Zoty – manuals (help pages) editable in the admin.
  * Table changelog_docs: one Markdown document per (slug, lang). A missing document is created
- * from its seed file the first time it is requested (MANUAL.md, docs/*.md).
+ * from its seed file the first time it is requested (Zoty Release Notes & Customer Support.md, docs/*.md).
  */
 
 // 'portal' => true: customers see it in the portal (admins see every manual)
 const DOCS = [
-    'admin'  => ['label' => 'Manuál administrace', 'langs' => ['en', 'cs'], 'seed' => ['en' => 'MANUAL.md'], 'portal' => false],
+    'admin'  => ['label' => 'Manuál administrace', 'langs' => ['en', 'cs'], 'seed' => ['en' => 'Zoty Release Notes & Customer Support.md'], 'portal' => false],
     'portal' => ['label' => 'Manuál zákaznického portálu', 'langs' => ['cs', 'en'], 'seed' => ['cs' => 'docs/portal.cs.md', 'en' => 'docs/portal.en.md'], 'portal' => true],
-    'zoty'   => ['label' => 'Manuál Zoty', 'langs' => ['cs'], 'seed' => ['cs' => 'docs/manual/manual.md'], 'portal' => true],
+    'zoty'   => ['label' => 'Manuál Zoty', 'langs' => ['cs', 'en'], 'seed' => ['cs' => 'docs/manual/manual.cs.md', 'en' => 'docs/manual/manual.en.md'], 'portal' => true],
 ];
 
 const DOC_NOTES = ['note' => 'Poznámka', 'tip' => 'Tip', 'info' => 'Informace', 'caution' => 'Pozor', 'warning' => 'Varování', 'danger' => 'Nebezpečí'];

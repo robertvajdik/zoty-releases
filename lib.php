@@ -685,7 +685,7 @@ function site_url(string $path = ''): string
               || strtolower((string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
         $host  = preg_replace('/[^A-Za-z0-9.\-:\[\]]/', '', (string)($_SERVER['HTTP_HOST'] ?? 'localhost'));
         $dir   = str_replace(chr(92), '/', dirname((string)($_SERVER['SCRIPT_NAME'] ?? '/')));
-        if (preg_match('#/admin$#', $dir)) $dir = substr($dir, 0, -6);   // called from admin/*.php
+        $dir   = preg_replace('#/(admin|portal)$#', '', $dir);   // called from admin/*.php or portal/*.php
         $base  = ($https ? 'https' : 'http') . '://' . $host . rtrim($dir, '/') . '/';
     }
     return rtrim($base, '/') . '/' . ltrim($path, '/');

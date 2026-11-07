@@ -71,7 +71,7 @@ changelog_ticket_comments  id, ticket_id, user_id (NULL = support),
                        staff_name, body, event, created_at
 changelog_docs         id, slug (admin | portal), lang, body (Markdown),
                        updated_at, updated_by – manuals, seeded from
-                       MANUAL.md and docs/portal.*.md on first view
+                       "Zoty Release Notes & Customer Support.md" and docs/portal.*.md on first view
 changelog_ticket_files id, ticket_id, comment_id, name, path, mime, size,
                        created_at (files in data/tickets/<ticket_id>/)
 
