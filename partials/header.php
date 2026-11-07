@@ -7,7 +7,7 @@ $portalUser = $isPortal ? portal_user() : null;
 $self = basename($_SERVER['SCRIPT_NAME'] ?? '');
 $L = $isAdminArea ? 'cs' : lang();
 // Admin has two workspaces: release notes (changelog) and support (customer requests).
-$adminSection = $admin_section ?? (in_array($self, ['tickets.php', 'ticket.php', 'customers.php'], true) ? 'support'
+$adminSection = $admin_section ?? (in_array($self, ['tickets.php', 'ticket.php', 'customers.php', 'admins.php'], true) ? 'support'
     : (in_array($self, ['manual.php', 'docs.php'], true) ? 'help' : 'releases'));
 $adminNav = [];
 if ($isAdminArea && is_admin()) {
@@ -18,6 +18,7 @@ if ($isAdminArea && is_admin()) {
     ] : ($adminSection === 'support' ? [
         ['tickets',   'Požadavky', ['tickets.php', 'ticket.php'], $tStats['open'] + $tStats['in_progress'] + $tStats['waiting']],
         ['customers', 'Zákazníci a přístupy', ['customers.php'], 0],
+        ['admins',    'Administrátoři', ['admins.php'], 0],
     ] : [
         ['./',          'Záznamy',    ['index.php', 'edit.php'], 0],
         ['versions',    'Verze',      ['versions.php'], 0],
@@ -40,7 +41,7 @@ if ($isAdminArea && is_admin()) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= $base ?>assets/style.css?v=14">
-  <?php if ($isAdminArea || $isPortal): ?><link rel="stylesheet" href="<?= $base ?>assets/tickets.css?v=17"><?php endif; ?>
+  <?php if ($isAdminArea || $isPortal): ?><link rel="stylesheet" href="<?= $base ?>assets/tickets.css?v=18"><?php endif; ?>
   <?php if ($isAdminArea): ?><link rel="stylesheet" href="<?= $base ?>assets/admin.css?v=2"><?php endif; ?>
   <link rel="alternate" type="application/atom+xml" title="<?= h(tr('site.name')) ?>" href="<?= $base ?>feed.xml">
   <?= $headExtra ?? '' ?>
@@ -63,7 +64,7 @@ if ($isAdminArea && is_admin()) {
           <li><a href="<?= $base ?>./" target="_blank" rel="noopener">Veřejný web ↗</a></li>
         <?php endif; ?>
         <li><a href="<?= $base ?>admin/manual" <?= in_array($self, ['manual.php', 'docs.php'], true) ? 'aria-current="page"' : '' ?>>Manuál</a></li>
-        <li class="nav-user"><span title="Přihlášený administrátor"><?= h((string)($_SESSION['zoty_admin'] ?? '')) ?></span> <a href="<?= $base ?>admin/logout">Odhlásit</a></li>
+        <li class="nav-user"><a href="<?= $base ?>admin/admins" title="Přihlášený administrátor – správa administrátorů" class="nav-user__name"><?= h((string)($_SESSION['zoty_admin'] ?? '')) ?></a> <a href="<?= $base ?>admin/logout">Odhlásit</a></li>
       <?php elseif ($isPortal && $portalUser): ?>
         <li><a href="<?= $base ?>portal/" <?= in_array($self, ['index.php', 'ticket.php'], true) ? 'aria-current="page"' : '' ?>><?= h(tr('portal.my_requests')) ?></a></li>
         <li><a href="<?= $base ?>portal/help" <?= $self === 'help.php' ? 'aria-current="page"' : '' ?>><?= h(tr('nav.help')) ?></a></li>

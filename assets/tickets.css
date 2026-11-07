@@ -11,7 +11,7 @@
 .portal__head h1 { margin: 0; font-size: 26px; }
 .portal__head p { margin: 4px 0 0; color: var(--muted); }
 .nav-user { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
-.nav-user span { max-width: 16em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-user span, .nav-user__name { max-width: 16em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav-count { display: inline-block; min-width: 1.6em; padding: 0 .45em; border-radius: 99px; background: var(--red); color: #fff; font: 600 11px/1.6 var(--font-head); text-align: center; vertical-align: 1px; }
 
 /* ---------- request type picker (Jira service desk style) */
@@ -420,3 +420,6 @@ select.tf__plain { appearance: auto; }
 .doc-name__form input[type="text"] { flex: 1 1 200px; }
 .doc-name__form small { flex-basis: 100%; }
 @media (max-width: 600px) { .doc-name__edit { flex: 1; } .doc-name__edit summary { width: 100%; justify-content: center; } .doc-name__form { left: 0; right: auto; } }
+
+.nav-user .nav-user__name { color: var(--muted); text-decoration: none; }
+.nav-user .nav-user__name:hover { color: var(--purple); text-decoration: underline; }

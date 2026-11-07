@@ -308,6 +308,17 @@ function migrate(PDO $pdo, string $driver): void
             $ins->execute([$n, date('Y-m-d H:i:s')]);
         }
     }
+    // v2 admins: several administrators, each can get the e-mails about new tickets
+    try {
+        $pdo->query("SELECT notify_tickets FROM $u WHERE 1 = 0");
+    } catch (PDOException $ex) {
+        $pdo->exec($driver === 'sqlite'
+            ? "ALTER TABLE $u ADD COLUMN notify_tickets INTEGER NOT NULL DEFAULT 1"
+            : "ALTER TABLE `$u` ADD COLUMN notify_tickets TINYINT(1) NOT NULL DEFAULT 1");
+        $pdo->exec($driver === 'sqlite'
+            ? "ALTER TABLE $u ADD COLUMN last_login TEXT NULL"
+            : "ALTER TABLE `$u` ADD COLUMN last_login DATETIME NULL");
+    }
     migrate_tickets($pdo, $driver);
     migrate_docs($pdo, $driver);
     // Guard against a table left over from the earlier schema (version stored as text on entries).
@@ -893,14 +904,66 @@ function auth_configured(): bool
 }
 
 /** Returns the username on success, null otherwise. */
-function auth_verify(string $user, string $password): ?string
+function auth_verify(string $user, string $password, bool $touch = true): ?string
 {
     $st = db()->prepare('SELECT username, password_hash FROM ' . t('changelog_users') . ' WHERE username = ?');
     $st->execute([$user]);
     $row = $st->fetch();
     // verify against a dummy hash when the user is unknown, so timing does not leak usernames
     $hash = $row['password_hash'] ?? password_hash('dummy-password', PASSWORD_DEFAULT);
-    return (password_matches($password, $hash) && $row) ? $row['username'] : null;
+    if (!(password_matches($password, $hash) && $row)) return null;
+    if ($touch) db()->prepare('UPDATE ' . t('changelog_users') . ' SET last_login = ? WHERE username = ?')->execute([date('Y-m-d H:i:s'), $row['username']]);
+    return $row['username'];
+}
+
+/** All administrators, oldest first. */
+function admin_list(): array
+{
+    return db()->query('SELECT id, username, notify_tickets, created_at, last_login FROM ' . t('changelog_users') . ' ORDER BY id')->fetchAll();
+}
+
+function admin_get(int $id): ?array
+{
+    $st = db()->prepare('SELECT id, username, notify_tickets, created_at, last_login FROM ' . t('changelog_users') . ' WHERE id = ?');
+    $st->execute([$id]);
+    return $st->fetch() ?: null;
+}
+
+/** Errors for a new administrator (username = e-mail). */
+function validate_admin(string $email, string $password): array
+{
+    $err = [];
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 80) $err[] = 'Zadejte platný e-mail (max. 80 znaků).';
+    if (mb_strlen($password) < 8) $err[] = 'Heslo musí mít alespoň 8 znaků.';
+    $st = db()->prepare('SELECT 1 FROM ' . t('changelog_users') . ' WHERE LOWER(username) = ?');
+    $st->execute([mb_strtolower($email)]);
+    if ($st->fetch()) $err[] = 'Administrátor ' . $email . ' už existuje.';
+    return $err;
+}
+
+function admin_set_password(int $id, string $password): void
+{
+    db()->prepare('UPDATE ' . t('changelog_users') . ' SET password_hash = ? WHERE id = ?')->execute([password_hash($password, PASSWORD_DEFAULT), $id]);
+}
+
+function admin_set_notify(int $id, bool $on): void
+{
+    db()->prepare('UPDATE ' . t('changelog_users') . ' SET notify_tickets = ? WHERE id = ?')->execute([$on ? 1 : 0, $id]);
+}
+
+function admin_delete(int $id): void
+{
+    db()->prepare('DELETE FROM ' . t('changelog_users') . ' WHERE id = ?')->execute([$id]);
+}
+
+/** E-mail addresses of the administrators who want the e-mails about tickets. */
+function admin_notify_emails(): array
+{
+    $out = [];
+    foreach (db()->query('SELECT username FROM ' . t('changelog_users') . ' WHERE notify_tickets = 1') as $r) {
+        if (filter_var($r['username'], FILTER_VALIDATE_EMAIL)) $out[] = (string)$r['username'];
+    }
+    return $out;
 }
 
 function auth_create(string $user, string $password): void
@@ -909,9 +972,18 @@ function auth_create(string $user, string $password): void
         ->execute([$user, password_hash($password, PASSWORD_DEFAULT), date('Y-m-d H:i:s')]);
 }
 
+/** Signed in as an administrator that still exists (a deleted admin loses access at once). */
 function is_admin(): bool
 {
-    return !empty($_SESSION['zoty_admin']);
+    static $ok = null;
+    if (empty($_SESSION['zoty_admin'])) return false;
+    if ($ok === null) {
+        $st = db()->prepare('SELECT 1 FROM ' . t('changelog_users') . ' WHERE username = ?');
+        $st->execute([(string)$_SESSION['zoty_admin']]);
+        $ok = (bool)$st->fetchColumn();
+        if (!$ok) unset($_SESSION['zoty_admin']);
+    }
+    return $ok;
 }
 
 function require_admin(): void

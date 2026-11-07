@@ -31,9 +31,11 @@ CREATE TABLE IF NOT EXISTS `changelog_entries` (
 
 CREATE TABLE IF NOT EXISTS `changelog_users` (
   `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `username`      VARCHAR(80)  NOT NULL UNIQUE,
+  `username`      VARCHAR(80)  NOT NULL UNIQUE COMMENT 'e-mail',
   `password_hash` VARCHAR(255) NOT NULL,
-  `created_at`    DATETIME     NOT NULL
+  `notify_tickets` TINYINT(1)  NOT NULL DEFAULT 1 COMMENT 'e-mails about new tickets and customer comments',
+  `created_at`    DATETIME     NOT NULL,
+  `last_login`    DATETIME     NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
 CREATE TABLE IF NOT EXISTS `changelog_subscribers` (

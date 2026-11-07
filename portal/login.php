@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = tr('recaptcha.failed');
     } elseif ($login['status'] === 'inactive') {
         $error = tr('portal.login_inactive');
-    } elseif (auth_verify(trim((string)($_POST['user'] ?? '')), (string)($_POST['password'] ?? ''))) {
+    } elseif (auth_verify(trim((string)($_POST['user'] ?? '')), (string)($_POST['password'] ?? ''), false)) {
         // the administrator's account typed into the customer portal
         $error = tr('portal.login_is_admin');
         $errorLink = ['href' => '../admin/login', 'text' => tr('portal.login_admin_link')];

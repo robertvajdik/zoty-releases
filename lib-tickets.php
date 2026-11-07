@@ -786,11 +786,16 @@ function event_text(string $event): string
 
 /* ---------------------------------------------------------------- notifications */
 
+/** Who gets the e-mails about tickets: config support.notify + every administrator with notifications on (no duplicates). */
 function ticket_staff_emails(): array
 {
     $n = support_config()['notify'];
-    return array_values(array_filter(array_map('trim', is_array($n) ? $n : explode(',', (string)$n)),
-        fn($e) => (bool)filter_var($e, FILTER_VALIDATE_EMAIL)));
+    $all = array_merge(array_map('trim', is_array($n) ? $n : explode(',', (string)$n)), admin_notify_emails());
+    $out = [];
+    foreach ($all as $e) {
+        if (filter_var($e, FILTER_VALIDATE_EMAIL)) $out[mb_strtolower($e)] ??= $e;
+    }
+    return array_values($out);
 }
 
 /** E-mails support staff about a new ticket or a customer's comment. Failures are only logged. */
