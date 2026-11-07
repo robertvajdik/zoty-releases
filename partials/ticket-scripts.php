@@ -6,4 +6,4 @@ foreach (['search', 'no_match', 'remove', 'link_prompt', 'bold_text', 'italic_te
 }
 ?>
 <script>window.ZOTY_T = <?= json_encode($jsT, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>
-<script src="<?= $base ?? '' ?>assets/tickets.js?v=1" defer></script>
+<script src="<?= $base ?? '' ?>assets/tickets.js?v=2" defer></script>

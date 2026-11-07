@@ -7,7 +7,7 @@
  */
 $ic = fn(string $d) => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $d . '</svg>';
 ?>
-<div class="rte<?= !empty($edInvalid) ? ' is-invalid' : '' ?>" data-rte>
+<div class="rte<?= !empty($edInvalid) ? ' is-invalid' : '' ?><?= !empty($edDoc) ? ' rte--doc' : '' ?>" data-rte>
   <div class="rte__bar" role="toolbar" aria-label="<?= h(tr('rte.toolbar')) ?>" aria-controls="<?= h($edId) ?>">
     <div class="rte__menu">
       <button type="button" class="rte__btn rte__btn--text" data-menu aria-haspopup="true" aria-expanded="false" title="<?= h(tr('rte.style')) ?>">Tt<span class="rte__caret" aria-hidden="true"></span></button>
@@ -30,9 +30,13 @@ $ic = fn(string $d) => '<svg width="16" height="16" viewBox="0 0 24 24" fill="no
     <button type="button" class="rte__btn" data-cmd="attach" title="<?= h(tr('rte.attach')) ?>" aria-label="<?= h(tr('rte.attach')) ?>"><?= $ic('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>') ?></button>
     <button type="button" class="rte__btn" data-cmd="code" title="<?= h(tr('rte.code')) ?>" aria-label="<?= h(tr('rte.code')) ?>"><?= $ic('<path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/>') ?></button>
     <button type="button" class="rte__btn" data-cmd="codeblock" title="<?= h(tr('rte.codeblock')) ?>" aria-label="<?= h(tr('rte.codeblock')) ?>"><?= $ic('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="m9 10-2 2 2 2M15 10l2 2-2 2"/>') ?></button>
+    <?php if (!empty($edDoc)): ?>
+    <button type="button" class="rte__btn" data-cmd="table" title="Tabulka" aria-label="Tabulka"><?= $ic('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M10 4v16"/>') ?></button>
+    <button type="button" class="rte__btn" data-cmd="hr" title="Oddělovač" aria-label="Oddělovač"><?= $ic('<path d="M3 12h18"/>') ?></button>
+    <?php endif; ?>
     <button type="button" class="rte__btn" data-cmd="quote" title="<?= h(tr('rte.quote')) ?>" aria-label="<?= h(tr('rte.quote')) ?>"><?= $ic('<path d="M5 7v10M10 8h9M10 12h9M10 16h6"/>') ?></button>
   </div>
-  <textarea id="<?= h($edId) ?>" name="<?= h($edName) ?>" rows="6" placeholder="<?= h($edPlaceholder ?? '') ?>"
+  <textarea id="<?= h($edId) ?>" name="<?= h($edName) ?>" rows="6" <?= !empty($edDoc) ? 'data-grow-max="4000" spellcheck="true"' : '' ?> placeholder="<?= h($edPlaceholder ?? '') ?>"
     <?= !empty($edRequired) ? 'data-required' : '' ?> <?= !empty($edInvalid) ? 'aria-invalid="true"' : '' ?>><?= h($edValue ?? '') ?></textarea>
-  <p class="rte__hint"><?= h(tr('rte.hint')) ?></p>
+  <p class="rte__hint"><?= h(!empty($edDoc) ? 'Markdown: # nadpis, **tučně**, *kurzíva*, - odrážka, 1. seznam, | tabulka |, ``` kód ```, [odkaz](https://…), [odkaz na kapitolu](#id-nadpisu). Obrázek vložíte tlačítkem, přetažením nebo Ctrl+V.' : tr('rte.hint')) ?></p>
 </div>

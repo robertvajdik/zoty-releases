@@ -69,6 +69,9 @@ changelog_tickets      id, customer_id, number (per customer), user_id, type,
                        severity, status, created_at, updated_at
 changelog_ticket_comments  id, ticket_id, user_id (NULL = support),
                        staff_name, body, event, created_at
+changelog_docs         id, slug (admin | portal), lang, body (Markdown),
+                       updated_at, updated_by – manuals, seeded from
+                       MANUAL.md and docs/portal.*.md on first view
 changelog_ticket_files id, ticket_id, comment_id, name, path, mime, size,
                        created_at (files in data/tickets/<ticket_id>/)
 
@@ -115,6 +118,7 @@ PUBLIC SITE
                   list of the customer's requests, new request
                   (Support Incident / Question / Feature Request),
                   request detail with comments and attachments
+/portal/help      customer help (public, CS/EN, edited in admin)
 /feed.xml         Atom feed
 /sitemap.xml      sitemap
 /robots.txt       robots

@@ -37,7 +37,7 @@ if ($isAdminArea && is_admin()) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= $base ?>assets/style.css?v=10">
-  <?php if ($isAdminArea || $isPortal): ?><link rel="stylesheet" href="<?= $base ?>assets/tickets.css?v=3"><?php endif; ?>
+  <?php if ($isAdminArea || $isPortal): ?><link rel="stylesheet" href="<?= $base ?>assets/tickets.css?v=4"><?php endif; ?>
   <?php if ($isAdminArea): ?><link rel="stylesheet" href="<?= $base ?>assets/admin.css?v=1"><?php endif; ?>
   <link rel="alternate" type="application/atom+xml" title="<?= h(tr('site.name')) ?>" href="<?= $base ?>feed.xml">
   <?= $headExtra ?? '' ?>
@@ -59,9 +59,11 @@ if ($isAdminArea && is_admin()) {
         <?php else: ?>
           <li><a href="<?= $base ?>./" target="_blank" rel="noopener">Veřejný web ↗</a></li>
         <?php endif; ?>
+        <li><a href="<?= $base ?>admin/help" <?= in_array($self, ['help.php', 'docs.php'], true) ? 'aria-current="page"' : '' ?>>Nápověda</a></li>
         <li class="nav-user"><span title="Přihlášený administrátor"><?= h((string)($_SESSION['zoty_admin'] ?? '')) ?></span> <a href="<?= $base ?>admin/logout">Odhlásit</a></li>
       <?php elseif ($isPortal && $portalUser): ?>
         <li><a href="<?= $base ?>portal/" <?= in_array($self, ['index.php', 'ticket.php'], true) ? 'aria-current="page"' : '' ?>><?= h(tr('portal.my_requests')) ?></a></li>
+        <li><a href="<?= $base ?>portal/help" <?= $self === 'help.php' ? 'aria-current="page"' : '' ?>><?= h(tr('nav.help')) ?></a></li>
         <li><a href="<?= $base ?>./"><?= h(tr('site.product')) ?></a></li>
         <li class="lang-switch" role="group" aria-label="<?= h(tr('lang.switch')) ?>">
           <?php foreach (LANGS as $code): ?>

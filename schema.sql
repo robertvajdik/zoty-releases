@@ -136,3 +136,15 @@ CREATE TABLE IF NOT EXISTS `changelog_ticket_files` (
   KEY `idx_ticket` (`ticket_id`),
   CONSTRAINT `fk_changelog_ticket_files_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `changelog_tickets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
+
+-- ---------------------------------------------------------------- manuals (admin/help, portal/help)
+
+CREATE TABLE IF NOT EXISTS `changelog_docs` (
+  `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `slug`       VARCHAR(40)  NOT NULL COMMENT 'admin | portal',
+  `lang`       VARCHAR(5)   NOT NULL,
+  `body`       MEDIUMTEXT   NOT NULL COMMENT 'Markdown; created from MANUAL.md / docs/*.md on first view',
+  `updated_at` DATETIME     NOT NULL,
+  `updated_by` VARCHAR(160) NOT NULL DEFAULT '',
+  UNIQUE KEY `uq_slug_lang` (`slug`, `lang`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;

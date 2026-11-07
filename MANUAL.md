@@ -175,6 +175,30 @@ Under the top bar there is a switch between two separate workspaces:
 - The logo takes you to the home page of the current workspace.
 - On a phone the section tabs scroll sideways.
 
+### Help and manuals (Nápověda)
+
+**Nápověda** in the top bar opens the manuals. The tabs switch between:
+
+| Manual | Who reads it | Where |
+|---|---|---|
+| **Příručka administrace** (EN, CS) | administrators | `/admin/help` |
+| **Nápověda zákaznického portálu** (CS, EN) | customers | `/portal/help` – link **Nápověda / Help** in the portal and on its sign-in page |
+
+The portal shows the help in the customer's language (falling back to the other one).
+
+**Editing a manual:** click **✎ Upravit**.
+
+- Left: Markdown with the formatting toolbar (headings, bold, italic, lists, link, image, code, **table**, **divider**, quote).
+  Right: live preview, rendered exactly like the published page.
+- Images: toolbar button, drag & drop or Ctrl+V – they are uploaded and inserted automatically.
+- Links to a chapter: `[text](#id-of-heading)`; the id is the heading in lower case with spaces as `-`
+  (hover a heading to see its `#` link).
+- **Uložit** (Ctrl+S) saves and stays in the editor, **Uložit a zobrazit** saves and opens the manual.
+  Leaving with unsaved changes asks for confirmation.
+- If someone else saved the manual meanwhile, you get a warning and your text is kept; saving again overwrites their version.
+- A missing language version (e.g. the Czech admin manual) is created from the other language, ready to translate.
+- **Obnovit výchozí text** replaces the manual with the original file (`MANUAL.md`, `docs/portal.cs.md`, `docs/portal.en.md`).
+
 ---
 
 ## 4. Workspace: Release notes

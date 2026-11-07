@@ -159,8 +159,20 @@
         set(s.v.slice(0, s.a) + md + s.v.slice(s.b), s.a + md.length, s.a + md.length);
       },
       attach: function () {
-        var form = box.closest('form'), btn = form && form.querySelector('[data-drop-browse]');
+        var form = box.closest('form'), btn = form && (form.querySelector('[data-drop-browse]') || form.querySelector('[data-img-input]'));
         if (btn) btn.click();
+      },
+      table: function () {
+        var s = sel(), NL = '\n';
+        var pre = s.a === 0 ? '' : (s.v[s.a - 1] !== NL ? NL + NL : (s.a > 1 && s.v[s.a - 2] !== NL ? NL : ''));
+        var col = t('col', 'Sloupec');
+        var md = pre + '| ' + col + ' 1 | ' + col + ' 2 |' + NL + '|---|---|' + NL + '| | |' + NL;
+        set(s.v.slice(0, s.a) + md + s.v.slice(s.b), s.a + pre.length + 2, s.a + pre.length + 2 + col.length + 2);
+      },
+      hr: function () {
+        var s = sel(), NL = '\n';
+        var pre = s.a === 0 ? '' : (s.v[s.a - 1] !== NL ? NL + NL : NL);
+        set(s.v.slice(0, s.a) + pre + '---' + NL + NL + s.v.slice(s.b), s.a + pre.length + 5, s.a + pre.length + 5);
       }
     };
 
@@ -190,7 +202,8 @@
       else if (k === 'k') { e.preventDefault(); cmds.link(); }
     });
     // auto-grow
-    function grow() { ta.style.height = 'auto'; ta.style.height = Math.min(Math.max(ta.scrollHeight + 2, 140), 640) + 'px'; }
+    var growMax = +ta.getAttribute('data-grow-max') || 640;
+    function grow() { ta.style.height = 'auto'; ta.style.height = Math.min(Math.max(ta.scrollHeight + 2, 140), growMax) + 'px'; }
     ta.addEventListener('input', grow);
     grow();
     ta.addEventListener('focus', function () { box.classList.add('is-focus'); });
