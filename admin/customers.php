@@ -37,7 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'save_customer') {
         $cf['name'] = trim(preg_replace('/\s+/u', ' ', (string)($_POST['name'] ?? '')));
-        $cf['code'] = strtoupper(trim((string)($_POST['code'] ?? '')));
+        // tolerant input: "nbu zoty" / "NBU-ZOTY" -> NBU_ZOTY (diacritics and other characters are dropped)
+        $raw = (string)($_POST['code'] ?? '');
+        $raw = function_exists('iconv') ? (string)@iconv('UTF-8', 'ASCII//TRANSLIT', $raw) : $raw;
+        $cf['code'] = trim(preg_replace('/[^A-Z0-9_]/', '', preg_replace('/[\s\-.]+/', '_', strtoupper(trim($raw)))), '_');
         if ($customer && $cf['code'] !== $customer['code']) {
             $cnt = fetch_tickets(['customer_id' => $customer['id']]);
             if ($cnt) $errors[] = 'Klíč nelze změnit – zákazník už má požadavky (' . $customer['code'] . '-…).';
@@ -157,7 +160,7 @@ require __DIR__ . '/../partials/header.php';
         </div>
         <div class="field full">
           <label for="code">Klíč požadavků *</label>
-          <input id="code" name="code" required maxlength="10" pattern="[A-Za-z][A-Za-z0-9_]{0,8}[A-Za-z0-9]" title="2–10 znaků A–Z, 0–9 nebo _, např. NBU_ZOTY" value="<?= h($cf['code']) ?>" placeholder="ACME"
+          <input id="code" name="code" required maxlength="10" value="<?= h($cf['code']) ?>" placeholder="ACME"
                  autocapitalize="characters" autocomplete="off" spellcheck="false" style="text-transform:uppercase">
           <small>Požadavky se číslují ACME-1, ACME-2… (NBU_ZOTY-1). 2–10 znaků A–Z, 0–9 nebo _, nelze změnit, jakmile existují požadavky.</small>
         </div>

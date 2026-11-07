@@ -373,3 +373,11 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--purple-300)
   .navbar__links li.lang-switch { align-self: flex-start; margin: 12px 0 0; border: 1px solid var(--purple-100); }
   .navbar__links .lang-switch a { display: inline-block; padding: 9px 14px; font-size: 13px; }
 }
+
+/* ---------- customer ticket keys in entries (NBU_ZOTY-12) */
+.ticket-ref {
+  display: inline-block; padding: 0 .45em; border-radius: 4px; background: #e9f0fc; color: #2b5cb8;
+  font: 600 .86em/1.6 var(--font-head); letter-spacing: .02em; text-decoration: none; white-space: nowrap; vertical-align: .05em;
+}
+.ticket-ref:hover { background: #d6e3fa; text-decoration: underline; }
+.entry:target { outline: 2px solid var(--purple-300); outline-offset: 2px; }

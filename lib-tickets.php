@@ -665,6 +665,75 @@ function ticket_render(string $text): string
     return $html;
 }
 
+/* ---------------------------------------------------------------- ticket keys in release notes */
+
+/** Keys of all customers (cached per request), e.g. ['ACME', 'NBU_ZOTY']. */
+function ticket_codes(): array
+{
+    static $codes = null;
+    if ($codes === null) {
+        try {
+            $codes = db()->query('SELECT code FROM ' . t('changelog_customers'))->fetchAll(PDO::FETCH_COLUMN);
+        } catch (PDOException $ex) {
+            $codes = [];
+        }
+        usort($codes, fn($a, $b) => strlen($b) - strlen($a));   // longest first: NBU_ZOTY before NBU
+    }
+    return $codes;
+}
+
+/** Regex matching a ticket key of an existing customer ("NBU_ZOTY-12"), or null when there are no customers. */
+function ticket_ref_regex(): ?string
+{
+    $codes = ticket_codes();
+    if (!$codes) return null;
+    $alt = implode('|', array_map(fn($c) => preg_quote($c, '/'), $codes));
+    // not part of a word, URL, query string or markdown link text
+    return '/(?<![\w\-\/=?&#\[])(' . $alt . ')-(\d{1,9})(?![\w\-])/u';
+}
+
+/** In already escaped HTML, turns ticket keys into links to the customer portal. */
+function link_ticket_refs(string $html): string
+{
+    $re = ticket_ref_regex();
+    if (!$re) return $html;
+    return preg_replace_callback($re, function ($m) {
+        $key = $m[1] . '-' . $m[2];
+        return '<a class="ticket-ref" href="' . h(site_url('portal/ticket?key=' . rawurlencode($key))) . '" title="' . h(tr('ticket.ref_title')) . '">' . $key . '</a>';
+    }, $html);
+}
+
+/** Ticket keys mentioned in a text. */
+function ticket_refs_in(string $text): array
+{
+    $re = ticket_ref_regex();
+    if (!$re || !preg_match_all($re, $text, $m, PREG_SET_ORDER)) return [];
+    return array_values(array_unique(array_map(fn($x) => $x[1] . '-' . $x[2], $m)));
+}
+
+/** Release-note entries that mention the ticket key (title or description), newest first. */
+function entries_for_ticket(string $key, bool $publishedOnly = true): array
+{
+    $like = '%' . strtr($key, ['!' => '!!', '%' => '!%', '_' => '!_']) . '%';
+    $sql = 'SELECT ' . ENTRY_COLS . ' FROM ' . t('changelog_entries') . ' e JOIN ' . t('changelog_versions') . ' v ON v.id = e.version_id'
+         . " WHERE (e.title LIKE ? ESCAPE '!' OR e.body LIKE ? ESCAPE '!')"
+         . ($publishedOnly ? ' AND e.published = 1 AND v.published = 1' : '')
+         . ' ORDER BY v.release_date DESC, v.id DESC, e.id';
+    $st = db()->prepare($sql);
+    $st->execute([$like, $like]);
+    // LIKE also matches ACME-1 inside ACME-12 – keep only exact references
+    return array_values(array_filter(array_map('normalize_entry', $st->fetchAll()),
+        fn($e) => in_array($key, ticket_refs_in($e['title'] . ' ' . $e['body']), true)));
+}
+
+/** Suggested release-note entry for a ticket (admin "Zapsat do release notes"). */
+function entry_draft_from_ticket(array $t): array
+{
+    $type = ['incident' => 'fixed', 'feature' => 'new', 'question' => 'improved'][$t['type']] ?? 'fixed';
+    $module = in_array($t['product'], module_names(), true) ? $t['product'] : '';
+    return ['type' => $type, 'module' => $module, 'title' => $t['summary'], 'body' => 'Požadavek ' . $t['key'] . '.'];
+}
+
 function status_label(string $s, ?string $lang = null): string   { return tr('ticket.status.' . $s, [], $lang); }
 function severity_label(string $s, ?string $lang = null): string { return tr('ticket.severity.' . $s, [], $lang); }
 function ticket_type_label(string $s, ?string $lang = null): string { return tr('ticket.type.' . $s, [], $lang); }

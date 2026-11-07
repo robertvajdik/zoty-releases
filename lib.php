@@ -769,6 +769,8 @@ function render_body(string $text): string
         $s = preg_replace('/`(.+?)`/u', '<code>$1</code>', $s);
         // Bug numbers such as #20261101 (#YYYYMMNN) – bold; not inside URLs or HTML entities
         $s = preg_replace('/(?<![\w&\/#])#\d{8}(?!\d)/u', '<strong class="bug-ref">$0</strong>', $s);
+        // Ticket keys of customers (NBU_ZOTY-12) – link to the request in the customer portal
+        $s = link_ticket_refs($s);
         // ![popis](uploads/... nebo https://...) – image; only uploaded files or http(s) URLs
         $s = preg_replace_callback('/!\[([^\]]*)\]\((https?:\/\/[^\s)]+|uploads\/[\w\/.\-]+)\)/u', function ($m) {
             return '<img src="' . $m[2] . '" alt="' . $m[1] . '" loading="lazy" decoding="async">';

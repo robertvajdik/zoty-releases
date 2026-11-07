@@ -4,7 +4,9 @@
  * @var array $ticket  @var array $comments  @var array $files  @var bool $isStaff
  * @var string $listUrl  link back to the list   @var string $fileUrl  prefix for attachment links ("file?id=")
  * @var array $errors   form errors              @var string $draft  unsent comment text
+ * @var array $releaseEntries  release-note entries that mention this ticket
  */
+$releaseEntries = $releaseEntries ?? [];
 $filesByComment = [];
 foreach ($files as $f) $filesByComment[(int)($f['comment_id'] ?? 0)][] = $f;
 $done = in_array($ticket['status'], TICKET_DONE, true);
@@ -50,6 +52,21 @@ $reporter = $ticket['reporter_name'] ?: ($ticket['reporter_email'] ?: tr('ticket
       <div class="md"><?= ticket_render($ticket['description']) ?></div>
       <?= $fileList($filesByComment[0] ?? []) ?>
     </section>
+
+    <?php if ($releaseEntries): ?>
+      <section class="tk__section tk__release" aria-labelledby="release-h">
+        <h2 class="tk__h" id="release-h"><?= h(tr('ticket.in_release')) ?></h2>
+        <ul class="rel-list">
+          <?php foreach ($releaseEntries as $re): ?>
+            <li>
+              <span class="tag tag--<?= h($re['type']) ?>"><?= h(type_label($re['type'])) ?></span>
+              <a href="<?= h($isStaff ? 'edit?id=' . $re['id'] : site_url('?version=' . rawurlencode($re['version']) . '#e' . $re['id'])) ?>"><?= h($re['title']) ?></a>
+              <span class="rel-list__ver"><?= h(tr('release.version', ['version' => $re['version']])) ?> · <?= fmt_date($re['date']) ?><?= $isStaff && (!$re['published'] || !$re['version_published']) ? ' · <span class="tag tag--draft">nepublikováno</span>' : '' ?></span>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      </section>
+    <?php endif; ?>
 
     <section class="tk__section" aria-labelledby="activity-h">
       <h2 class="tk__h" id="activity-h"><?= h(tr('ticket.activity')) ?></h2>
@@ -126,6 +143,10 @@ $reporter = $ticket['reporter_name'] ?: ($ticket['reporter_email'] ?: tr('ticket
         <?php endif; ?>
       </div>
       <dl class="details">
+        <?php if ($isStaff): ?>
+          <dt>Release notes</dt>
+          <dd><a class="button button--ghost button--sm" href="edit?ticket=<?= h(rawurlencode($ticket['key'])) ?>">+ Zapsat do release notes</a></dd>
+        <?php endif; ?>
         <dt><?= h(tr('ticket.request_type')) ?></dt>
         <dd><span class="rt rt--<?= h($ticket['type']) ?>" aria-hidden="true"></span><?= h(ticket_type_label($ticket['type'])) ?></dd>
         <dt><?= h(tr('ticket.severity')) ?></dt>

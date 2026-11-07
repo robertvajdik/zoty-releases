@@ -17,6 +17,9 @@ $e = $existing ?? [
     'version_id' => (int)($_GET['version_id'] ?? ($versions[0]['id'] ?? 0)),
     'type' => 'new', 'module' => '', 'title' => '', 'body' => '', 'published' => true,
 ];
+// "Zapsat do release notes" from a support ticket: prefill the new entry
+$fromTicket = !$existing && isset($_GET['ticket']) ? get_ticket_by_key((string)$_GET['ticket']) : null;
+if ($fromTicket) $e = entry_draft_from_ticket($fromTicket) + $e;
 // Fields for an inline "new version" – shown when there is no version yet or "+ Nová verze…" is chosen.
 $nv = ['version' => '', 'date' => date('Y-m-d'), 'title' => '', 'summary' => '', 'published' => true];
 $choice = $versions ? (string)$e['version_id'] : 'new';
@@ -82,6 +85,7 @@ require __DIR__ . '/../partials/header.php';
   </div>
 
   <?php if ($errors): ?><div class="flash flash--error"><?= implode('<br>', array_map('h', $errors)) ?></div><?php endif; ?>
+  <?php if ($fromTicket): ?><div class="flash">Předvyplněno z požadavku <a href="ticket?key=<?= h(rawurlencode($fromTicket['key'])) ?>"><?= h($fromTicket['key']) ?></a> (<?= h($fromTicket['customer_name']) ?>). Klíč v popisu propojí záznam s požadavkem.</div><?php endif; ?>
 
   <form class="card" method="post">
     <?= csrf_field() ?>
@@ -153,7 +157,7 @@ require __DIR__ . '/../partials/header.php';
           <input type="file" id="img-file" accept="image/jpeg,image/png,image/gif,image/webp" multiple hidden>
           <span id="img-status" class="upload-status" aria-live="polite"></span>
         </div>
-        <small>Formátování: prázdný řádek = nový odstavec, <code>- </code> na začátku řádku = odrážka, <code>**tučně**</code>, číslo chyby <code>#20261101</code> se zvýrazní tučně, <code>`kód`</code>, <code>[text](https://odkaz)</code>, obrázek <code>![popis](adresa)</code>. Obrázek můžete do pole i přetáhnout nebo vložit (Ctrl+V). JPG/PNG/GIF/WebP, max. 5 MB.</small>
+        <small>Formátování: prázdný řádek = nový odstavec, <code>- </code> na začátku řádku = odrážka, <code>**tučně**</code>, číslo chyby <code>#20261101</code> se zvýrazní tučně, klíč požadavku zákazníka (<code>NBU_ZOTY-12</code>) se změní na odkaz do zákaznického portálu a požadavek pak ukáže, ve které verzi byl vyřešen, <code>`kód`</code>, <code>[text](https://odkaz)</code>, obrázek <code>![popis](adresa)</code>. Obrázek můžete do pole i přetáhnout nebo vložit (Ctrl+V). JPG/PNG/GIF/WebP, max. 5 MB.</small>
       </div>
       <div class="field full">
         <label class="check"><input type="checkbox" name="published" value="1" <?= !empty($e['published']) ? 'checked' : '' ?>> Publikovat na veřejném changelogu</label>
