@@ -409,13 +409,14 @@ select.tf__plain { appearance: auto; }
   .doc-bar__actions .button { flex: 1; justify-content: center; }
 }
 
-/* admin manuals: name + inline rename */
-.doc-name { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; margin: 0 0 14px; }
-.doc-name__h { margin: 0; font-size: 26px; }
+/* admin manuals: inline rename (popover under the button) */
+.doc-name__edit { position: relative; }
 .doc-name__edit summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
 .doc-name__edit summary::-webkit-details-marker { display: none; }
 .doc-name__edit[open] summary { background: var(--hover-bg); }
-.doc-name__form { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-.doc-name__form input[type="text"] { width: min(420px, 100%); }
+.doc-name__form { position: absolute; right: 0; top: calc(100% + 6px); z-index: 20; width: min(440px, calc(100vw - 32px));
+  display: flex; flex-wrap: wrap; gap: 8px; padding: 14px; background: var(--white); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow-pop); }
+.doc-name__form input[type="text"] { flex: 1 1 200px; }
 .doc-name__form small { flex-basis: 100%; }
-@media (max-width: 600px) { .doc-name__h { font-size: 22px; } }
+@media (max-width: 600px) { .doc-name__edit { flex: 1; } .doc-name__edit summary { width: 100%; justify-content: center; } .doc-name__form { left: 0; right: auto; } }

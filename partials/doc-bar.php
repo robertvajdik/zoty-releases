@@ -13,32 +13,11 @@ $url = fn(string $s, string $l) => $page . '?doc=' . rawurlencode($s) . '&amp;la
       $langs = doc_langs($s);
       $l = $s === $slug ? $lang : (in_array('cs', $langs, true) ? 'cs' : $langs[0]); ?>
     <a href="<?= $url($s, $s === $slug ? $lang : $langs[0]) ?>" <?= $s === $slug ? 'aria-current="page"' : '' ?>>
-      <?= h(doc_name($s, $l)) ?>
+      <?= h(doc_tab_name($s, $l)) ?>
       <?php if (!empty($d['portal'])): ?><svg class="doc-tabs__eye" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="vidí zákazníci" role="img"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><?php endif; ?>
     </a>
   <?php endforeach; ?>
 </nav>
-
-<?php if ($barMode === 'view' && $doc): ?>
-  <div class="doc-name">
-    <h1 class="doc-name__h"><?= h(doc_name($slug, $lang)) ?></h1>
-    <details class="doc-name__edit">
-      <summary class="button button--ghost button--sm" title="Přejmenovat jazykovou verzi <?= strtoupper($lang) ?>">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
-        Přejmenovat
-      </summary>
-      <form method="post" action="docs?doc=<?= h(rawurlencode($slug)) ?>&amp;lang=<?= h($lang) ?>" class="doc-name__form">
-        <?= csrf_field() ?>
-        <input type="hidden" name="action" value="rename">
-        <label class="visually-hidden" for="doc-rename">Název manuálu (<?= strtoupper($lang) ?>)</label>
-        <input type="text" id="doc-rename" name="title" value="<?= h((string)$doc['title']) ?>" maxlength="<?= DOC_NAME_MAX ?>"
-               placeholder="<?= h(DOCS[$slug]['label']) ?>">
-        <button class="button button--primary button--sm" type="submit">Uložit název</button>
-        <small class="muted">Jen pro verzi <?= strtoupper($lang) ?>. Prázdné = výchozí název.</small>
-      </form>
-    </details>
-  </div>
-<?php endif; ?>
 
 <div class="doc-bar">
   <div class="doc-bar__langs" role="group" aria-label="Jazyková verze">
@@ -64,6 +43,23 @@ $url = fn(string $s, string $l) => $page . '?doc=' . rawurlencode($s) . '&amp;la
 
   <div class="doc-bar__actions">
     <?php if ($barMode === 'view'): ?>
+      <?php if ($doc): ?>
+    <details class="doc-name__edit">
+      <summary class="button button--ghost button--sm" title="Přejmenovat jazykovou verzi <?= strtoupper($lang) ?>">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+        Přejmenovat
+      </summary>
+      <form method="post" action="docs?doc=<?= h(rawurlencode($slug)) ?>&amp;lang=<?= h($lang) ?>" class="doc-name__form">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="rename">
+        <label class="visually-hidden" for="doc-rename">Název manuálu (<?= strtoupper($lang) ?>)</label>
+        <input type="text" id="doc-rename" name="title" value="<?= h((string)$doc['title']) ?>" maxlength="<?= DOC_NAME_MAX ?>"
+               placeholder="<?= h(DOCS[$slug]['label']) ?>">
+        <button class="button button--primary button--sm" type="submit">Uložit název</button>
+        <small class="muted">Jen pro verzi <?= strtoupper($lang) ?>. Prázdné = výchozí název.</small>
+      </form>
+    </details>
+      <?php endif; ?>
       <?php if (!empty(DOCS[$slug]['portal'])): ?>
         <a class="button button--ghost button--sm" href="../portal/help?doc=<?= h(rawurlencode($slug)) ?>&amp;lang=<?= h($lang) ?>" target="_blank" rel="noopener">Zobrazit v portálu ↗</a>
       <?php endif; ?>

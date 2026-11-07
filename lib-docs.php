@@ -19,6 +19,16 @@ const DOC_NOTES = ['note' => 'Poznámka', 'tip' => 'Tip', 'info' => 'Informace',
 const DOC_IMG_DIR = 'docs/manual/img';
 const DOC_IMG_EXT = ['png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif', 'webp' => 'image/webp'];
 
+/** Tab name of a manual: the name of $lang, else a name set for another language, else the default label. */
+function doc_tab_name(string $slug, string $lang): string
+{
+    $default = DOCS[$slug]['label'] ?? $slug;
+    foreach (array_unique(array_merge([$lang, 'cs'], LANGS)) as $l) {
+        if (($n = doc_name($slug, $l)) !== $default) return $n;
+    }
+    return $default;
+}
+
 /** Language versions of a manual: the configured ones plus any created in the editor, in LANGS order. */
 function doc_langs(string $slug): array
 {
