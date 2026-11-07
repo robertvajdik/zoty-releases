@@ -1,0 +1,783 @@
+// Zoty - RTP export
+
+const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+const isNumeric = value => !Number.isNaN(parseFloat(value)) && /^[+-]?\d*\.?\d+(?:[Ee][+-]?\d+)?$/.test(value);
+const entityMap = {};
+const entityTypeMap = {};
+const userIdMap = {};
+const userMap = {};
+const stateMap = {};
+
+const fillUser = (id) => userMap[id] ? `${userMap[id].lastName} ${userMap[id].firstName}` : null;
+
+const stateList = await getStateListRequest({});
+
+(stateList || []).forEach((state) => {
+  state.nameTranslated = state.name[`{{language}}`];
+  stateMap[state.id] = state;
+});
+
+const entityTypeList = await getGraphql({
+  query: `query getEntityTypeList($input: ConnectionInputType) {
+    entityTypeListQuery(input: $input) {
+      id name entityCategory metadata methodIdList keyPrefix
+    }
+  }
+  `,
+  variables: {
+    input: {},
+  },
+});
+
+(entityTypeList || []).forEach((entityType) => {
+  entityType.nameTranslated = entityType.name[`{{language}}`];
+  entityTypeMap[entityType.id] = entityType;
+});
+
+const groupList = await getGraphql({
+  query: `query getGroupList($input: GroupQueryType) {
+    groupListQuery(input: $input) {
+      id, name, metadata, entityList { id }
+    }
+  }`,
+  variables: {
+    input: {
+      filter: {
+        groupSchemaId: 'organization',
+      },
+    },
+  },
+});
+
+const groupMap = groupList.reduce((map, group) => {
+  group.nameTranslated = group.name[`{{language}}`];
+  map[group.id] = group;
+  return map;
+}, {});
+
+const getEntities = async (filter) => {
+  const responseData = await getGraphql({
+    query: `query getEntityListQuery($input: ConnectionInputType) {
+      entityListQuery(input: $input) {
+        id, key, entityTypeId, entityCategory, stateId, fileSystemPath, ownerId, attributeList, attributeSystemList, metadata, externalSourceId, authorId, createdAt, updatedAt
+      }
+    }`,
+    variables: {
+      input: {
+        fieldList: ['id', 'key', 'entityTypeId', 'entityCategory', 'stateId', 'fileSystemPath', 'ownerId', 'authorId', 'createdAt', 'updatedAt', 
+        'attribute.name', 'attribute.description', 'attribute.costs', 'attribute.validFrom', 'attribute.validTo', 'attribute.deadline',
+        'attributeRelation.guarantor', 'attributeRelation.processOwner', 'attributeRelation.projectManager', 'attributeRelation.riskOwner', 'attributeRelation.riskAuthor', 
+        'metadata', 'externalSourceId'],
+        filter,
+      },
+    },
+  });
+  
+  return responseData.map(x => getFormatEntity(x));
+};
+
+const getRelations = async (filter) => await getGraphql({
+  query: `query relationList($input: ConnectionInputType) {
+    relationListQuery(input: $input) {
+      id, relationTypeId, sourceId, sourceTypeId, targetId, targetTypeId, metadata,
+    }
+  }`,
+  variables: {
+    input: {
+      fieldList: ['id', 'relationTypeId', 'sourceId', 'sourceTypeId', 'targetId', 'targetTypeId', 'metadata'],
+      filter,
+    },
+  },
+});
+
+const getWorkflows = async (filter) => await getGraphql({
+  query: `query getWorkflowList($input: ConnectionInputType) {
+    workflowListQuery(input: $input) {
+      id key parentId replacedId workflowSchemaId type category stateId ownerId ownerVisitedAt participantIdList participantList contextIdList contextList deadline stepCompletedList stepCurrent isCompleted isSystem data metadata authorId createdAt updatedAt
+    }
+  }
+  `,
+  variables: {
+    input: {
+      filter,
+    },
+  },
+});
+
+const getMeasures = async (filter) => await getGraphql({
+  query: `query measureList($input: ConnectionInputType) {
+    measureListQuery(input: $input) {
+      id key state category typeList authorId sourceId sourceTypeId targetId targetTypeId relatedData    
+      evaluationSchemaId evaluationCurrentId evaluationTargetId evaluationActualId costs score validFrom validTo parentId metadata name description cybersecurityConcepts informationSecurityProperties operationalCapabilities securityDomains number importance isTemplate isWrapper isRequired methodIdList createdAt updatedAt
+      measureHasEntityList { id state type measureId entityId entityTypeId entityFragmentId metadata authorId createdAt updatedAt }
+    }
+  }`,
+  variables: {
+    input: {
+      filter,
+    },
+  },
+});
+
+const getEntityGuarantor = (entity) => {
+  if (entity) {
+    let guarantor = null;
+
+    if (entity.entityTypeId === 'process') {
+      guarantor = entity.processOwner;
+    }
+
+    if (entity.entityTypeId === 'project') {
+      guarantor = entity.projectManager;
+    }
+
+    if (entity.entityTypeId === 'risk') {
+      guarantor = entity.riskOwner || entity.riskAuthor;
+    }
+
+    return guarantor || entity.guarantor || null;
+  }
+
+  return null;
+};
+
+const getDataSetList = await getGraphql({
+  query: `query getDataSetList($input: ConnectionInputType) {
+    dataSetListQuery(input: $input) {
+      id parentId dataSetSchemaId name stateId ownerId category contextId contextType description validFrom validTo data metadata methodIdList authorId zotyPackage updatedAt createdAt
+    }
+  }`,
+  variables: {
+    input: {
+      filter: {
+        contextId: {{dataId}},
+      },
+    },
+  },
+});
+
+const rtpDataSet = getDataSetList.filter(x => x.dataSetSchemaId === 'rtp')[0];
+
+const rtp = await getGraphql({
+  query: `query getEntityDetailById($input: EntityGetInputType!) {
+    entityDetailQuery(input: $input) {
+      ... on NodeInterfaceType { id createdAt updatedAt }
+      attributeList attributeSystemList authorId deleted entityCategory entityTypeId fileSystemParentId fileSystemPath groupId importance isSystem key metadata externalSource externalSourceId externalSourceType methodIdList ownerId stateId
+      relationList { id authorId metadata methodIdList nodeType relationState relationTypeId sourceFragmentId rootId sourceId sourceTypeId targetFragmentId targetId targetTypeId createdAt updatedAt }
+      measureList { id state typeList authorId sourceId sourceTypeId targetId targetTypeId relatedData evaluationSchemaId evaluationCurrentId evaluationTargetId evaluationActualId costs score validFrom validTo parentId metadata name description isTemplate isWrapper isRequired methodIdList createdAt updatedAt }
+    }
+  }`,
+  variables: {
+    input: {
+      id: {{dataId}},
+      entityTypeId: 'riskTreatmentPlan',
+    },
+  },
+});
+
+const getSurveySchemas = async (filter) => await getGraphql({
+  query: `query getSurveyList($input: ConnectionInputType) {
+    surveyListQuery(input: $input) {
+      id parentId name description period
+      questionList {
+        id type text order isActive isRequired isSystem isVisible isGlobal authorId updatedAt createdAt
+        answerList {
+          id text value valueType order isActive isSystem isVisible isGlobal authorId updatedAt createdAt extraMetadata
+        }
+      }
+      data isActive isSystem isVisible isResultEditable restrictionGroupIdList restrictionRoleIdList restrictionUserIdList metadata methodIdList authorId updatedAt createdAt
+    }}`,
+  variables: {
+    input: {
+      filter,
+    },
+  },
+});
+
+const rtpSchemaList = await getSurveySchemas({ id: 'rtp' });
+const rtpSchema = rtpSchemaList[0];
+
+if (rtpSchema) {
+  rtpSchema.questionList.forEach(x => {
+    rtpSchema[x.id] = x;
+  });
+}
+
+const c = {};
+//const rtpList = await getEntities({ id: {{dataId}} });
+//const rtp = rtpList[0];
+const rtpValidFrom = rtp?.validFrom && getZotyHelpers('date', rtp.validFrom, 'utc()', 'format(l)');
+const rtpValidTo = rtp?.validTo && getZotyHelpers('date', rtp.validTo, 'utc()', 'format(l)');
+let getUserIdList = [];
+
+let dataMap = {
+  measureDataSetMap: {},
+};
+
+if (rtp) {  
+  getUserIdList.push(rtp.authorId);
+  getUserIdList.push(rtp.ownerId);
+  const riskEntityIdMap = {};
+  
+  const fileList = await getGraphql({
+    query: `query getFileList($input: ConnectionInputType) {
+      fileListQuery(input: $input) {
+        id originalName authorId updatedAt createdAt
+      }}`,
+    variables: {
+      input: {
+        filter: {
+          parentId: rtp.id,
+        },
+      },
+    },
+  });
+  
+  const groupHasEntityList = await getGraphql({
+    query: `query getGroupHasEntityList($input: GroupHasEntityQueryType) {
+      groupHasEntityListQuery(input: $input) {
+        groupId
+        entityId
+      }
+    }`,
+    variables: {
+      input: {
+        filter: {
+          entityId: rtp.id,
+        },
+      },
+    },
+  });
+  
+  rtp.groupHasEntityList = groupHasEntityList;
+  
+  rtp.groupList = groupHasEntityList.filter(x => groupMap[x.groupId]).map(x => ({
+    id: x.groupId,
+    nameTranslated: groupMap[x.groupId].name[`{{language}}`],
+  }));
+  
+  const relationList = await getRelations({
+    $or: [{ sourceId: rtp.id }, { targetId: rtp.id }],
+  });
+    
+  rtp.state = stateMap[rtp.stateId] ? stateMap[rtp.stateId].name[`{{language}}`] : rtp.stateId;
+  rtp.fileList = (fileList || []).map(x => {
+    getUserIdList.push(x.authorId);    
+    return x;
+  });
+  rtp.relationList = relationList || [];    
+  
+  rtp.riskIdList = rtp.relationList
+    .filter(x => x.relationTypeId === 'include' && x.targetTypeId === 'risk')
+    .map(x => {
+      riskEntityIdMap[x.targetId] = true;
+      return x.targetId;
+    });
+    
+  const riskList = await getEntities({ id: rtp.riskIdList });  
+  
+  rtp.evaluationList = await getGraphql({
+    query: `query getEvaluationList($input: EvaluationListInputType) {
+      evaluationListQuery(input: $input) {
+        id parentId name entityId parentEntityIdList
+        score { customName levelType value valueQualitative valueAxisX valueAxisY valueType x y currency }
+        scoreCoordinates { x y }
+        scoreValueList { type levelIndex levelKey levelType metricId min max customName value valueQualitative valueAxisX valueAxisY valueSourceList valueType x y currency schemaId sourceId sourceType sourceEvaluationId sourceList { evaluationId sourceId sourceType }}
+        dateValidFrom dateValidTo distribution distributionType type schemaId authorId metadata treatmentStrategy respondentIdList methodIdList createdAt updatedAt
+      }
+    }
+    `,
+    variables: {
+      input: {
+        filter: {
+          dateValidFrom: {
+            $gte: rtp.validFrom,
+          },
+          dateValidTo: {
+            $lte: rtp.validTo,
+          },
+          schemaId: rtp.evaluationSchemaIdList[0],
+          parentEntityIdList: {
+            $raw: `this && array['${rtp.riskIdList.join("','")}']::varchar[]`,
+          },
+        },
+      },
+    },
+  });
+  
+  const currentEvaluationByParentIdMap = {};
+  const targetEvaluationByParentIdMap = {};
+  rtp.evaluationList = (rtp.evaluationList || []).sort((a, b) => (new Date(a.dateValidFrom) - new Date(b.dateValidFrom)));
+  
+  const evaluationMap = rtp.evaluationList.reduce((map, x) => {
+    map[x.id] = x;
+    return map;
+  }, {});
+  
+  rtp.evaluationList.forEach((evaluation) => {
+    if (evaluation.type === 'target') {
+      /* Pracujeme s Riziky, proto muzeme primo vzit prvniho rodice.
+      Pokud je ohodnoceni v periode vice, vlozi se "posledni" diky sort(). */
+      targetEvaluationByParentIdMap[evaluation.parentEntityIdList[0]] = evaluation;
+      currentEvaluationByParentIdMap[evaluation.parentEntityIdList[0]] = evaluationMap[evaluation.parentId];
+    } else if (
+      evaluation.type === 'current' &&
+      !currentEvaluationByParentIdMap[evaluation.parentEntityIdList[0]]
+    ) {
+      // Pokud neni Cil, vlozime posledni ohodnoceni Skutecnosti, ktere neni na Cil vazano.
+      currentEvaluationByParentIdMap[evaluation.parentEntityIdList[0]] = evaluation;
+    }
+  });
+  
+  // Opatreni pro jednotliva Cilova ohodnoceni.
+  const measureList = await getMeasures({
+    evaluationSchemaId: rtp.evaluationSchemaIdList[0] || null,
+    evaluationTargetId: rtp.evaluationList.map(x => x.id),
+  });
+  
+  const workflowList = await getWorkflows({
+    metadata: { $raw: `this->>'sourceId' = '${rtp.id}'`, },
+  });
+  
+  const approvalWorkflowMap = workflowList.reduce((map, workflow) => {
+    const contextList = workflow.contextList.filter(x => x.isPrimary && riskEntityIdMap[x.id]);
+    if (contextList.length) {
+      map[contextList[0].id] = workflow;
+    }
+    return map;
+  }, {});
+  
+  const measureEntityIdMap = {};
+
+  const measureListByRiskEntityIdMap = measureList.reduce((map, measure) => {
+    measureEntityIdMap[measure.targetId] = true;
+    
+    rtp.evaluationList.forEach((evaluation) => {
+      if (evaluation.id === measure.evaluationActualId) {
+        measure.evaluationActual = evaluation;
+      }
+
+      if (evaluation.id === measure.evaluationCurrentId) {
+        measure.evaluationCurrent = evaluation;
+      }
+
+      if (evaluation.id === measure.evaluationTargetId) {
+        measure.evaluationTarget = evaluation;
+      }
+    });
+
+    if (measure.methodIdList[0] === 'zotySimple') {
+      (map[measure.sourceId] = map[measure.sourceId] || []).push(measure);
+    } else if (measure.relatedData) {
+      Object.values(measure.relatedData).filter(x => riskEntityIdMap[x.id]).forEach((x) => {
+        if (x.entityTypeId === 'risk') {
+          (map[x.id] = map[x.id] || []).push(measure);
+        }
+      });
+    }
+
+    return map;
+  }, {});
+  
+  const planMeasureMap = {};
+  
+  rtp.relationList.filter(x => x.relationTypeId === 'include').forEach((relation) => {
+    if (measureListByRiskEntityIdMap[relation.targetId]) {
+      measureListByRiskEntityIdMap[relation.targetId].forEach((measure) => {
+        planMeasureMap[measure.id] = measure;
+      });
+    }
+  });
+  
+  const activeMeasureMap = {};
+  const planMeasureEntityMap = {};
+  const planMeasureList = Object.values(planMeasureMap);    
+  const measureEntityList = await getEntities({ id: Object.keys(measureEntityIdMap) });
+  c.a = measureEntityList;
+  
+  (measureEntityList || []).forEach(x => {
+    planMeasureEntityMap[x.id] = x;
+    planMeasureEntityMap[x.id].guarantorId = getEntityGuarantor(x);
+    getUserIdList.push(x.ownerId);
+    getUserIdList.push(planMeasureEntityMap[x.id].guarantorId);
+  });
+  
+  let measureCosts = null;
+  let measureCostsActual = null;
+  let measureCostsTotal = null;
+  let measureCostsTotalUnknown = null;
+  let measureCostsUnknown = null;
+  
+  planMeasureList.forEach((measure) => {
+    if (planMeasureEntityMap[measure.targetId]) {          
+      activeMeasureMap[measure.id] = measure;
+      measureCostsTotal = measureCostsTotal || 0;
+      measureCostsTotal += measure.costs.total;
+      
+      if (measure.state === 'toApprove') {
+        measureCostsTotalUnknown = measureCostsTotalUnknown || 0;
+        measureCostsTotalUnknown += measure.costs.total;
+      }
+
+      if (measure.costs && isNumeric(measure.costs.value)) {
+        measureCosts = measureCosts || 0;
+        measureCosts += measure.costs.value;
+      }
+
+      if (measure.costs && isNumeric(measure.costs.valueActual)) {
+        measureCostsActual = measureCostsActual || 0;
+        measureCostsActual += measure.costs.valueActual;
+      } else {
+        measureCostsUnknown = measureCostsUnknown || 0;
+        measureCostsUnknown += measure.costs.value;
+      }
+    }
+  });
+  
+  if (rtpSchema && rtpDataSet?.data?.restrictionDataIdList) {
+    rtpDataSet.data.dataList.forEach(x => {
+      const data = {
+        id: x.id,
+        questionAnswerList: [],
+        respondentIdList: [],
+        note: x.note,
+        authorId: x.authorId,
+        updatedAt: x.updatedAt,
+      };
+      
+      const surveyResult = x.surveyResultList[0];
+      
+      if (surveyResult) {
+        data.contextId = rtpSchema.id,
+        data.contextType = 'survey';
+        data.name = rtpSchema.name;
+        data.respondentIdList = surveyResult.respondentIdList || [];
+        data.questionAnswerList = [];
+        
+        data.respondentIdList.forEach(userId => {
+          getUserIdList.push(userId);
+        });     
+        
+        (surveyResult.questionAnswerList || []).forEach(qa => {
+          let value = qa.answerText;
+          
+          if (qa.answerId === 'switchAnswer') {
+            value = qa.answerValue;
+          }
+          
+          if (qa.answerId === 'customScript') {
+            const entity = planMeasureEntityMap[data.id];
+            
+            if (qa.questionId === 'rtpQuestion2') {
+              value = entity?.['costsCapex']?.CZK || null;
+            }
+            
+            if (qa.questionId === 'rtpQuestion3') {
+              value = entity?.['costsOpex']?.CZK || null;
+            }
+          }
+          
+          data.questionAnswerList.push({
+            questionId: qa.questionId,
+            name: rtpSchema[qa.questionId] ? rtpSchema[qa.questionId].text : null,
+            value,
+            note: qa.answerNote,
+          });
+        });
+      }
+      
+      if (planMeasureEntityMap[data.id] && rtpDataSet.data.restrictionDataIdList.includes(x.id)) {
+        dataMap.measureDataSetMap[x.id] = data;
+      }    
+    });
+  }
+  
+  const costs = isNumeric(measureCostsActual) ? measureCostsActual : measureCosts;  
+  let costsDifference = null;
+  
+  if (measureCostsTotal !== null && costs !== null) {
+    costsDifference = parseFloat(((measureCostsTotal - (measureCostsTotalUnknown || 0)) - costs).toFixed(2));
+  }
+  
+  rtp.riskEntityList = [];
+
+  (riskList || []).forEach(entity => {
+    const riskRecord = {
+      ...entity,
+      evaluationCurrent: currentEvaluationByParentIdMap[entity.id] || null,
+      evaluationTarget: targetEvaluationByParentIdMap[entity.id] || null,
+      guarantorId: getEntityGuarantor(entity) || null,
+      measureList: measureListByRiskEntityIdMap[entity.id] || [],
+      riskTreatmentStrategy: (targetEvaluationByParentIdMap[entity.id]?.treatmentStrategy) || null,
+      approvalWorkflow: approvalWorkflowMap[entity.id],
+      isApprovalCompleted: !!(approvalWorkflowMap[entity.id]?.isCompleted && approvalWorkflowMap[entity.id].metadata.dateCompleted),
+      workflowOwnerId: approvalWorkflowMap[entity.id]?.ownerId || null,
+      workflowStateId: approvalWorkflowMap[entity.id]?.stateId || null,
+      workflowState: stateMap[approvalWorkflowMap[entity.id]?.stateId]?.nameTranslated || null,
+      created: getZotyHelpers('date', entity.createdAt, 'format("l, LT")'),
+      updated: getZotyHelpers('date', entity.updatedAt, 'format("l, LT")'),
+    };
+    
+    if (riskRecord.riskTreatmentStrategy) {
+      riskRecord.riskTreatmentStrategy = i18n(`riskTreatmentStrategies.${riskRecord.riskTreatmentStrategy}`);
+    }
+
+    riskRecord.approvalOwnerId = riskRecord.guarantorId || riskRecord.ownerId;
+    rtp.riskEntityList.push(riskRecord);
+    getUserIdList.push(entity.authorId);
+    getUserIdList.push(entity.ownerId);
+    getUserIdList.push(riskRecord.guarantorId);
+    getUserIdList.push(entity.approvalOwnerId);
+    getUserIdList.push(entity.workflowOwnerId);
+  });
+  
+  getUserIdList = getUserIdList.filter(x => x);
+  const userList = await getUserListRequest({ filter: { id: getUserIdList, }, });  
+  (userList || []).forEach((user) => { userMap[user.id] = user; });
+  
+  rtp.owner = fillUser(rtp.ownerId);
+  rtp.author = fillUser(rtp.authorId);
+  
+  rtp.riskEntityList.forEach(entity => {
+    entity.owner = fillUser(entity.ownerId);
+    entity.author = fillUser(entity.authorId);
+    entity.guarantor = fillUser(entity.guarantorId);
+    entity.approvalOwner = fillUser(entity.approvalOwnerId);
+    entity.workflowOwner = fillUser(entity.workflowOwnerId);
+  });
+  
+  rtp.fileList.forEach(file => {
+    file.created = getZotyHelpers('date', file.createdAt, 'format("l, LT")'),
+    file.author = fillUser(file.authorId);
+  });
+  
+  dataMap = {
+    key: rtp.key,
+    riskIdList: rtp.riskIdList,
+    activeMeasureMap,
+    currentEvaluationByParentIdMap,
+    targetEvaluationByParentIdMap,
+    costsActualMissing: measureCostsUnknown,
+    costsActualTotal: measureCostsActual - (measureCostsUnknown || 0),
+    costs,
+    costsTotal: measureCostsTotal,
+    costsDifference,
+    riskEntityList: rtp.riskEntityList,
+    evaluationList: rtp.evaluationList,
+    measureDataSetMap: dataMap.measureDataSetMap || {},
+    measureEntityIdList: Object.values(planMeasureEntityMap).map(x => x.id),
+    measureEntityList: Object.values(planMeasureEntityMap),
+    measureEntityMap: planMeasureEntityMap,
+    measureList: planMeasureList,
+    measureListByRiskEntityIdMap,
+    ownerId: rtp.ownerId,
+    schemaId: rtp.evaluationSchemaIdList[0],
+  };
+}
+
+const result = {
+  // c,
+  dataEntity: rtp,
+  dataMap,
+  pageCover: {
+    title: i18n('riskTreatment.plan'),
+    subtitle: rtp ? `${rtp.nameTranslated}` : null,
+    headline: rtp ? `${rtpValidFrom} - ${rtpValidTo}` : null,
+  },
+  componentFiles: {
+    id: 'files',
+    componentId: 'table',
+    title: i18n('entity.section.files'),
+    iconType: 'files',
+    options: {
+      isBorder: true,
+      titleType: 'section',
+    },
+    columnList: [{
+      key: 'originalName',
+      name: 'Název',
+    }, {
+      key: 'author',
+      name: i18n('common.authorId'),
+    }, {
+      key: 'created',
+      name: i18n('common.date'),
+    }],
+    dataList: rtp ? rtp.fileList : [],
+  },
+  contentList: (dataMap.riskEntityList || []).sort((a, b) => collator.compare(a.nameTranslated, b.nameTranslated)).map(riskEntity => {
+    const content = {
+      title: riskEntity.nameTranslated,
+      componentList: [{
+        id: 'risks',
+        componentId: 'table',
+        options: {
+          isBorder: false,
+          isInRow: true,
+          isHalf: true,
+        },
+        columnList: [{
+          key: 'key',
+          name: i18n('entity.attribute.key'),
+        }, {
+          key: 'owner',
+          name: i18n('entity.attribute.owner'),
+        }, {
+          key: 'guarantor',
+          name: i18n('entity.attribute.guarantorId'),
+        }, {
+          key: 'riskTreatmentStrategy',
+          name: i18n('riskTreatmentStrategies'),
+        }, {
+          key: 'workflowState',
+          name: i18n('approval'),
+        }, {
+          key: 'isApprovalCompleted',
+          name: i18n('common.completed'),
+        }, {
+          key: 'workflowOwner',
+          name: i18n('approval.approver'),
+        }, {
+          key: 'created',
+          name: i18n('common.attribute.createdAt'),
+        }, {
+          key: 'updated',
+          name: i18n('common.attribute.updatedAt'),
+        }],
+        dataList: [riskEntity],
+      }, {
+        id: 'evaluations',
+        componentId: 'table',
+        title: i18n('evaluation_pl'),
+        options: {
+          isBorder: true,
+          isInRow: false,          
+        },
+        columnList: [{
+          key: 'name',
+          name: i18n('common.name'),
+        }, {
+          key: 'type',
+          name: i18n('common.evaluationType'),
+        }, {
+          key: 'value',
+          name: i18n('common.value'),
+        }],
+        dataList: dataMap.evaluationList.filter(x => x.parentEntityIdList.includes(riskEntity.id))
+          .map(x => {
+            const levelType = i18n(x.score.levelType);
+          
+            return ({
+              name: x.name,
+              type: i18n(`schema.${x.type}`),
+              value: `${x.score.valueQualitative} (${levelType})`,
+            });
+          }),
+      }, {
+        id: 'measures',
+        componentId: 'table',
+        options: {
+          isBorder: false,
+          isInRow: true,
+          isHalf: true,
+        },
+        title: i18n('measure_pl'),
+        columnList: [{
+          key: 'key',
+          name: i18n('entity.attribute.key'),      
+        }, {
+          key: 'nameTranslated',
+          name: i18n('common.name'),
+        }, {
+          key: 'owner',
+          name: i18n('entity.attribute.owner'),          
+        }, {
+          key: 'guarantor',
+          name: i18n('entity.attribute.guarantorId'),
+        }, {
+          key: 'entityType',
+          name: i18n('common.entityType'),
+        }, {
+          key: 'state',
+          name: i18n('common.state'),
+        }, {
+          key: 'riskTreatmentStrategy',
+          name: i18n('riskTreatmentStrategies'),
+        }, {
+          key: 'workflowState',
+          name: i18n('approval'),
+        }, {
+          key: 'isApprovalCompleted',
+          name: i18n('common.completed'),
+        }, {
+          key: 'workflowOwner',
+          name: i18n('approval.approver'),
+        }, {
+          key: 'costs',
+          name: i18n('common.costs'),
+        }, {
+          key: 'costsAllocated',
+          name: i18n('common.costsAllocated'),
+        }, {
+          key: 'costsActual',
+          name: i18n('common.costsActual'),
+        }, {
+          key: 'impactQualitative',
+          name: i18n('common.scoreReduction'),
+        }, {
+          key: 'impactQualitativeActual',
+          name: i18n('common.scoreReductionActual'),
+        }, {
+          key: 'created',
+          name: i18n('common.attribute.createdAt'),
+        }, {
+          key: 'updated',
+          name: i18n('common.attribute.updatedAt'),
+        }, {
+          key: 'survey',
+          name: rtpSchema ? rtpSchema.name['CZ'] : '',
+          childList: rtpSchema ? (rtpSchema.questionList || []).map(question => ({
+            name: question.text['CZ'],
+            key: question.id,
+          })) : [],
+        }],
+        dataList: (dataMap.measureListByRiskEntityIdMap[riskEntity.id] || []).map(x => {
+          const obj = {
+            x,
+            survey: dataMap.measureDataSetMap[x.targetId] ? ' ' : null,
+          };
+          
+          const entity = dataMap.measureEntityMap[x.targetId];
+          
+          if (entity) {
+            obj.key = entity.key;
+            obj.nameTranslated = entity.nameTranslated;
+            obj.state = stateMap[entity.stateId]?.nameTranslated || null;
+            obj.entityType = entityTypeMap[entity.entityTypeId]?.nameTranslated || null;
+            obj.owner = fillUser(entity.ownerId);
+            obj.guarantor = fillUser(entity.guarantorId);
+            obj.costs = entity.costs?.CZK;
+            obj.costsAllocated = isNumeric(x.costs.value) ? x.costs.value : null;
+            obj.costsActual = isNumeric(x.costs.valueActual) ? x.costs.valueActual : null;
+            obj.impactQualitative = isNumeric(x.score.impactQualitative) ? x.score.impactQualitative : null;
+            obj.impactQualitativeActual = isNumeric(x.score.impactQualitativeActual) ? x.score.impactQualitativeActual : null;
+            obj.created = entity.createdAt && getZotyHelpers('date', entity.createdAt, 'format("l, LT")');
+            obj.updated = entity.updatedAt && getZotyHelpers('date', entity.updatedAt, 'format("l, LT")');
+            
+            (dataMap.measureDataSetMap['Eoiv4eexwotz']?.questionAnswerList || []).forEach(qa => {
+              obj[qa.questionId] = qa.value;
+            });
+          }
+          
+          return obj;
+        }),
+      }],
+    }
+    
+    return content;
+  }),
+  signature: {
+    appendBefore: '',
+    appendAfter: i18n('report.signatureAfter'),
+  },
+};

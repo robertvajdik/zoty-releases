@@ -1,0 +1,19 @@
+.counterBox {
+  width: 100%;
+  border: 0;
+}
+.counterBox td {
+  padding: 0 0 0 1em;
+}
+.counterBox > tr > td:first-child {
+  padding-left: 0;
+}
+.counterBox_card {
+  padding: 16px;
+  text-align: center;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+}
+.counterBox_counter {
+  font-size: 18px;
+}

@@ -1,0 +1,20 @@
+const assetTypeList = await getGraphql({
+  query: `query EntityTypeListQuery {
+    entityTypeListQuery {
+      id
+      name
+      entityCategory    
+    }
+  }`,
+  variables: {
+    input: {
+      filter: {
+        entityCategory: 'assets',
+      }
+    },
+  },
+});
+
+const result = {
+  assetTypeList,
+};

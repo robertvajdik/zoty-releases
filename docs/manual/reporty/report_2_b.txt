@@ -1,0 +1,21 @@
+const entityList = await getGraphql({
+  query: `query getEntityListQuery($input: ConnectionInputType) {
+    entityListQuery(input: $input) {
+      id, key, entityTypeId, entityCategory, fileSystemPath, attributeList, metadata, externalSourceId,
+    }
+  }`,
+  variables: {
+    input: {
+      "fieldList": ["id", "attribute.name", "organizationList[]"],
+      "filter": {
+        "entityTypeId": ["risk"],
+	// Hledame pouze entity zarazeny do slozky s ID.
+        fileSystemPath: { $raw: `STRPOS(this, 'ECR2cSCBK47g') > 0` },
+      }
+    },
+  },
+});
+
+const result = {
+  entityList,
+};

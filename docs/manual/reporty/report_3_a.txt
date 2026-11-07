@@ -1,0 +1,26 @@
+// Vrati hodnoceni pro Riziko ECRS1YCtGEXx.
+let evaluationList = await getGraphql({
+  query: `query getEvaluationList($input: EvaluationListInputType) {
+    evaluationListQuery(input: $input) {
+      id parentId name entityId parentEntityIdList
+      score { customName levelType value valueQualitative valueAxisX valueAxisY valueType x y currency }
+      scoreCoordinates { x y }
+      scoreValueList { type levelIndex levelKey levelType metricId min max customName value valueQualitative valueAxisX valueAxisY valueSourceList valueType x y currency schemaId sourceId sourceType sourceEvaluationId sourceList { evaluationId sourceId sourceType }}
+      dateValidFrom dateValidTo distribution distributionType type schemaId authorId metadata treatmentStrategy respondentIdList methodIdList createdAt updatedAt
+    }
+  }
+  `,
+  variables: {
+    input: {
+      filter: {
+        parentEntityIdList: {
+          $raw: `this && array['ECRS1YCtGEXx']::varchar[]`,
+        },
+      },
+    },
+  },
+});
+
+const result = {
+  evaluationList,
+};

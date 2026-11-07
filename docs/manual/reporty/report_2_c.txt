@@ -1,0 +1,63 @@
+
+// Organizace je specificky typ skupiny.
+const groupList = await getGraphql({
+  query: `query getGroupList($input: GroupQueryType) {
+    groupListQuery(input: $input) {
+      id, name, metadata, entityList { id }
+    }
+  }`,
+  variables: {
+    input: {
+      filter: {
+        groupSchemaId: 'organization',
+      },
+    },
+  },
+});
+
+const groupMap = groupList.reduce((map, group) => {
+  map[group.id] = group;
+  return map;
+}, {});
+
+// (ČEZ a.s. - DOKE)
+const groupHasEntityList = await getGraphql({
+  query: `query getGroupHasEntityList($input: GroupHasEntityQueryType) {
+    groupHasEntityListQuery(input: $input) {
+      entityId
+      groupId
+    }
+  }`,
+  variables: {
+    input: {
+      filter: {
+        groupId: 'EBLXLdqXTHwL',
+      },
+    },
+  },
+});
+
+const entityInOrganizationIdList = groupHasEntityList.map(x => x.entityId);
+
+const entityList = await getGraphql({
+  query: `query getEntityListQuery($input: ConnectionInputType) {
+    entityListQuery(input: $input) {
+      id, key, entityTypeId, entityCategory, fileSystemPath, attributeList, attributeSystemList, metadata, externalSourceId,
+    }
+  }`,
+  variables: {
+    input: {
+      "fieldList": ["id", "attribute.name", "organizationList[]"],
+      "filter": {
+        "id": entityInOrganizationIdList,
+        "entityTypeId": ["risk"],
+      }
+    },
+  },
+});
+
+const result = {
+  groupList,
+  groupHasEntityList,
+  entityList,
+};

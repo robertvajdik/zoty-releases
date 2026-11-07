@@ -1,0 +1,106 @@
+
+// Organizace je specificky typ skupiny.
+const groupList = await getGraphql({
+  query: `query getGroupList($input: GroupQueryType) {
+    groupListQuery(input: $input) {
+      id, name, metadata, entityList { id }
+    }
+  }`,
+  variables: {
+    input: {
+      filter: {
+        groupSchemaId: 'organization',
+      },
+    },
+  },
+});
+
+const groupMap = groupList.reduce((map, group) => {
+  map[group.id] = group;
+  return map;
+}, {});
+
+// (ČEZ a.s. - DOKE)
+const groupHasEntityList = await getGraphql({
+  query: `query getGroupHasEntityList($input: GroupHasEntityQueryType) {
+    groupHasEntityListQuery(input: $input) {
+      entityId
+      groupId
+    }
+  }`,
+  variables: {
+    input: {
+      filter: {
+        groupId: 'EBLXLdqXTHwL',
+      },
+    },
+  },
+});
+
+const entityInOrganizationIdList = groupHasEntityList.map(x => x.entityId);
+
+const entityList = await getGraphql({
+  query: `query getEntityListQuery($input: ConnectionInputType) {
+    entityListQuery(input: $input) {
+      id, key, entityTypeId, entityCategory, fileSystemPath, attributeList, attributeSystemList, metadata, externalSourceId,
+    }
+  }`,
+  variables: {
+    input: {
+      "fieldList": ["id", "attribute.name", "organizationList[]"],
+      "filter": {
+        "id": entityInOrganizationIdList,
+        "entityTypeId": ["risk"],
+        // Hledame pouze entity zarazeny do slozky s ID.
+        fileSystemPath: { $raw: `STRPOS(this, 'ECR2cSCBK47g') > 0` },
+      }
+    },
+  },
+});
+
+// Vraci propojeni entit dle filtru.
+const getRelations = async (filter) => await getGraphql({
+  query: `query relationList($input: ConnectionInputType) {
+    relationListQuery(input: $input) {
+      id, relationTypeId, sourceId, sourceTypeId, targetId, targetTypeId, metadata,
+    }
+  }`,
+  variables: {
+    input: {
+      fieldList: ['id', 'relationTypeId', 'sourceId', 'sourceTypeId', 'targetId', 'targetTypeId', 'metadata'],
+      filter,
+    },
+  },
+});
+
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
+
+const riskEntityList = [];
+
+await asyncForEach(entityList, async (entity) => {
+  // Pro rizika vyhleda vsechny relace.
+  const relationList = await getRelations({
+    $or: [{ sourceId: entity.id }, { targetId: entity.id }],
+  });
+  
+  const obj = {
+    ...entityList.find(x => x.id === entity.id),
+  }
+  
+  riskEntityList.push({
+    id: entity.id,
+    nameTranslated: obj.nameTranslated,
+    relationList,
+  })
+});
+
+const result = {
+  groupList,
+  groupHasEntityList,
+  entityList,
+  riskEntityList,
+};
