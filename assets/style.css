@@ -423,3 +423,8 @@ input[type=checkbox], input[type=radio] { accent-color: var(--purple); }
 }
 .ticket-ref:hover { background: #d6e3fa; text-decoration: underline; }
 .entry:target { outline: 2px solid var(--purple-300); outline-offset: 2px; }
+
+/* reCAPTCHA v3: the badge is hidden, the required notice is shown under the form instead */
+.grecaptcha-badge { visibility: hidden; }
+.recaptcha-note { flex-basis: 100%; margin: 4px 0 0; font-size: 12px; opacity: .8; }
+.recaptcha-note a { color: inherit; }

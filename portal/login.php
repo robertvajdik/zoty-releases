@@ -16,7 +16,8 @@ if (portal_user()) {
 $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
-    $user = customer_verify((string)($_POST['user'] ?? ''), (string)($_POST['password'] ?? ''));
+    $human = recaptcha_check('portal_login');
+    $user = $human ? customer_verify((string)($_POST['user'] ?? ''), (string)($_POST['password'] ?? '')) : null;
     if ($user) {
         session_regenerate_id(true);
         $_SESSION['zoty_customer'] = (int)$user['id'];
@@ -24,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     usleep(400000);
-    $error = tr('portal.login_error');
+    $error = $human ? tr('portal.login_error') : tr('recaptcha.failed');
 }
 
 $L = lang();
@@ -43,7 +44,7 @@ $keyIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/login.css?v=2">
+  <link rel="stylesheet" href="../assets/login.css?v=3">
   <link rel="stylesheet" href="../assets/tickets.css?v=1">
 </head>
 <body class="auth">
@@ -75,6 +76,7 @@ $keyIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="
       </label>
 
       <button class="auth__submit" type="submit"><?= h(tr('portal.login_button')) ?></button>
+      <?= recaptcha_field('portal_login') ?>
       <p class="auth__links">
         <?= h(tr('portal.no_account')) ?> <a href="https://zoty.cz/kontakt/"><?= h(tr('nav.contact')) ?></a>
         · <?php foreach (LANGS as $code): if ($code === $L) continue; ?><a href="<?= h(lang_url($code)) ?>" hreflang="<?= $code ?>"><?= h(tr('lang.name', [], $code)) ?></a><?php endforeach; ?>

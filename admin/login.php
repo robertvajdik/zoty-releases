@@ -13,8 +13,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $user = trim((string)($_POST['user'] ?? ''));
     $pass = (string)($_POST['password'] ?? '');
+    $human = recaptcha_check('admin_login');
 
-    if ($setup) {
+    if (!$human) {
+        usleep(400000);
+        $error = tr('recaptcha.failed', [], 'cs');
+    } elseif ($setup) {
         if (!filter_var($user, FILTER_VALIDATE_EMAIL) || mb_strlen($user) > 80) {
             $error = 'Zadejte platný email (max. 80 znaků).';
         } elseif (mb_strlen($pass) < 8) {
@@ -58,7 +62,7 @@ $keyIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/login.css?v=2">
+  <link rel="stylesheet" href="../assets/login.css?v=3">
 </head>
 <body class="auth">
   <main class="auth__wrap">
@@ -93,6 +97,7 @@ $keyIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="
       </label>
 
       <button class="auth__submit" type="submit"><?= $setup ? 'Vytvořit účet' : 'Přihlásit se' ?></button>
+      <?= recaptcha_field('admin_login', 'cs') ?>
     </form>
   </main>
 

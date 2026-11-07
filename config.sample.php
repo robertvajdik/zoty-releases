@@ -37,6 +37,14 @@ return [
         // choices for "Operating System" on the request form ("Jiné" / "Other" is always added)
         'os' => ['Windows 11', 'Windows 10', 'Windows Server 2022', 'Windows Server 2019', 'Linux', 'macOS'],
     ],
+    // Google reCAPTCHA v3 (invisible) on the login forms and the subscription form.
+    // Keys: https://www.google.com/recaptcha/admin (type "Score based (v3)", add your domain).
+    // Leave the keys empty to turn it off. min_score: 0.0 (bot) … 1.0 (human), 0.5 is Google's default.
+    'recaptcha' => [
+        'site_key'  => '6LfdpxQuAAAAADdOHJXLAkEAAqqwGV4XyZNHYrY6',
+        'secret'    => '6LfdpxQuAAAAAP6Afx2jXhcA2xR-CCsgG9npRpY5',
+        'min_score' => 0.5,
+    ],
     // Klíčová slova (meta keywords + JSON-LD). Module names are added automatically.
     'keywords' => ['Zoty', 'přehled změn', 'release notes', 'changelog', 'novinky', 'aktualizace', 'vylepšení', 'opravy', 'verze'],
 ];

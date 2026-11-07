@@ -16,6 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $_SESSION['sub_tries'][] = time();
 
+    if (!recaptcha_check('subscribe')) {
+        flash(tr('recaptcha.failed'));
+        header('Location: ' . $back);
+        exit;
+    }
+
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 190) {
         flash(tr('subscribe.flash.invalid'));
     } else {

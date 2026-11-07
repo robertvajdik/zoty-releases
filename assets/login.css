@@ -159,3 +159,8 @@ body.auth {
   .auth__submit { height: 56px; margin-top: 32px; font-size: 19px; }
 }
 .auth__note + .auth__msg { margin-top: -16px; }
+
+/* reCAPTCHA v3 notice (badge hidden) */
+.grecaptcha-badge { visibility: hidden; }
+.recaptcha-note { margin: 14px 0 0; text-align: center; font-size: 12px; color: #77727a; }
+.recaptcha-note a { color: inherit; }

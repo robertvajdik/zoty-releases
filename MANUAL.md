@@ -268,6 +268,7 @@ A module can be deleted only when no entry uses it. Modules also form the **Prod
 ### 4.4 Subscribers (Odběratelé)
 
 - List of e-mail subscribers with status (**Potvrzeno** = confirmed, **Čeká** = waiting for confirmation); **Odebrat** removes one.
+- Portal customers can switch the release-notes e-mails on/off themselves (**Moje požadavky**, top right); they appear here as confirmed straight away.
 - **Test odesílání e-mailů** – send a test e-mail to check the mail settings.
 - **Log odesílání e-mailů** – every e-mail the app sent or failed to send: time, status (**Odesláno** / **Chyba**),
   recipient, subject, purpose (e.g. `ACME-1 → zákazník`, `Verze v1.42.07`, `Přístup ACME`, `Test`) and the error detail.

@@ -338,3 +338,17 @@ select.tf__plain { appearance: auto; }
   .doc-fig--mobile a { max-width: 320px; margin: 0 auto; border-radius: 18px; }
   .doc-fig figcaption { font-size: 13px; }
 }
+
+/* portal: release-notes subscription switch */
+.news-toggle { display: flex; align-items: center; gap: 14px; padding: 10px 14px; background: #fff;
+  border: 1px solid var(--line); border-radius: var(--radius); max-width: 420px; }
+.news-toggle__text { display: grid; gap: 2px; font-size: 14px; line-height: 1.35; }
+.news-toggle__text span { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.switch { flex: none; position: relative; width: 44px; height: 26px; padding: 0; border: 0; border-radius: 13px;
+  background: #c9c3d6; cursor: pointer; transition: background-color .15s; }
+.switch span { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .15s; }
+.switch[aria-checked="true"] { background: var(--green, #3aa935); }
+.switch[aria-checked="true"] span { transform: translateX(18px); }
+.switch:focus-visible { outline: 2px solid var(--focus, #6144a3); outline-offset: 2px; }
+@media (max-width: 600px) { .news-toggle { max-width: none; width: 100%; } }

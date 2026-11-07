@@ -91,9 +91,9 @@ function tr(string $key, array $params = [], ?string $lang = null): string
 }
 
 /** Like tr(), HTML-escaped; $html params are inserted as ready-made HTML. */
-function trh(string $key, array $params = [], array $html = []): string
+function trh(string $key, array $params = [], array $html = [], ?string $lang = null): string
 {
-    $s = h(tr($key, $params));
+    $s = h(tr($key, $params, $lang));
     foreach ($html as $k => $v) $s = str_replace(h('{' . $k . '}'), $v, $s);
     return $s;
 }
@@ -943,6 +943,78 @@ function csrf_check(): void
     }
 }
 
+/* ---------------------------------------------------------------- reCAPTCHA v3 (config 'recaptcha') */
+
+/** On when config.php has both reCAPTCHA keys. */
+function recaptcha_enabled(): bool
+{
+    $c = config()['recaptcha'] ?? [];
+    return !empty($c['site_key']) && !empty($c['secret']);
+}
+
+/**
+ * Hidden token field + the script that fills it right before the form is sent.
+ * Put it inside the <form>; $action names the form in the reCAPTCHA console (login, subscribe…).
+ */
+function recaptcha_field(string $action, ?string $lang = null): string
+{
+    if (!recaptcha_enabled()) return '';
+    static $loaded = false;
+    $key = (string)config()['recaptcha']['site_key'];
+    $out = '<input type="hidden" name="g-recaptcha-response" value="" data-recaptcha="' . h($action) . '">'
+         . '<p class="recaptcha-note">' . trh('recaptcha.note', [], [
+               'privacy' => '<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">' . h(tr('recaptcha.privacy', [], $lang)) . '</a>',
+               'terms'   => '<a href="https://policies.google.com/terms" target="_blank" rel="noopener">' . h(tr('recaptcha.terms', [], $lang)) . '</a>',
+           ], $lang) . '</p>';
+    if (!$loaded) {
+        $loaded = true;
+        $out .= '<script src="https://www.google.com/recaptcha/api.js?render=' . rawurlencode($key) . '" async defer></script>'
+              . '<script>(function(){var k=' . json_encode($key) . ';'
+              . 'document.addEventListener("submit",function(e){var f=e.target,i=f.querySelector("input[data-recaptcha]");'
+              . 'if(!i||f.dataset.rcDone)return;e.preventDefault();if(f.dataset.rcBusy)return;f.dataset.rcBusy=1;'
+              . 'var go=function(t){i.value=t||"";f.dataset.rcDone=1;f.submit();};'
+              . 'if(!window.grecaptcha){go("");return;}'
+              . 'grecaptcha.ready(function(){grecaptcha.execute(k,{action:i.dataset.recaptcha}).then(go,function(){go("");});});'
+              . '},true);})();</script>';
+    }
+    return $out;
+}
+
+/**
+ * Verifies the token sent by recaptcha_field(). True when reCAPTCHA is off, the score passes,
+ * or Google cannot be reached (logged – an outage must not lock everyone out).
+ */
+function recaptcha_check(string $action): bool
+{
+    if (!recaptcha_enabled()) return true;
+    $c = config()['recaptcha'];
+    $token = (string)($_POST['g-recaptcha-response'] ?? '');
+    if ($token === '' || strlen($token) > 4000) return false;
+
+    $post = http_build_query(['secret' => $c['secret'], 'response' => $token, 'remoteip' => $_SERVER['REMOTE_ADDR'] ?? '']);
+    $url = 'https://www.google.com/recaptcha/api/siteverify';
+    $raw = false;
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $post, CURLOPT_RETURNTRANSFER => true,
+                                CURLOPT_TIMEOUT => 6, CURLOPT_CONNECTTIMEOUT => 4]);
+        $raw = curl_exec($ch);
+        curl_close($ch);
+    } else {
+        $raw = @file_get_contents($url, false, stream_context_create(['http' => [
+            'method' => 'POST', 'header' => "Content-Type: application/x-www-form-urlencoded\r\n", 'content' => $post, 'timeout' => 6]]));
+    }
+    $r = is_string($raw) ? json_decode($raw, true) : null;
+    if (!is_array($r)) {
+        error_log('Zoty reCAPTCHA: ověřovací server nedostupný – formulář propuštěn');
+        return true;
+    }
+    $min = (float)($c['min_score'] ?? 0.5);
+    $ok = !empty($r['success']) && ($r['action'] ?? '') === $action && (float)($r['score'] ?? 0) >= $min;
+    if (!$ok) error_log('Zoty reCAPTCHA ' . $action . ': zamítnuto (score ' . ($r['score'] ?? '-') . ', ' . implode(',', $r['error-codes'] ?? []) . ')');
+    return $ok;
+}
+
 function flash(?string $msg = null): ?string
 {
     if ($msg !== null) {
@@ -1005,6 +1077,37 @@ function subscriber_confirm(string $token): ?string
     db()->prepare("UPDATE $tbl SET confirmed = 1, confirmed_at = COALESCE(confirmed_at, ?) WHERE id = ?")
         ->execute([date('Y-m-d H:i:s'), $row['id']]);
     return (string)$row['email'];
+}
+
+/** Is $email a confirmed subscriber? */
+function subscriber_active(string $email): bool
+{
+    $st = db()->prepare('SELECT confirmed FROM ' . t('changelog_subscribers') . ' WHERE email = ?');
+    $st->execute([mb_strtolower(trim($email))]);
+    return (bool)$st->fetchColumn();
+}
+
+/**
+ * Turns the release-notes e-mails on/off for an address that is already verified
+ * (a portal account) – no confirmation e-mail. Off removes the subscriber.
+ */
+function subscriber_set(string $email, bool $on): void
+{
+    $email = mb_strtolower(trim($email));
+    $tbl = t('changelog_subscribers');
+    if (!$on) {
+        db()->prepare("DELETE FROM $tbl WHERE email = ?")->execute([$email]);
+        return;
+    }
+    $now = date('Y-m-d H:i:s');
+    $st = db()->prepare("SELECT id FROM $tbl WHERE email = ?");
+    $st->execute([$email]);
+    if ($id = $st->fetchColumn()) {
+        db()->prepare("UPDATE $tbl SET confirmed = 1, confirmed_at = COALESCE(confirmed_at, ?) WHERE id = ?")->execute([$now, $id]);
+    } else {
+        db()->prepare("INSERT INTO $tbl (email, token, confirmed, created_at, confirmed_at, ip) VALUES (?, ?, 1, ?, ?, ?)")
+            ->execute([$email, bin2hex(random_bytes(16)), $now, $now, substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45)]);
+    }
 }
 
 function subscriber_by_token(string $token): ?array

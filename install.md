@@ -57,6 +57,11 @@ Alternatively, the environment variable `ZOTY_CONFIG` can point to a different c
 
 ## Security
 
+- **reCAPTCHA v3** (invisible) protects the admin login, the portal login and the subscription form.
+  Create keys at https://www.google.com/recaptcha/admin (type *Score based (v3)*, add your domain) and put them in
+  `config.php` → `'recaptcha' => ['site_key' => '…', 'secret' => '…', 'min_score' => 0.5]`. Empty keys = off.
+  If Google cannot be reached from the server, the form is let through and the failure is written to the PHP error log.
+
 On Apache, `.htaccess` blocks web access to `config.php`, `lib.php`, `*.sql`, `data/` and `partials/`.
 On nginx, add the same rules yourself.
 

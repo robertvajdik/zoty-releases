@@ -103,6 +103,9 @@ Pokud požadavek čekal na vás nebo byl vyřešený, váš komentář ho vrát�
 Na e-mail vám přijde zpráva, když podpora **odpoví** nebo **změní stav** vašeho požadavku.
 V e-mailu je odkaz přímo na požadavek. E-maily chodí v jazyce, ve kterém jste se naposledy přihlásili.
 
+**E-mail o nových verzích:** přepínačem vpravo nahoře na stránce **Moje požadavky** si zapnete nebo vypnete
+přehled změn každé nové verze Zoty. Chodí na e-mail vašeho účtu, bez potvrzovacího e-mailu.
+
 ## Formátování textu
 
 Panel nástrojů nad textem vloží formátování za vás. Můžete ho psát i přímo:

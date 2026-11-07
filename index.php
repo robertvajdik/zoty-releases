@@ -131,6 +131,7 @@ require __DIR__ . '/partials/header.php';
       <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
       <button class="button button--green" type="submit"><?= h(tr('subscribe.button')) ?></button>
       <p class="subscribe__note"><?= h(tr('subscribe.note')) ?> · <a href="feed.xml"><?= h(tr('subscribe.feed')) ?></a></p>
+      <?= recaptcha_field('subscribe') ?>
     </form>
   </section>
 </main>

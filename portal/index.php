@@ -2,6 +2,17 @@
 require __DIR__ . '/../lib.php';
 $me = require_portal_user();
 
+// release-notes e-mails for the signed-in user's own address
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newsletter'])) {
+    csrf_check();
+    $on = $_POST['newsletter'] === '1';
+    subscriber_set($me['email'], $on);
+    flash(tr($on ? 'portal.news.flash_on' : 'portal.news.flash_off', ['email' => $me['email']]));
+    header('Location: ./');
+    exit;
+}
+$newsOn = subscriber_active($me['email']);
+
 // The customer's space: all requests of the customer's organisation.
 $tab = in_array($_GET['status'] ?? 'open', ['open', 'done', 'all'], true) ? ($_GET['status'] ?? 'open') : 'open';
 $mine = !empty($_GET['mine']);
@@ -32,6 +43,16 @@ require __DIR__ . '/../partials/header.php';
       <h1><?= h(tr('portal.my_requests')) ?></h1>
       <p><?= h(tr('portal.space_of', ['customer' => $me['customer_name']])) ?></p>
     </div>
+    <form class="news-toggle<?= $newsOn ? ' is-on' : '' ?>" method="post">
+      <?= csrf_field() ?>
+      <input type="hidden" name="newsletter" value="<?= $newsOn ? '0' : '1' ?>">
+      <span class="news-toggle__text">
+        <b><?= h(tr('portal.news.title')) ?></b>
+        <span><?= h(tr($newsOn ? 'portal.news.on' : 'portal.news.off', ['email' => $me['email']])) ?></span>
+      </span>
+      <button class="switch" type="submit" role="switch" aria-checked="<?= $newsOn ? 'true' : 'false' ?>"
+              aria-label="<?= h(tr('portal.news.title')) ?>" title="<?= h(tr($newsOn ? 'portal.news.turn_off' : 'portal.news.turn_on')) ?>"><span></span></button>
+    </form>
   </div>
 
   <nav class="tabs" aria-label="<?= h(tr('portal.filter_status')) ?>">

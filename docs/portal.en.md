@@ -103,6 +103,9 @@ If the request was waiting for you or resolved, your comment hands it back to su
 You get an email when support **replies** or **changes the status** of your request.
 The email links straight to the request and is sent in the language you last signed in with.
 
+**New version emails:** the switch at the top right of **My requests** turns the release notes of every new Zoty
+version on or off. They go to your account's email address; no confirmation email is needed.
+
 ## Text formatting
 
 The toolbar above the text inserts the formatting for you. You can also type it:
