@@ -31,14 +31,16 @@ $info = @getimagesize($f['tmp_name']);
 if (!$info || !isset($allowed[$info[2]])) fail('Povolené formáty: JPG, PNG, GIF, WebP.');
 $ext = $allowed[$info[2]];
 
+// manuals keep their pictures in docs/manual/img (referenced as img/name), everything else in uploads/YYYY/MM
+$forDoc = ($_GET['for'] ?? '') === 'doc';
 $sub = date('Y/m');
-$dir = __DIR__ . '/../uploads/' . $sub;
+$dir = $forDoc ? __DIR__ . '/../' . DOC_IMG_DIR : __DIR__ . '/../uploads/' . $sub;
 if (!is_dir($dir) && !mkdir($dir, 0755, true)) fail('Nelze vytvořit složku pro obrázky.', 500);
 
-$name = date('d') . '-' . bin2hex(random_bytes(8)) . '.' . $ext;
+$name = ($forDoc ? date('Ymd') : date('d')) . '-' . bin2hex(random_bytes(8)) . '.' . $ext;
 if (!move_uploaded_file($f['tmp_name'], $dir . '/' . $name)) fail('Obrázek se nepodařilo uložit.', 500);
 @chmod($dir . '/' . $name, 0644);
 
 $alt = trim(preg_replace('/[\[\]()\r\n]+/u', ' ', pathinfo((string)$f['name'], PATHINFO_FILENAME)));
-$url = 'uploads/' . $sub . '/' . $name;
+$url = $forDoc ? 'img/' . $name : 'uploads/' . $sub . '/' . $name;
 echo json_encode(['url' => $url, 'markdown' => '![' . $alt . '](' . $url . ')'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

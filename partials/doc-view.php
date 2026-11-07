@@ -38,3 +38,28 @@ $docHtml = doc_render($doc['body'], $toc);
     document.querySelectorAll('.doc__body h2[id]').forEach(function (h) { io.observe(h); });
   })();
 </script>
+<?php if (str_contains($docHtml, 'doc-fig')): ?>
+<link rel="stylesheet" href="<?= h($base_path ?? '') ?>assets/vendor/glightbox/glightbox.min.css?v=3.3.0">
+<script src="<?= h($base_path ?? '') ?>assets/vendor/glightbox/glightbox.min.js?v=3.3.0"></script>
+<script>
+  // picture viewer (GLightbox): click a picture of the manual -> full size with zoom, swipe, arrows / Esc, caption
+  (function () {
+    if (!window.GLightbox) return;   // without the library the link still opens the picture in a new tab
+    var links = Array.prototype.slice.call(document.querySelectorAll('.doc__body .doc-fig > a'));
+    if (!links.length) return;
+    var esc = function (s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+    links.forEach(function (a) {
+      var cap = a.parentNode.querySelector('figcaption');
+      a.setAttribute('data-type', 'image');
+      a.setAttribute('data-gallery', 'manual');
+      if (cap) a.setAttribute('data-description', esc(cap.textContent.trim()));   // shown as text, never as HTML
+    });
+    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    GLightbox({
+      selector: '.doc__body .doc-fig > a',
+      touchNavigation: true, loop: false, zoomable: true, draggable: true, descPosition: 'bottom',
+      openEffect: still ? 'none' : 'zoom', closeEffect: still ? 'none' : 'fade', slideEffect: still ? 'none' : 'slide'
+    });
+  })();
+</script>
+<?php endif; ?>

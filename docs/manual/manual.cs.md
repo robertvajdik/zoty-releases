@@ -106,7 +106,7 @@ Pro většinu uživatelů není nezbytné studovat tuto část manuálu pro zvl�
 Nabídka voleb z menu v levém ovládacím panelu poskytuje přístup k jednotlivým funkcionalitám a registrům Zoty, kde jsou uloženy příslušné typy entit a zpravidla též zatříděny do kategorií pomocí složek.     
 Ovládací panel lze jednoduše skrýt či zobrazit kliknutím na jeho záhlaví s názvem Zoty účtu a zvětšit tak hlavní pracovní plochu vpravo vedle tohoto panelu.
 
-<img src="/docs/img/3-zoty-menu.png"  title="Menu ovládacího panelu" />
+<img src="img/3-zoty-menu.png"  title="Menu ovládacího panelu" />
 
 &nbsp;
 
@@ -115,7 +115,7 @@ Hlavní **pracovní plocha** aplikace Zoty zobrazuje většinou některý z regi
 Registry jsou standardně vizualizovány pomocí dvou panelů pracovní plochy. V levém panelu se zobrazuje stromová struktura složek obsahující [entity určitého typu](#typy-entit-a-jejich-kódové-značení) (např. aktiva nebo rizika atp.). Zatímco pravý panel pak může zobrazovat různý obsah podle toho, jakou záložku (např. ***Aktivity, Propojení, Oprávnění, Schválení*** atp.) vybere uživatel v nástrojové liště pracovní plochy. Při výběru složky v levém panelu bude nabídka záložek jiná než při výběru entity. Přičemž i entity různého typu mohou mít specifickou nabídku záložek. Některé záložky mohou být také určitým uživatelům skryté s ohledem na omezení definovaná v rámci nastavení jejich uživatelských oprávnění.      
 Výchozí záložkou je ***Přehled***, která v pravém panelu zobrazuje přehled všech atributů a dalších informací, jež lze evidovat u konkrétní složky nebo entity, vybrané z registru v levém panelu.
 
-<img src="/docs/img/3-pracovni-plocha.png" title="Pracovní plocha aplikace Zoty" />
+<img src="img/3-pracovni-plocha.png" title="Pracovní plocha aplikace Zoty" />
 
 &nbsp;
 
@@ -138,7 +138,7 @@ Vpravo nad panelem seznamu entit lze vybrat některý z předdefinovaných filtr
 
 Nastavení šířky panelů pracovní plochy lze konfigurovat pomocí symbolu zubatého kola v pravém horním rohu pracovní plochy. Lze pak lépe využít šířku pracovní plochy s ohledem na velikost displeje, zejména poměr jeho stran. Toto nastavení se pak použije také pro ostatní panely použité i na jiných místech aplikace Zoty. Stejnou možnost konfigurace mají uživatelé k dispozici také v [nastavení svého profilu](#393-mé-nastavení). 
 
-<img src="/docs/img/3-konfigurace-panelu-pracovni-plochy.png " title="Konfigurace nastavení šířky panelů pracovní plochy" width="600"/>
+<img src="img/3-konfigurace-panelu-pracovni-plochy.png" title="Konfigurace nastavení šířky panelů pracovní plochy" width="600"/>
 
 &nbsp;
 
@@ -182,7 +182,7 @@ Vždy, když se *Všeobecné obchodní podmínky pro poskytování licencí a ú
 ### 3.3	Kalendář
 V kalendáři lze zobrazit pro zvolený měsíc všechny záznamy filtrované dle data, kdy byly vytvořeny nebo aktualizovány nebo nastavit přihlášenému uživateli zobrazení všech jeho záznamů, u kterých je správcem. V kalendáři se takto zobrazují záznamy entit typu: *Incidenty, Požadavky, Cíle, Aktiva, Projekty, Procesy, Úkoly, Hrozby, Zranitelnosti, Rizika, Hodnocení*.
 
-<img src="/docs/img/3-kalendar.png" title="Kalendář" />
+<img src="img/3-kalendar.png" title="Kalendář" />
 
 &nbsp;
 
@@ -190,42 +190,42 @@ V kalendáři lze zobrazit pro zvolený měsíc všechny záznamy filtrované dl
 V sekci **Schválení** se zobrazuje seznam entit typu *aktiva* a *rizika*, které musí nejprve projít procesem schválení v rámci obecného schvalovacího workflow.     
 V nástrojové liště se zobrazuje ikona, která upozorňuje na počet záznamů čekajících na schválení.
 
-<img src="/docs/img/3-schvaleni-notifikace.png" title="Notifikace – entity ke schválení" width="300"/>
+<img src="img/3-schvaleni-notifikace.png" title="Notifikace – entity ke schválení" width="300"/>
 
 Po kliknutí na notifikační ikonu se zobrazí výpis záznamů všech entit čekajících na schválení. Ty lze schvalovat, a to buď jednotlivě nebo hromadně.
 
-<img src="/docs/img/3-schvaleni-jednotlive.png" title="Schválení" />
+<img src="img/3-schvaleni-jednotlive.png" title="Schválení" />
 
 &nbsp;
 
 Možnost hromadného schválení, stejně jako možnost hromadného přiřazení schvalovatele, se zobrazí ve spodním modrém pruhu poté, co uživatel vybere záznamy ze seznamu kliknutím do zaškrtávacího pole v prvním sloupci seznamu.
 
-<img src="/docs/img/3-schvaleni-hromadne.png" title="Schválení - hromadné" />
+<img src="img/3-schvaleni-hromadne.png" title="Schválení - hromadné" />
 
 &nbsp;
 
 Hromadně lze schválit entity tak, jak jsou, tedy beze změn. Chce-li schvalovatel provést v rámci schvalovacího workflow libovolné úpravy schvalovaných entit, musí je schválit jednotlivě, každou samostatně. Pak může navrhovat libovolné úpravy, jak je patrné v příkladu na obrázku níže.
 
-<img src="/docs/img/3-schvaleni-jednotlive-navrh-uprav.png" title="Schválení – Návrh úprav" width="420"/>
+<img src="img/3-schvaleni-jednotlive-navrh-uprav.png" title="Schválení – Návrh úprav" width="420"/>
 
 &nbsp;
 
 Případné úpravy či doplnění chybějících informací ve schvalované entitě, se v posledním kroku schvalovacího workflow mohou potvrdit a schválit volbou stavu *Schválit a aplikovat změny*. Nebo může být stav schválení zvolen *Schválit beze změny*, *Vrátit* či *Zamítnout*, případně lze schvalování *Delegovat* na jiného schvalovatele.      
 Zároveň může schvalovatel k tomuto schvalovacím workflow připojit svůj komentář. Komentář je povinný pro volby *Delegovat, Vrátit* a *Zamítnout*.
 
-<img src="/docs/img/3-schvaleni-jednotlive-potvrzeni-zmen.png" title="Schválení – Návrh úprav" width="440"/>
+<img src="img/3-schvaleni-jednotlive-potvrzeni-zmen.png" title="Schválení – Návrh úprav" width="440"/>
 
 &nbsp;
 
 Kliknutím na tlačítko ***Potvrdit*** je schvalovací workflow dokončeno a příslušná entita dle zvoleného typu akce buď schválena nebo vrácena žadateli (např. k doplnění některých informací potřebných k úspěšnému schválení) nebo delegována na jiného schvalovatele nebo je schválení zamítnuto.
 
-<img src="/docs/img/3-schvaleni-jednotlive-potvrzeni-zmen-approved.png" title="Schválení – Návrh úprav" width="580"/>
+<img src="img/3-schvaleni-jednotlive-potvrzeni-zmen-approved.png" title="Schválení – Návrh úprav" width="580"/>
 
 &nbsp;
 
 Průběh každého workflow je dokumentován a uložen. Lze se k němu kdykoliv snadno vrátit a zobrazit kdy a jaké změny byly provedeny, kdo byl za schválení odpovědný, kdo jej vyžádal nebo jaká komunikace formou komentářů zde probíhala.
 Přístup k těmto informacím zprostředkují tyto ikony:   
-<img src="/docs/img/3-schvaleni-piktogramy-aktivity-a-comment.png" title="Schválení – dokumentace aktivit" width="90"/>
+<img src="img/3-schvaleni-piktogramy-aktivity-a-comment.png" title="Schválení – dokumentace aktivit" width="90"/>
 
 K jednotlivým schválením (instancím schvalovacích workflow) mají přístup všichni jeho ***účastníci***, tj.:
 - ***Autor*** - uživatel, který příslušnou entitu (aktivum, riziko, atp.) nebo výstup (např. analýzu rizik) odeslal ke schválení a tím celé workflow inicioval, což může být jakýkoliv uživatel;;
@@ -238,7 +238,7 @@ Celý průběh schvalování je patrný z workflow diagramu níže. Ukazuje, kdy
 
 &nbsp;
 
-<img src="/docs/img/3-schvalovaci-workflow-diagram.png" title="Schvalovací workflow - diagram" width="680"/>
+<img src="img/3-schvalovaci-workflow-diagram.png" title="Schvalovací workflow - diagram" width="680"/>
 
 &nbsp;
 
@@ -251,7 +251,7 @@ Je-li odeslána ke schválení entita uživateli, který k ní má omezené opr�
 ### 3.5	Vyhledávání
 Vyhledávat lze globálně napříč celým systémem dle názvu nebo klíče entity s využitím symbolu lupy v nástrojové liště aplikace.
 
-<img src="/docs/img/3-vyhledavani-globalni-vcetne-pripinani.png" title="Vyhledávání globálně s připínáním výsledků do rychlých záložek" />
+<img src="img/3-vyhledavani-globalni-vcetne-pripinani.png" title="Vyhledávání globálně s připínáním výsledků do rychlých záložek" />
 
 &nbsp;
 
@@ -261,7 +261,7 @@ Ikona připínáčku, která se zobrazuje vedle každého vyhledaného záznamu,
 
 Někdy může být výhodné omezit vyhledávání jen na sekci s příslušným registrem, např. **Aktiva**, **Rizika** atp. Vyhledávání v těchto sekcích funguje obdobně, jako globální vyhledávání. Stačí pouze zadat část vyhledávaného řetězce do pole pro vyhledávání vedle symbolu lupy.
 
-<img src="/docs/img/3-vyhledavani.png" title="Vyhledávání v sekci" width="600" />
+<img src="img/3-vyhledavani.png" title="Vyhledávání v sekci" width="600" />
 
 &nbsp;
 
@@ -274,7 +274,7 @@ Je-li zadávanou hodnotou atributu uživatel, lze v seznamu entit pro výběr u�
 ### 3.6	Filtry
 V seznamech lze rychle filtrovat záznamy volbou z dostupných, výrobcem předdefinovaných filtrů.
 
-<img src="/docs/img/3-filtry.png" title="Filtry" />
+<img src="img/3-filtry.png" title="Filtry" />
 
 &nbsp;
 
@@ -283,7 +283,7 @@ Uživatelské filtry nabízejí možnost definovat filtrační podmínky dle obs
 
 Příklad na obrázku níže demonstruje definici filtru pro vyhledání všech textových fragmentů (paragrafů, odstavců, písmen...) nějakého zákona (normy, směrnice, smlouvy atp.) mají garanta Martinu ***NEBO*** Adama ***NEBO*** jsou označeny jako auditní (daný fragment reprezentuje požadavek, který má být ověřován v rámci auditu, zda je s ním organizace ve shodě) ***A*** mají připojen alespoň jeden komentář.
 
-<img src="/docs/img/3-filtr-kombinace-filtracnich-kategorii.png" title="Filtr - definice" width="400"/>
+<img src="img/3-filtr-kombinace-filtracnich-kategorii.png" title="Filtr - definice" width="400"/>
 
 &nbsp;
 
@@ -308,50 +308,50 @@ Systémová služba ***Notifikace*** informuje uživatele o všech aktivitách, 
 
 Při prvním přihlášení uživatele se mu zobrazí výzva k uložení nastavení notifikací.
 
-<img src="/docs/img/3-notifikace-vyzva-k-nastaveni.png" title="Výzva k nastavení notifikací" width="370"/>
+<img src="img/3-notifikace-vyzva-k-nastaveni.png" title="Výzva k nastavení notifikací" width="370"/>
 
 &nbsp;
 
 Tato výzva se bude zobrazovat i při každém dalším přihlášení, dokud uživatel nepotvrdí pomocí tlačítka ***Uložit*** své nastavení notifikací, tj. zda je chce či nechce zasílat.    
 Notifikace jsou přednastaveny v konfiguraci „vypnuté notifikace“.
 
-<img src="/docs/img/3-notifikace-vypnuto.png" title="Výzva k nastavení notifikací" width="690" />
+<img src="img/3-notifikace-vypnuto.png" title="Výzva k nastavení notifikací" width="690" />
 
 Pokud tedy uživatel potvrdí výzvu k nastavení notifikací, v následujím kroku notifikace nezapne a pouze potvrdí tlačítko ***Uložit***, tak mu notifikace nebudou zasílány.    
 Uživatel si může později toto nastavení změnit – notifikace lze kdykoliv vypnout, zapnout či změnit jejich nastavení dle aktuálních preferencí uživatele.
 V nastavení lze konfigurovat, jaké typy notifikací se mají odesílat a zda má být notifikace odeslána okamžitě nebo v souhrnném e-mail reportu jehož četnost (denně nebo týdně) a čas odeslání si může uživatel nastavit.
 
-<img src="/docs/img/3-notifikace-nastaveni.png" title="Notifikace - nastavení" width="710"/>
+<img src="img/3-notifikace-nastaveni.png" title="Notifikace - nastavení" width="710"/>
 
 Dostupný výčet typů notifikací lze rozšířit formou zakázkové úpravy na základě požadavku uživatele.      
       
 V nástrojové liště se vpravo zobrazuje ikona notifikací, informující o počtu nových notifikací, které jsou připraveny ve výpisu pro přihlášeného uživatele.
       
-<img src="/docs/img/3-notifikace-ikona.png" title="Notifikační ikona" width="190"/>
+<img src="img/3-notifikace-ikona.png" title="Notifikační ikona" width="190"/>
 
 Po kliknutí na notifikační ikonu se zobrazí výpis s rychlým náhledem posledních deseti událostí, které mají souvislost s přihlášeným uživatelem (entita, kde je přihlášený uživatel zmíněn nebo je jejím správcem, byla založena, upravena, smazána nebo propojena vazbou s jinou entitou). 
 Tlačítko ***Zobrazit vše***, na konci tohoto seznamu, zobrazí kompletní výpis všech notifikací uživatele seskupených po jednotlivých dnech, včetně časové známky zaznamenané systémem pro každou notifikovanou událost.
 
-<img src="/docs/img/3-notifikace-vypis.png" title="Notifikace - výpis" />
+<img src="img/3-notifikace-vypis.png" title="Notifikace - výpis" />
 
 &nbsp;
 
 Pokud dojde ke ztrátě spojení se Zoty serverem, ať už v důsledku výpadku síťového nebo internetového připojení, dlouhodobé nečinnosti v aplikaci, či z jiných příčin, systémová notifikační služba bude odpojena a veškeré notifikace budou pozastaveny.
 V takovém případě Zoty zobrazí informaci, že připojení k notifikační službě bylo odpojeno a pokusí se o opětovné připojení za 20 sec.      
 
-<img src="/docs/img/3-notifikace-sluzba-odpojeno-reconnect-1.png" title="Notifikace – výpadek služby" width="350"/>      
+<img src="img/3-notifikace-sluzba-odpojeno-reconnect-1.png" title="Notifikace – výpadek služby" width="350"/>      
       
       
 V případě úspěchu zobrazí informaci, že připojení ke službě bylo opět navázáno.      
 
-<img src="/docs/img/3-notifikace-sluzba-obnoveno.png" title="Notifikace – obnovení služby" width="350"/>    
+<img src="img/3-notifikace-sluzba-obnoveno.png" title="Notifikace – obnovení služby" width="350"/>    
      
 V případě neúspěchu zopakuje za 30 sec. ještě jednou pokus o připojení.      
 
-<img src="/docs/img/3-notifikace-sluzba-reconnect-2.png" title="Notifikace – opakované připojení" width="350"/>
+<img src="img/3-notifikace-sluzba-reconnect-2.png" title="Notifikace – opakované připojení" width="350"/>
 Pokud ani druhý pokus nebyl úspěšný, informuje uživatele.     
 
-<img src="/docs/img/3-notifikace-sluzba-failed.png" title="Notifikace – pozastavení služby" width="350"/>
+<img src="img/3-notifikace-sluzba-failed.png" title="Notifikace – pozastavení služby" width="350"/>
 V takovém případě není služba notifikací funkční a je třeba kontaktovat vašeho správce IT. Až v případě, kdy se prověří, že chyba není způsobena výpadkem síťového nebo internetového připojení či jinou chybou ICT indrastruktury, obracejte se na [Zoty podporu](#zoty-podpora).
 
 &nbsp;
@@ -396,17 +396,17 @@ V komentáři lze zmínit jiného uživatele zadáním symbolu zavináče ***@**
 Podobným způsobem lze v komentářích zmínit také odkazy na libovolné entity v systému s pomocí znaku ***#***.    
 Komentáře lze skrýt a zobrazit je pouze pro vybrané uživatele či role. Standardně jsou komentáře publikovány se statusem *Veřejné*. Pokud je před odesláním status komentáře změněn na *Soukromé*, zobrazí se nabídka ***Oprávnění***, kde lze zadat role, konkrétní uživatele či kombinaci obojího, pro které bude komentář viditelný.
 
-<img src="/docs/img/3-komentare-opravneni.png"  title="Komentáře - oprávnění" width="560" />
+<img src="img/3-komentare-opravneni.png"  title="Komentáře - oprávnění" width="560" />
 
 &nbsp;
 
 Soukromé komentáře indikuje ikona ***Oprávnění***:
 
-<img src="/docs/img/3-ikona-opravneni-komentare.png"  title="Oprávnění pro komentáře" width="35" />
+<img src="img/3-ikona-opravneni-komentare.png"  title="Oprávnění pro komentáře" width="35" />
 
 Po najetí ukazovátka myši nad tuto ikonu se zobrazí seznam s názvy rolí či jmen uživatelů, kteří mají oprávnění ke zobrazení tohoto komentáře.
 
-<img src="/docs/img/3-komentare-opravneni-indikace.png" title="Komentáře – indikace nastavené restrikce" width="700"/>
+<img src="img/3-komentare-opravneni-indikace.png" title="Komentáře – indikace nastavené restrikce" width="700"/>
 
 &nbsp;
 
@@ -414,14 +414,14 @@ Po najetí ukazovátka myši nad tuto ikonu se zobrazí seznam s názvy rolí č
 K entitám lze připojovat soubory, [štítky](#14štítky), [metody](#metody), [organizace](#1621organizace), ale i jiné entity a zachytit tak vzájemné souvislosti.
 Propojení entit mezi sebou navzájem lze zobrazit na záložce ***Propojení*** v detailu každé entity, kde lze také vytvářet nová propojení pomocí tlačítka ***Vytvořit***.
 
-<img src="/docs/img/3-propojeni-seznam.png" title="Propojení – Seznam a vytvoření" width="700"/>
+<img src="img/3-propojeni-seznam.png" title="Propojení – Seznam a vytvoření" width="700"/>
 
 &nbsp;
       
 #### 3.11.1	Vizualizace propojení pomocí diagramu
 Propojení jsou zobrazena nejen seznamem propojených entit, ale i graficky pomocí diagramu.
 
-<img src="/docs/img/3-propojeni-diagram-vizualizace-odstranene-entity.png" title="Propojení - diagram" />
+<img src="img/3-propojeni-diagram-vizualizace-odstranene-entity.png" title="Propojení - diagram" />
 
 &nbsp;
 
@@ -433,14 +433,14 @@ Pokud je nějaká entita odstraněna, je přesunuta do koše, ale v diagramu je 
 
 Při najetí ukazovátka myši nad libovolnou entitu v diagramu se zobrazí nabídka, která umožní zobrazit ***Detail*** a ***Vlastnosti*** této entity, tzn. veškeré její atributy, připojené soubory a komentáře.
 
-<img src="/docs/img/3-diagram-propojeni-detail-a-vlastnosti.png" title="Detail a vlastnosti entity v diagramu propojení" />
+<img src="img/3-diagram-propojeni-detail-a-vlastnosti.png" title="Detail a vlastnosti entity v diagramu propojení" />
 
 &nbsp;
 
 V pravé části záhlaví okna Diagramu je, vedle možnosti filtrace zobrazených entit, také ikona hierarchizace. Pokud mají entity zobrazené v diagramu nějakou další hierarchizaci v rámci svých propojení na další entity, tak každé kliknutí na tuto ikonu provede dekompozici v hierarchii jejich propojení o jednu další úroveň níže.
 
-<img src="/docs/img/3-diagram-propojeni-1x-dekompozice.png" title="Hierarchizace - Dekompozice o další jednu úroveň níže" />
-<img src="/docs/img/3-diagram-propojeni-2x-dekompozice.png" title="Hierarchizace - Dekompozice o další dvě úrovně níže" />
+<img src="img/3-diagram-propojeni-1x-dekompozice.png" title="Hierarchizace - Dekompozice o další jednu úroveň níže" />
+<img src="img/3-diagram-propojeni-2x-dekompozice.png" title="Hierarchizace - Dekompozice o další dvě úrovně níže" />
 
 Pro rychlý návrat zpět do původního zobrazení lze použít obnovení okna prohlížeče (funkční klávesa F5).      
 
@@ -475,7 +475,7 @@ Propojení entit pomocí vazby typu *Rodič -> Dítě* je také nezbytné, má-l
 Zoty automaticky zaznamenává aktivity uživatelů v systému. *Aktivity* zobrazují přehled informací zejména o tom, jaké entity, kdy a jakým uživatelem byly nově přidány, změněny či smazány, jaké soubory byly k jaké entitě připojeny či odebrány, nebo jaké entity byly vzájemně propojeny vazbou. Do seznamu aktivit se zapisují i aktualizace obsahu atributů.    
 *Aktivity* se zobrazují jednak v přehledu na úvodní stránce, kde se zobrazuje seznam posledních aktivit a pak také v detailu u každého typu entity pouze ty vybrané aktivity, kterého se dané entity týkají. Uživatel, který nemá přiřazenu roli *Administrátor* nebo *Manažer entit*, vidí pouze aktivity informující o entitách, kde je tento uživatel přiřazen jako *Správce*.
 
-<img src="/docs/img/3-aktivity.png" title="Aktivity" />
+<img src="img/3-aktivity.png" title="Aktivity" />
    
 
 ### 3.13	Složky a záznamy
@@ -497,7 +497,7 @@ Ve stromové struktuře složek zobrazené v levém okně se po výběru složky
 
 Tyto operace (vyjma exportu) nejsou dostupné pro uživatele, kteří mají přidělené systémové role s nižšími oprávněními, tj. role *Uživatel*, *Auditor* nebo *Moderátor* nebo mají nastavená omezená oprávnění nebo pokud je entita uzamčena. Uzamčená entita je pak v horním pravém rohu detailu entity vizualizována ikonou zámku. Uzamknout či odemknout entitu mohou pouze uživatelé, kteří mají přidělené systémové role s vyššími oprávněními, tj. role *Manažer entit* nebo *Administrátor*.
 
-<img src="/docs/img/3-zamek-entity.png"  title="Uzamčení entity" width="850"/>
+<img src="img/3-zamek-entity.png"  title="Uzamčení entity" width="850"/>
 
 &nbsp;
 
@@ -514,7 +514,7 @@ Samotné entity, ale i celé složky, do kterých jsou entity zatříděny, lze 
 Pro podporu udržení přehlednosti, zejména při větším počtu různých [typů aktiv](#typy-aktiv) (ale i jakýchkoliv jiných [typů entit](#typy-entit-a-jejich-kódové-značení)), lze zajistit, aby systém hlídal, že do konkrétní složky nebude možné uložit jiné typy entit než ty, které administrátor povolil. V případě, že do složky bude povoleno ukládat více než jeden [typ entit](#typy-entit-a-jejich-kódové-značení), lze též přednastavit, jaký výchozí typ entity se má automaticky přednastavit, pokud bude uživatel do této složky vytvářet novou entitu.    
 Administrátor tedy může upravit vlastnosti každé složky tak, že např. data, informace a znalosti, které v Zoty reprezentují tři různé specifické typy entit, umístí do tří samostatných složek nebo je naopak umístí do jedné společné a povolí do ní ukládat všechny tyto tři typy entit.
 
-<img src="/docs/img/3-slozka-nastaveni-omezeni.png"  title="Omezení obsahu složek" width="370"/>
+<img src="img/3-slozka-nastaveni-omezeni.png"  title="Omezení obsahu složek" width="370"/>
 
 Pokud má být jeden [typ entity](#typy-entit-a-jejich-kódové-značení), umístěný např. ve složce *Hardware*, dále členěn pro větší přehlednost do více samostatných podsložek (např. *Servery, Pracovní stanice, Tiskárny* atp. …) tak potom volba ***Nastavit dle rodiče*** u všech podřízených složek zajistí, že povolené typy entity pro ně budou nastaveny takové, jak má nastavena nadřazená (rodičovská) složka, tedy v tomto příkladu *Hardware*.    
 Vedle omezení obsahu složek lze také omezit samotný [přístup na složky a entity](#3132oprávnění-přístupu-na-záznamy) v nich zatříděné.
@@ -528,13 +528,13 @@ Pro každou složku i entitu lze nastavit různé úrovně oprávnění přístu
 Ve výchozím nastavení jsou složky či záznamy v nich uložené viditelné všem uživatelům. To je zajištěno pomocí atributu ***Přístup***, který je při vytváření všech nových složek či entit automaticky přednastaven na hodnotu *Veřejný*.    
 Pro omezení přístupu k vybraným složkám či záznamům je třeba atribut ***Přístup*** přepnout do stavu *Omezený* nebo *Soukromý* v nastavení oprávnění na detailu příslušné entity či složky.
 
-<img src="/docs/img/3-pristup-na-slozku.png" title="Omezení přístupu k záznamu nebo obsahu složky" width="370"/>
+<img src="img/3-pristup-na-slozku.png" title="Omezení přístupu k záznamu nebo obsahu složky" width="370"/>
 
 &nbsp;
 
 Takto nastavená restrikce pak omezí přístup pouze pro vybrané uživatele nebo role dle definovaných úrovní oprávnění, jak je popsáno níže. Nebo složku či záznam zcela skryje, takže ji ostatní uživatelé bez nastaveného oprávnění vůbec nevidí (soukromý přístup).
 
-<img src="/docs/img/3-omezeny-pristup-info-pro-uzivatele.png" title="Omezený přístupu – info pro uživatele" width="770"/>
+<img src="img/3-omezeny-pristup-info-pro-uzivatele.png" title="Omezený přístupu – info pro uživatele" width="770"/>
 
 &nbsp;
 
@@ -542,7 +542,7 @@ Pro složky, záznamy všech typů entit a pro povolení pořizovat k nim [komen
 Pokud je nastaven přístup na *Omezený* nebo *Soukromý* a nejsou definována žádná oprávnění pro role nebo uživatele, tak budou mít k takovýmto složkám nebo entitám přístup pouze uživatelé s rolí administrátora.    
 Na obrázcích níže je příklad nastavení oprávnění přístupu na konkrétní složku.
 
-<img src="/docs/img/3-opravneni-na-slozku.png" title="Oprávnění" width="740"/>
+<img src="img/3-opravneni-na-slozku.png" title="Oprávnění" width="740"/>
 
 &nbsp;
 
@@ -551,7 +551,7 @@ Na obrázcích níže je příklad nastavení oprávnění přístupu na konkré
 Zoty umožňuje aplikovat princip tzv. dědičnosti oprávnění. To znamená, že oprávnění lze definovat pro vybranou složku pouze jednou a automaticky je pak dědit do všech podřízených složek a entit v nich zatříděných.
 K tomu slouží volba *Aplikovat oprávnění na podřízené uzly*. 
 
-<img src="/docs/img/3-opravneni-na-slozku-nastaveni.png" title="Nastavení oprávnění" width="350"/>
+<img src="img/3-opravneni-na-slozku-nastaveni.png" title="Nastavení oprávnění" width="350"/>
 
 &nbsp;
 
@@ -562,7 +562,7 @@ V případě potřeby se lze velmi snadno vrátit do předchozího stavu před v
 - kdekoliv v nadřízeném uzlu je nastaveno omezení oprávnění, které se dědí do podřízených uzlů a
 - oprávnění nejsou děděna, tzn. aktuálně jsou definována přímo na dané složce nebo entitě nebo nejsou zatím vůbec definována.
 
-<img src="/docs/img/3-opravneni-zdedit-pristup.png" title="Oprávnění – zdědit přístup" width="650"/>
+<img src="img/3-opravneni-zdedit-pristup.png" title="Oprávnění – zdědit přístup" width="650"/>
 
 &nbsp;
 
@@ -579,20 +579,20 @@ Pokud je na složce nastavena dědičnost, tak se uplatní nejen na všechny st�
 #### Oprávnění z pohledu uživatele
 Pokud je pro přihlášeného uživatele složka či entita viditelná, ale má nastaveno jakékoliv omezení v nastavení oprávnění pro některou z jeho rolí či přímo pro něj, tak se mu v detailu příslušné složky či entity zobrazí ikona "**!**" s varováním, že oprávnění k této složce nebo entitě jsou pro něj omezena. Po najetí ukazovátka myši nad tuto ikonu se zobrazí tooltip s informací, jaká konkrétní omezení jsou zde pro něj nastavena a pokud jsou zděděna z nadřízeného uzlu, tak je zobrazen i název složky reprezentující nadřízený uzel, odkud se tato oprávnění dědí.
 
-<img src="/docs/img/3-opravneni-prihlaseneho-uzivatele-info-k-omezeni.png" title="Informace k omezení oprávnění přihlášeného uživatele" width="750"/>                
+<img src="img/3-opravneni-prihlaseneho-uzivatele-info-k-omezeni.png" title="Informace k omezení oprávnění přihlášeného uživatele" width="750"/>                
 
 &nbsp;
 
 #### Oprávnění z pohledu administrátora
 Pro každou entitu nebo složku lze na záložce ***Oprávnění*** zobrazit seznam uživatelů a rolí s přehledem všech úrovní jim přidělených oprávnění včetně informace, zda jsou tato oprávnění děděna i na podřízené uzly neboli zda dědičnost na podřízené uzly je aktivní či neaktivní.
 
-<img src="/docs/img/3-opravneni-na-slozku-prehled-a-editace.png" title="Přehled přidělených oprávnění" />
+<img src="img/3-opravneni-na-slozku-prehled-a-editace.png" title="Přehled přidělených oprávnění" />
 
 &nbsp;
 
 Pokud jsou oprávnění k přístupu na složku či entitu zděděna z nadřízeného uzlu, tak ikona, která zobrazuje menu pro editaci či odstranění oprávnění, není dostupná, neboť správa těchto oprávnění je realizována na úrovni nadřízeného uzlu odkud jsou zděděna. Informace, který konkrétní nadřízený uzel je rodičem, odkud se oprávnění dědí a kde je tedy lze případně editovat či odstranit, je dostupná přes info ikonu ***Zdroj oprávnění***.
 
-<img src="/docs/img/3-opravneni-na-slozku-info-o-dedicnosti.png" title="Info o rodiči - zdroj, odkud se dědí oprávnění"/>
+<img src="img/3-opravneni-na-slozku-info-o-dedicnosti.png" title="Info o rodiči - zdroj, odkud se dědí oprávnění"/>
 
 Vzhledem k tomu, že lze definovat (nebo dědit) různé úrovně oprávnění zcela nezávisle pro uživatele a pro role, může nastat situace, kdy uživatel bude mít přiřazeny role, jejichž úroveň oprávnění pro některou složku či entitu bude v konfliktu s úrovní oprávnění, která jsou definována (nebo děděna) přímo pro tohoto konkrétního uživatele. Konflikt spočívá v tom, že uživatel může mít nějaké oprávnění povoleno, ale jemu přidělená role bude mít tu stejnou úroveň oprávnění (např. odstranění složky/entity) zakázanou.      
 Zoty tento konflikt řeší tak, že pokud tento případ nastane, tak oprávnění se sečtou a přednost dostane ta úroveň oprávnění, která povoluje (zelená) před tou, která zakazuje (červená).
@@ -602,7 +602,7 @@ Uživatel Martina má přiřazenou roli *Manažer entit*. Tato **role** má v re
 :::
 
 
-<img src="/docs/img/3-opravneni-konflikt-stejna-pro-uzivatele-i-roli.png" title="Konflikt oprávnění uživatele a jeho role" />
+<img src="img/3-opravneni-konflikt-stejna-pro-uzivatele-i-roli.png" title="Konflikt oprávnění uživatele a jeho role" />
 
 &nbsp;
 
@@ -626,7 +626,7 @@ Pokud má uživatel vidět některá data označená štítkem [*Organizace*](#1
 ## 4	PŘEHLED
 Úvodní stránka zobrazuje přehled základních informací, co se nového událo, jaké nejnovější záznamy, aktivity či komentáře byly pořízeny nebo aktualizovány, jaké úkoly uživatel vytvořil nebo mu byly přiděleny k řešení anebo kolik aktiv, rizik, opatření, cílů či jiných entit je aktuálně v systému celkem evidováno.
 
-<img src="/docs/img/4-homepage.png" title="Zoty úvodní stránka" />
+<img src="img/4-homepage.png" title="Zoty úvodní stránka" />
 
 &nbsp;
 
@@ -635,7 +635,7 @@ Vzhled a obsah této stránky si může každý uživatel přizpůsobit dle svý
 #### Nastavení karet
 Obsah v horním pruhu karet lze nastavit přes ikonu ***Nastavení karet*** v pravém horním rohu pracovní plochy úvodní stránky.
 
-<img src="/docs/img/4-homepage-nastaveni-karet.png" title="Zoty úvodní stránka - nastavení karet" />
+<img src="img/4-homepage-nastaveni-karet.png" title="Zoty úvodní stránka - nastavení karet" />
 
 &nbsp;
 
@@ -644,7 +644,7 @@ Pro zachování kompaktního zobrazení je třeba, aby byly v rámci případný
 #### Konfigurace panelů
 Vzhled celé úvodní stránky lze upravit přepnutím do editačního módu, kdy lze jednotlivé celky zvětšovat, zmenšovat či přesouvat.
 
-<img src="/docs/img/4-homepage-nastaveni.png" title="Zoty úvodní stránka - přizpůsobení" />
+<img src="img/4-homepage-nastaveni.png" title="Zoty úvodní stránka - přizpůsobení" />
 
 &nbsp;
 
@@ -653,13 +653,13 @@ Vzhled celé úvodní stránky lze upravit přepnutím do editačního módu, kd
 Zobrazení všech úkolů je dostupné v sekci **Úkoly**. Zde je lze třídit, filtrovat, sledovat jejich stav, časový průběh, datumy kdy byly vytvořeny, upraveny, jaký mají deadline, jakého mají správce nebo důležitost.    
 Úkoly, které nebyly uzavřeny (tzn. dokončeny, odmítnuty nebo archivovány) do plánovaného datumu dokončení, se po uplynutí tohoto datumu zobrazují v seznamu červeně s vykřičníkem. V případě, že plánovaný datum dokončení je již velmi blízko (tzn. je dnes nebo nastane již následující den), zobrazuje se toto datum oranžově.
 
-<img src="/docs/img/5-ukoly-zobrazeni-seznam.png" title="Seznam úkolů" />
+<img src="img/5-ukoly-zobrazeni-seznam.png" title="Seznam úkolů" />
 
 &nbsp;
 
 V nastavení zobrazení lze zvolit, zda budou úkoly zobrazeny formou řádkového seznamu nebo formou karet (tzv. Kanban zobrazení).
 
-<img src="/docs/img/5-ukoly-zobrazeni-kanban.png" title="Úkoly - Kanban zobrazení" />
+<img src="img/5-ukoly-zobrazeni-kanban.png" title="Úkoly - Kanban zobrazení" />
 
 &nbsp;
 
@@ -667,13 +667,13 @@ V nastavení zobrazení lze zvolit, zda budou úkoly zobrazeny formou řádkové
  Pozastaven, Dokončen, Archivován*.
 Průběh stavů je v seznamu úkolů, stejně tak i v detailu úkolu, graficky vizualizován indikátorem průběhu, kdy jednotlivé stavy jsou rozlišeny barevně a délka každé barvy reprezentuje dobu (v počtu dnů) po jakou se úkol v daném stavu nacházel.
 
-<img src="/docs/img/5-ukol-seznam-prubeh-stavu.png" title="Úkoly – Průběh stavů" width="550"/>
+<img src="img/5-ukol-seznam-prubeh-stavu.png" title="Úkoly – Průběh stavů" width="550"/>
 
 &nbsp;
 
 Po najetí ukazovátka myši nad příslušnou barvu v indikátoru průběhu se zobrazí informace o názvu stavu, který tato barva reprezentuje, počtu dnů a datumu *Od-Do*, ve kterém se úkol v tomto stavu nacházel.
 
-<img src="/docs/img/5-ukol-detail-prubeh-stavu.png" title="Úkoly – Průběh stavů" width="670"/>
+<img src="img/5-ukol-detail-prubeh-stavu.png" title="Úkoly – Průběh stavů" width="670"/>
 
 &nbsp;
 
@@ -682,7 +682,7 @@ Podmínky, za jakých může úkol změnit jeden stav na jiný, jsou dány logik
 ##### Workflow diagram - změna stavů úkolu      
 
 
-<img src="/docs/img/5-workflow-task.png" title="Úkoly – Wokflow" width="700"/>
+<img src="img/5-workflow-task.png" title="Úkoly – Wokflow" width="700"/>
 
 &nbsp;
 
@@ -699,7 +699,7 @@ Případné požadavky v této oblasti směrujte na vašeho dodavatele nebo př�
 ### 6.1	Obecné
 Příklad vizualizace vazeb závislostí mezi primárními a podpůrnými aktivy a jejich hodnocení.
 
-<img src="/docs/img/6-vizualizace-primarni-vs-podpurna-aktiva.png" title="Vizualizace vazeb primární vs podpůrná aktiva – Wokflow" />
+<img src="img/6-vizualizace-primarni-vs-podpurna-aktiva.png" title="Vizualizace vazeb primární vs podpůrná aktiva – Wokflow" />
 
 &nbsp;
 
@@ -708,14 +708,14 @@ Z první vizualizace jsou na první pohled patrná veškerá propojení mezi pri
 Následné vizualizace nabízí samostatné seznamy primárních a podpůrných aktiv, přičemž jakékoliv aktivum lze pak rozbalit/sbalit kliknutím na symbol +/- a zobrazit pouze na něm závislá připojená aktiva.     
 Na obrázku níže je takto příklad rychlého zobrazení všech podpůrných aktiv nezbytných pro zajištění fungování procesu „Zajištění fyzické bezpečnosti“ – IP bezpečnostních kamery a SW aplikace pro management bezpečnostních kamer, která je instalovaná na serveru *PowerEdge* umístěném v serverovně v lokalitě ZO1.
 
-<img src="/docs/img/6-vizualizace-rozklik-primarniho-aktiva-na-podpurna.png" title="Vizualizace – Rozpad primárních aktiv na podůrná" />
+<img src="img/6-vizualizace-rozklik-primarniho-aktiva-na-podpurna.png" title="Vizualizace – Rozpad primárních aktiv na podůrná" />
 
 &nbsp;
 
 ### 6.2	Hodnocení
 Příklad změny vizualizace hodnocení aktiv jednoduchou změnou registru v záhlaví grafu na libovolný (uživatelsky definovatelný) katalog, který může mít zcela jinou strukturu složek, v nichž jsou hodnocená aktiva zatříděna:
 
-<img src="/docs/img/6-vizualizace-obecne-registr-vs-katalogy.png" title="Vizualizace – Hodnocení aktiv seskupená různými způsoby" />
+<img src="img/6-vizualizace-obecne-registr-vs-katalogy.png" title="Vizualizace – Hodnocení aktiv seskupená různými způsoby" />
 
 &nbsp;
 
@@ -726,13 +726,13 @@ Ověření shody s příslušnými požadavky je pak realizováno spoluprací fu
 ### 7.1	Požadavky
 Registr požadavků je tvořen veškerými požadavky, které mohou být relevantní k řízení rizik a aktiv. Mohou zde ale také být obecně jakékoliv požadavky, se kterými musí být organizace trvale ve shodě. Registr požadavků je proto strukturován na požadavky zákonné (vyplývající z legislativy národní či evropské), požadavky vyplývající z ISO norem a požadavky smluvní.
 
-<img src="/docs/img/7-pozadavky.png" title="Požadavky" />
+<img src="img/7-pozadavky.png" title="Požadavky" />
 
 &nbsp;
 
 Obsah každého požadavku je tvořen fragmenty textu, reprezentující ve struktuře dokumentu kapitoly, odstavce, písmena či paragrafy. Ke každému fragmentu lze připojit soubory, libovolné další entity uložené v Zoty, vyjadřovat se k němu spolu s ostatními uživateli formou komentářů nebo k němu přiřadit odpovědnou osobu – garanta, který odpovídá za zajištění shody s tímto dílčím požadavkem.
 
-<img src="/docs/img/7-pozadavek-kybersecurity-propojeni-garant.png" title="Garant požadavku" width="470"/>
+<img src="img/7-pozadavek-kybersecurity-propojeni-garant.png" title="Garant požadavku" width="470"/>
 
 &nbsp;
 
@@ -742,19 +742,19 @@ Aby bylo na první pohled vidět, za kterými fragmenty textu se skrývají dal�
  V celém obsahu dokumentu lze snadno zobrazit pouze ty fragmenty textu, za kterými se skrývají další informace. Stačí jednoduše kliknout na ikonu filtru.
 :::
 
-<img src="/docs/img/7-pozadavek-kybersecurity-propojeni-filtrace.png" title="Požadavek – filtrace textových fragmentů" width="460"/>
+<img src="img/7-pozadavek-kybersecurity-propojeni-filtrace.png" title="Požadavek – filtrace textových fragmentů" width="460"/>
 
 &nbsp;
 
 Takovýto strukturovaný obsah lze tvořit pomocí ikony se symbolem „**+**“, která se u stávajícího či nově vytvořeného požadavku nabídne po přepnutí jeho záložky ***Obsah*** do editačního režimu.
 
-<img src="/docs/img/7-pozadavky-strukturace-nadpisu-a-odstavcu-cil-zoty.png" title="Tvorba strukturovaného obsahu požadavku"/>
+<img src="img/7-pozadavky-strukturace-nadpisu-a-odstavcu-cil-zoty.png" title="Tvorba strukturovaného obsahu požadavku"/>
 
 &nbsp;
 
 Obsah zde potom lze vložit manuálním zadáním textu nebo nejlépe využít již připravený existující text, např. ve formátu dokumentu typu Word – ten označit a zkopírovat do schránky (ve Windows Ctrl+C) a vložit jej do Zoty (Ctrl+V).
 
-<img src="/docs/img/7-pozadavky-strukturace-nadpisu-a-odstavcu-zdroj-word.png" title="Tvorba strukturovaného obsahu požadavku – příprava zdrojového textu ve Wordu"/>
+<img src="img/7-pozadavky-strukturace-nadpisu-a-odstavcu-zdroj-word.png" title="Tvorba strukturovaného obsahu požadavku – příprava zdrojového textu ve Wordu"/>
 
 &nbsp;
 
@@ -762,7 +762,7 @@ Text bude přenesen včetně zachování základního formátování (tučný fo
          
 Po najetí myší nad libovolný fragment se u něj zobrazí paleta základních nástrojů vizualizovaných ikonami, jež umožnují daný fragment editovat, posouvat jeho odsazení vlevo/vpravo pro zvýšení přehlednosti různých úrovní nadpisů či odstavců, přidávat za vybraný fragment další nové fragmenty nebo jej celý odstranit.
 
-<img src="/docs/img/7-pozadavky-editace-fragmentu.png" title="Tvorba strukturovaného obsahu požadavku – editace fragmentů"/>
+<img src="img/7-pozadavky-editace-fragmentu.png" title="Tvorba strukturovaného obsahu požadavku – editace fragmentů"/>
 
 &nbsp;
 
@@ -771,16 +771,16 @@ Z požadavků lze pak ještě vytvářet tzv. odvozené požadavky, jejichž smy
 Odvozený, uživatelsky srozumitelný požadavek, lze vytvořit a připojit ke každému paragrafu či konkrétnímu odstavci zákona, či libovolného jiného typu dokumentu. A k němu přiřadit odpovědnou osobu. A celý jej pak propojit vazbou např. s rizikem, libovolným typem aktiva, cílem nebo s jiným souvisejícím požadavkem. Jsou zde tedy stejné možnosti, jako při práci s fragmenty textů u nadřízeného požadavku.
 Lze tak mj. snadno dohledat, kdo za plnění jakých požadavků odpovídá a jak se s nimi konkrétně organizace vypořádala v rámci celého systému řízení rizik a shody.
 
-<img src="/docs/img/7-pozadavek-kybersecurity-propojeni.png" title="Propojení na odvozený požadavek" />
+<img src="img/7-pozadavek-kybersecurity-propojeni.png" title="Propojení na odvozený požadavek" />
 
-<img src="/docs/img/7-pozadavek-kybersecurity-propojeni-pozadavek-odvozeny-a-commenty.png" title="Odvozený požadavek" width="390"/>
+<img src="img/7-pozadavek-kybersecurity-propojeni-pozadavek-odvozeny-a-commenty.png" title="Odvozený požadavek" width="390"/>
 &nbsp;
 
 #### Legislativní požadavky na řízení informačních aktiv
 
 Příkladem odvozeného požadavku jsou pravidla ochrany jednotlivých úrovní informačních aktiv, která vychází z požadavků na řízení aktiv dle § 4 písm. h) – j) vyhlášky o kybernetické bezpečnosti.
 
-<img src="/docs/img/7-pozadavky-odvozeny-pozadavek-rizeni-aktiv.png"  title="Odvozený požadavek - Pravidla ochrany jednotlivých úrovní informačních aktiv" width="" />
+<img src="img/7-pozadavky-odvozeny-pozadavek-rizeni-aktiv.png"  title="Odvozený požadavek - Pravidla ochrany jednotlivých úrovní informačních aktiv" width="" />
 
 &nbsp;
 
@@ -834,11 +834,11 @@ ________________________________
 Speciální kategorii pak tvoří aktiva typu projekt a proces, která mohou (spolu s [úkoly](#5úkoly)) vystupovat v roli konkrétních [opatření](#101opatření) připojených k [cílovým hodnocením](#9hodnocení) rizik v rámci jejich mitigace.
 
 Jakékoliv aktivum lze na jedno kliknutí ohodnotit z hlediska jeho důležitosti.
-<img src="/docs/img/8-aktivum-dulezitost-detail.png" title="Stanovení důležitosti aktiva"/>
+<img src="img/8-aktivum-dulezitost-detail.png" title="Stanovení důležitosti aktiva"/>
 
 &nbsp;
 
-<img src="/docs/img/8-aktivum-dulezitost-seznam.png" title="Seznam vybraných aktiv dle důležitosti" width="590"/>
+<img src="img/8-aktivum-dulezitost-seznam.png" title="Seznam vybraných aktiv dle důležitosti" width="590"/>
 
 &nbsp;
 
@@ -855,7 +855,7 @@ Důležitost aktiva může být např. vodítkem také pro to, zda pro něj dle 
 #### 8.2.1 Správa aktiv
 Uživatel si může v registru aktiv vytvořit libovolnou strukturu složek a kategorizovat tak aktiva dle vlastních preferencí. Podobně, jako u jiných registrů, i zde se lze nechat inspirovat již vytvořenými strukturami složek v rámci předdefinovaných kategorií v katalozích aktiv.
        
-<img src="/docs/img/8-katalogy-aktiv.png" title="Katalogy aktiv" width="570"/>
+<img src="img/8-katalogy-aktiv.png" title="Katalogy aktiv" width="570"/>
 
 Zejména při větším objemu aktiv pak vhodně zvolená kategorizace významným způsobem zpřehledňuje a usnadňuje jejich správu. Proto při vytváření nejen nových aktiv, ale i libovolných jiných entit, je vhodné myslet také na jejich správné zatřídění ve struktuře složek v příslušném registru.
 
@@ -869,7 +869,7 @@ Pokud zatřídění neproběhlo správně, tzn. nový záznam se uložil do chyb
 
 S pomocí oprávnění lze v [administraci aplikace](#oprávnění-přístupu-do-aplikace) nastavit také různé úrovně oprávnění pro registry. Tak lze např. zamezit tomu, aby uživatelé mohli přímo do root registrů entity či složky ukládat. Nebo zde předdefinovanou strukturu složek jakkoliv měnit. Dokud tedy uživatel nejprve některou složku nevybere, tak tlačítko ***Vytvořit*** nebude v registru dostupné. Tím je zabráněno uložení nově vytvářené entity do rootu příslušného registru, tj. mimo předdefinovanou strukturu složek.
 
-<img src="/docs/img/8-entity-restrikce-na-ulozeni-do-registru.png"  title="Restrikce na vytvoření entit s uložením do root registru" />
+<img src="img/8-entity-restrikce-na-ulozeni-do-registru.png"  title="Restrikce na vytvoření entit s uložením do root registru" />
          
 :::info
 Registr není standardní složka, ale část aplikace Zoty. Proto restrikce na celý registr nelze nastavit v rámci systému [správy řízení přístupů na záznamy](#3132oprávnění-přístupu-na-záznamy)
@@ -896,7 +896,7 @@ Proto je vhodné, vždy v rámci konkrétního hodnocení, individuálně posoud
 #### Hodnocení dodavatelů
 V rámci hodnocení aktiv lze hodnotit i dodavatele, neboť dodavatel je v Zoty [specifická entita](#typy-aktiv) typu aktivum - ***Dodavatel***, pro kterou lze uživatelsky definovat libovolné [schéma hodnocení](#1614hodnocení), jak je demonstrováno v příkladu na obrázku níže.
 
-<img src="/docs/img/8-hodnoceni-dodavatelu.png "  title="Hodnocení dodavatelů" width="" />
+<img src="img/8-hodnoceni-dodavatelu.png"  title="Hodnocení dodavatelů" width="" />
 
 &nbsp;
 
@@ -914,7 +914,7 @@ Vybranou množinu aktiv, zpravidla těch, která byla pro organizaci identifikov
 
 ##### Diagram schvalovacího workflow pro analýzu aktiv
 
-<img src="/docs/img/8-schvalovaci-workflow-analyza-aktiv-diagram.png"  title="Schvalovací workflow pro analýzu aktiv" />
+<img src="img/8-schvalovaci-workflow-analyza-aktiv-diagram.png"  title="Schvalovací workflow pro analýzu aktiv" />
 
 &nbsp;
 
@@ -940,16 +940,16 @@ Při návrhu nejvhodnější struktury složek v příslušných registrech v r�
 -	Katalog bezpečnostních hrozeb ohrožujících soukromí uživatelů dle frameworku LIDDUN (LINDDUN privacy threats)
 -	Katalog hrozeb dle metodiky STRIDE
 
-<img src="/docs/img/8-katalogy-hrozeb.png" title="Katalogy hrozeb" width="570"/>
+<img src="img/8-katalogy-hrozeb.png" title="Katalogy hrozeb" width="570"/>
 
-<img src="/docs/img/8-katalogy-zranitelnosti.png" title="Katalogy zranitelností" width="570"/>
+<img src="img/8-katalogy-zranitelnosti.png" title="Katalogy zranitelností" width="570"/>
 
 &nbsp;
 
 ### 8.4	Rizika
 Podobně, jako v jiných registrech, i zde platí, že uživatel si může vytvořit svoji vlastní strukturu složek, která bude nejlépe vyhovovat jeho potřebám a inspirovat se přitom některým z předdefinovaných katalogů rizik.    
 
- <img src="/docs/img/8-katalogy-rizik.png " title="Katalogy rizik" width="560"/>
+ <img src="img/8-katalogy-rizik.png" title="Katalogy rizik" width="560"/>
 
 &nbsp;
 
@@ -979,7 +979,7 @@ Rizika nemusí vytvářet sám uživatel, ale může si je nechat vygenerovat do
 
 Název nového rizika (jedno, zda vytvářeného manuálně nebo generováním ze znalostní báze) může být automaticky generován kombinací z názvů jeho rodičů nebo z jejich identifikátorů, tzv. [klíčů](#typy-entit-a-jejich-kódové-značení), či z kombinace obojího – podle toho, co si uživatel zvolí v atributu „***Generovaný název dle rodiče***“.
 
-<img src="/docs/img/8-riziko-generovany-nazev-dle-rodice.png" title="Generovaný název rizika dle jeho rodičů (aktiva, hrozby, zranitelnosti)" />
+<img src="img/8-riziko-generovany-nazev-dle-rodice.png" title="Generovaný název rizika dle jeho rodičů (aktiva, hrozby, zranitelnosti)" />
 
 &nbsp;
 
@@ -987,22 +987,22 @@ Název nového rizika (jedno, zda vytvářeného manuálně nebo generováním z
 Hodnocení je speciální [typ entity](#typy-entit-a-jejich-kódové-značení), jejíž jednotlivé záznamy představují konkrétní instance ohodnocení rizika nebo aktiva nebo hrozby nebo zranitelnosti.
 V rámci hodnocení lze ohodnotit skutečnost nebo cílový stav pro vybrané časové období.
 
-<img src="/docs/img/9-hodnoceni-rizika-detail-nastaveni-a-ohodnoceni.png" title="Hodnocení rizika – detail nastavení a ohodnocení" width="660"/>
+<img src="img/9-hodnoceni-rizika-detail-nastaveni-a-ohodnoceni.png" title="Hodnocení rizika – detail nastavení a ohodnocení" width="660"/>
 
 &nbsp;
 
 Při zadávání hodnocení cílového nebo skutečného stavu si lze zobrazit všechna předchozí provedená hodnocení (pro skutečnost i cíl) a automaticky jimi předvyplnit aktuálně prováděné hodnocení, s tím, že uživatel si může nabídnuté hodnoty změnit.
 
-<img src="/docs/img/9-hodnoceni-predvyplnit-vyber.png" title="Hodnocení rizika – detail nastavení a ohodnocení" />
+<img src="img/9-hodnoceni-predvyplnit-vyber.png" title="Hodnocení rizika – detail nastavení a ohodnocení" />
 
-<img src="/docs/img/9-hodnoceni-predvyplnit-vybrano.png" title="Hodnocení rizika – detail nastavení a ohodnocení" />
+<img src="img/9-hodnoceni-predvyplnit-vybrano.png" title="Hodnocení rizika – detail nastavení a ohodnocení" />
 
 &nbsp;
 
 Při samotném hodnocení lze ke každé hodnocené metrice vložit číselné hodnoty, které mohou např. rozložit hodnocený parametr na více řádků, aby bylo zřejmé, z jakých dílčích hodnot se skládá.       
 K jednotlivým metrikám, stejně tak k výslednému skóre, lze vkládat libovolné množství textových poznámek. Ikona pro editaci poznámky indikuje jejich počet a tím zároveň informuje, které hodnocené metriky či výsledné skóre jsou opatřeny poznámkou.
 
-<img src="/docs/img/9-hodnoceni-poznamky.png"  title="Hodnocení - poznámky" width="600" />
+<img src="img/9-hodnoceni-poznamky.png"  title="Hodnocení - poznámky" width="600" />
 
 &nbsp;
 
@@ -1012,19 +1012,19 @@ Všechny tyto parametry lze plně uživatelsky konfigurovat v [nastavení Hodnoc
            
 Ve výběru z dostupných schémat hodnocení, dle kterých se má hodnocení provést, se nenabízí všechna schémata hodnocení definovaná v [nastavení Hodnocení](#1614hodnocení). Nabízí se pouze schémata relevantní pro hodnocení určitého typu, tj. buď pro rizika nebo aktiva nebo hrozby nebo zranitelnosti.
 
-<img src="/docs/img/9-hodnoceni-typy-hodnoceni-v-nastaveni.png" title="Hodnocení rizika – detail nastavení a ohodnocení" />
+<img src="img/9-hodnoceni-typy-hodnoceni-v-nastaveni.png" title="Hodnocení rizika – detail nastavení a ohodnocení" />
 
 &nbsp;
 
 Výběr z dostupných schémat pro hodnocení daného typu lze dále ještě více omezit, pokud při vytváření nové entity typového *Hodnocení* byl nejen zvolen určitý podtyp *Hodnocení* (A, R, T, V), ale bylo toto typové *Hodnocení* navíc přiřazeno nějaké konkrétní metodě, jež má v *Nastavení* povoleno pouze jedno vybrané schéma hodnocení pro tento typ.
 
-<img src="/docs/img/9-hodnoceni-detail.png" title="Hodnocení rizika – detail nastavení a ohodnocení" />
+<img src="img/9-hodnoceni-detail.png" title="Hodnocení rizika – detail nastavení a ohodnocení" />
 
 &nbsp;
 
 Při tvorbě nové entity typového Hodnocení je hlavně třeba také zvolit, co konkrétně se bude hodnotit, tj. k čemu se pak jednotlivá hodnocení vztahují (např. k jakému konkrétnímu riziku).
 
-<img src="/docs/img/9-hodnoceni-detail-rodice.png" title="Hodnocení rizika – detail nastavení a ohodnocení" />
+<img src="img/9-hodnoceni-detail-rodice.png" title="Hodnocení rizika – detail nastavení a ohodnocení" />
 
 &nbsp;
 
@@ -1035,7 +1035,7 @@ Propojení entit pomocí vazby typu *Rodič-Potomek* je nezbytné, má-li jedna 
 Přehled všech hodnocení, jejich výsledného skóre a časového rozmezí, pro který je platné, lze pro hodnocení každé konkrétní entity zobrazit ze stejnojmenné záložky *Hodnocení*, viz obr. níže.
 Pro plánovaná cílová hodnocení reprezentující cílové milníky, je navíc vidět i celkový počet opatření, s pomocí kterých má být cílového stavu dosaženo. Kliknutím na symbol **+**/**-** vlevo vedle názvu hodnocení, lze pak rozbalit/sbalit seznam všech opatření připojených k tomuto plánovanému cílovému milníku.
 
-<img src="/docs/img/9-hodnoceni.png" title="Hodnocení rizika – detail nastavení a ohodnocení" />
+<img src="img/9-hodnoceni.png" title="Hodnocení rizika – detail nastavení a ohodnocení" />
 
 &nbsp;
 
@@ -1049,7 +1049,7 @@ Opatření lze připojovat k libovolným typům entit, které lze hodnotit (akti
         
 Zoty poskytuje přednaplněný registr opatření pro plnění cílů bezpečnosti informací ve všech oblastech požadovaných mezinárodními standardy (např. ISO 27 002) nebo legislativou (vyhláška k ZoKB).
 
-<img src="/docs/img/10-sablony-opatreni.png"  title="Šablony opatření dle ISO 27002" width="" />         
+<img src="img/10-sablony-opatreni.png"  title="Šablony opatření dle ISO 27002" width="" />         
 
 &nbsp;
 
@@ -1130,7 +1130,7 @@ Protože některé tyto záznamy, zejména bezpečnostní události a incidenty,
 
 ### 11.1	Bezpečnostní události a incidenty
 
-<img src="/docs/img/11-incident-detail.png"  title="Incident - detail"/>
+<img src="img/11-incident-detail.png"  title="Incident - detail"/>
 
 &nbsp;
 
@@ -1145,7 +1145,7 @@ Pokud jsou takovéto "významné změny" identifikovány, měly by iniciovat zno
 V Zoty je pro tento účel zaveden specifický typ entity **Významná změna**, která může být propojena s [analýzou vybraných aktiv](#823-analýza-aktiv) (dotčených změnou). Ta následně vstupuje do analýzy rizik a vymezuje tak její rozsah.     
 Výsledek analýzy rizik pak dává podklady k rozhodnutí o způsobech posouzení úrovně bezpečnosti za účelem identifikace slabých míst (např. provedení penetračního testování, skenu zranitelností či prověrky konfigurace) a případně též zavedení vhodných opatření vedoucích ke snížení rizika minimalizací dopadu těchto změn. 
 
-<img src="/docs/img/11-vyznamna-zmena-detail.png"  title="Významná změna - detail" />
+<img src="img/11-vyznamna-zmena-detail.png"  title="Významná změna - detail" />
 
 &nbsp;
 
@@ -1158,23 +1158,23 @@ Pro mitigaci rizik lze v Zoty volit z připravených šablon bezpečnostních op
 ## 12	AUDITY
 V modulu **Audity** lze zakládat interní či externí audity a kontroly a propojovat je s požadavky, vůči kterým je v rámci příslušných auditů nebo kontrol posuzována shoda.
 
-<img src="/docs/img/13-audit-seznam.png" title="Audity" />
+<img src="img/13-audit-seznam.png" title="Audity" />
 
 Je-li audit propojen s požadavkem v sekci Řízení shody - [Požadavky](#71požadavky), a tímto požadavkem je dokument (zákon, ISO norma, směrnice, smlouva, atp.), jež má strukturovaný obsah (kapitoly, podkapitoly nebo paragrafy, odstavce, písmena, atp.), tak pak lze ze všech těchto ucelených fragmentů textu vybrat v rámci auditu ty, u kterých má být posuzováno, zda je s nimi organizace ve shodě či nikoliv.
 Po najetí ukazovátka myši nad příslušný fragment textu, např. jeden konkrétní odstavec, se zobrazí volba, která umožní aktivovat pro něj funkcionality auditu. Tento fragment /dílčí požadavek se pak stává tzv. auditní a je tedy zahrnut do kritérií a cílů auditů či kontrol. Tzn., že bude možné u něj posuzovat shodu se zavedeným systémem, např. na zajištění bezpečnosti informací.
 
-<img src="/docs/img/13-audit-aktivace-pro-fragment-textu-pozadavku.png" title="Aktivace auditu pro fragment textu požadavku" width="770"/>
+<img src="img/13-audit-aktivace-pro-fragment-textu-pozadavku.png" title="Aktivace auditu pro fragment textu požadavku" width="770"/>
 
 Ke každému dílčímu požadavku lze také přiřadit odpovědnou osobu – garanta, který zodpovídá za jeho zavedení, připojit k němu komentáře nebo jej propojit s libovolnými dalšími entitami v Zoty. V rámci auditu lze pak každý dílčí požadavek označit za *Zaveden, Nezaveden, V procesu zavádění* či *Neaplikovatelný*.
 
-<img src="/docs/img/13-audit-detail.png" title="Audit - detail" />
+<img src="img/13-audit-detail.png" title="Audit - detail" />
 
-<img src="/docs/img/13-audit-zokb-grafy.png" title="Audit – vyhodnocení v grafu" />
+<img src="img/13-audit-zokb-grafy.png" title="Audit – vyhodnocení v grafu" />
 
 Zoty ve standardu nabízí různé typy grafů, které poskytnou rychlý přehled o aktuálním stavu plnění požadavků daného zákona, normy či jiných předpisů prověřovaných v rámci interního auditu.      
 Grafy lze snadno použít i v externích dokumentech, např. v prezentacích a to tak, že po najetí ukazovátka myši do oblasti grafu se zobrazí ikona pro stažení grafu ve formátu PNG.
        
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="/docs/img/13-ikona-graph-download.png" title="Ikona stažení grafu" width="40"/>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="img/13-ikona-graph-download.png" title="Ikona stažení grafu" width="40"/>    
 
 ### 12.1 Zjištění auditu
 Zjištění auditu, jako jsou např. shoda, neshoda, příležitost ke zlepšení, lze zaznamenat v textové formě do popisných atributů v entitě typu **Audit**. Pokud je ale v rámci auditního zjištění identifikována neshoda, je výhodné založit v Zoty specifický typ entity **Neshoda** a připojit ji k příslušnému auditu. Jedině tak je možné s ní systematicky a efektivně dále pracovat, tj. např. přiřadit odpovědnou osobu, sledovat stav a způsob řešení, termíny atp. Podobně lze pracovat i s doporučeními auditu.      
@@ -1253,7 +1253,7 @@ Záložka ***Oprávnění*** umožňuje pro vybrané role či konkrétní uživa
 V případě, kdy jsou v registrech vytvořeny struktury složek, může být žádoucí, aby uživatelé nemohli zakládat nově vytvářené entity, např. [aktiva](#821-správa-aktiv), přímo do root registru, tedy mimo tuto předdefinovanou strukturu. Za tímto účelem lze v administraci nastavit oprávnění pro ***Registry entit***.
 :::
 
-<img src="/docs/img/16-opravneni-registry.png"  title="Nastavení oprávnění pro registry entit" />
+<img src="img/16-opravneni-registry.png"  title="Nastavení oprávnění pro registry entit" />
 
 &nbsp;
 
@@ -1308,7 +1308,7 @@ Znalostní báze je matice kombinující hrozby s relevantními zranitelnostmi, 
 V konfiguraci lze zapnout přepínač *Kompaktní zobrazení*, kdy se namísto názvů entit zobrazují pouze jejich klíče a název se zobrazí až v tooltipu (po najetí ukazovátka myši nad příslušný klíč). Matice se pak stane daleko přehlednější. Zejména v případech, kdy uživatelé používají delší názvy.      
 :::
 
-<img src="/docs/img/16-znalostni-baze-kompaktni-zobrazeni.png" title="Znalostní báze - Kompaktní zobrazení" />
+<img src="img/16-znalostni-baze-kompaktni-zobrazeni.png" title="Znalostní báze - Kompaktní zobrazení" />
 
 Tlačítko ***Přidat*** sloupec nabídne výběr ze všech entit typu zranitelnosti a entit a složek z registrů aktiv a požadavků.     
 Na konci každého řádku lze pomocí symbolu tří teček vyvolat menu s volbou ***Upravit***, umožňující nastavit relevanci propojení, tj. které sloupce matice jsou pro tento konkrétní řádek relevantní.     
@@ -1319,35 +1319,35 @@ V menu jsou dále dostupné volby ***Duplikovat*** celý řádek matice a ***Det
 K tomu, aby byl tento koncept funkční, je pouze třeba, vedle správné jednorázové konfigurace matice, aby konkrétní identifikovaná aktiva byla při založení do systému vždy zatřízena do správné kategorie reprezentované složkami v registru aktiv. Zpravidla jsou totiž hrozby nebo zranitelnosti namapovány nikoliv na konkrétní aktivum, ale na celou kategorii aktiv daného typu, tj. složku, např. *Hardware, Software, Informace*, atp., případně na podkategorie; pro *Hardware* to tedy mohou být např. *Aktivní síťové prvky*, *Servery*, atp.
 :::
 
-<img src="/docs/img/16-znalostni-baze-kategorie-aktiv.png" title="Kategorie aktiv pro konfiguraci matice znalostní báze" width="400"/>
+<img src="img/16-znalostni-baze-kategorie-aktiv.png" title="Kategorie aktiv pro konfiguraci matice znalostní báze" width="400"/>
 
 &nbsp;
 
 #### Generování rizik
 Pokud je v daném řádku matice definovaná alespoň jedna kombinace hrozby s dalším typem entity (jedno zda zranitelností, aktivem či kombinace obojího), pak volba ***Detail*** v menu nabídne navíc možnost z těchto kombinací vytvořit rizika.       
-<img src="/docs/img/16-znalostni-baze.png" title="Zobrazení detailu možných kombinací entit pro vybranou hrozbu" />
+<img src="img/16-znalostni-baze.png" title="Zobrazení detailu možných kombinací entit pro vybranou hrozbu" />
 
 &nbsp;
 
 Rizika lze takto vygenerovat hromadně z celého seznamu, který Zoty sestaví na základě znalosti možných kombinací mezi vybranou hrozbu a všemi relevantními aktivy a zranitelnostmi. Hromadné generování je dostupné pouze po zvolení některé z nabízených metod (lze zvolit i volbu „*Bez metody*“). Nebo může uživatel procházet seznam s jednotlivými kombinacemi, které Zoty pro vytvoření rizik nabízí a pomocí tlačítka ***Vytvořit*** na každém jednotlivém řádku generovat rizika jedno po druhém.
-<img src="/docs/img/16-znalostni-baze-kombinace-avt-detail.png" title="Nabídka kombinací aktiv, zranitelností a hrozeb pro generování rizik" />
+<img src="img/16-znalostni-baze-kombinace-avt-detail.png" title="Nabídka kombinací aktiv, zranitelností a hrozeb pro generování rizik" />
 
 &nbsp;
 
 Pokud je z dané kombinace riziko vytvořeno, není již pro ni tlačítko ***Vytvořit*** dostupné a namísto něj se zobrazuje identifikátor (klíč) vytvořeného rizika. Je-li riziko odstraněno, tlačítko ***Vytvořit*** bude pro tuto kombinaci opět dostupné.      
 
 Zoty nemusí nabízet seznam pro generování rizik hledáním kombinací aktiv a zranitelností vždy jen pro jednu hrozbu, ale i pro více hrozeb najednou. Stačí je vybrat.
-<img src="/docs/img/16-znalostni-baze-select-hrozeb.png" title="Výběr hrozeb k sestavení jejich kombinací s aktivy, zranitelnostmi" />
+<img src="img/16-znalostni-baze-select-hrozeb.png" title="Výběr hrozeb k sestavení jejich kombinací s aktivy, zranitelnostmi" />
 
 &nbsp;
 
 Je-li vybráno více hrozeb, aktivuje se ve spodní části pracovní plochy modrý pruh s informací o počtu vybraných záznamů. A také s tlačítkem ***Detail***, které nabídne kombinace pro hromadné vytvoření rizik sestavené ze znalostní báze pro všechny vybrané hrozby se všemi relevantními aktivy a zranitelnostmi. 
-<img src="/docs/img/16-znalostni-baze-kombinace-avt-select-hrozeb-detail.png" title="Výběr hrozeb k sestavení jejich kombinací s aktivy, zranitelnostmi" />
+<img src="img/16-znalostni-baze-kombinace-avt-select-hrozeb-detail.png" title="Výběr hrozeb k sestavení jejich kombinací s aktivy, zranitelnostmi" />
 
 &nbsp;
 
 V detailu jednoho či více vybraných řádků matice znalostní báze lze zapnout zobrazování doplňkových informací. Pak se u aktiv, na které hrozba/hrozby působí, bude zobrazovat, jakým metodám nebo organizacím či org. jednotkám jsou tato aktiva přiřazena.
-<img src="/docs/img/16-znalostni-baze-kombinace-avt-rozsireny-detail-a-skryvani.png" title="Skrývání vybraných kombinací aktiv, zranitelností a hrozeb pro generování rizik" />      
+<img src="img/16-znalostni-baze-kombinace-avt-rozsireny-detail-a-skryvani.png" title="Skrývání vybraných kombinací aktiv, zranitelností a hrozeb pro generování rizik" />      
 
 &nbsp;
 
@@ -1363,19 +1363,19 @@ Nechtěné kombinace se záměrně neodstraňují, ale pouze skrývají proto, a
 V rámci **Administrace – Nastavení – Hodnocení** lze zobrazit přehled stávajících definic schémat hodnocení, upravovat nastavení těchto schémat nebo založit definici nového schématu hodnocení.
 
 
-<img src="/docs/img/16-hodnoceni-prehled-schemat.png" title="Přehled schémat hodnocení" />      
+<img src="img/16-hodnoceni-prehled-schemat.png" title="Přehled schémat hodnocení" />      
        
 &nbsp;
 
 Nově vytvořené schéma je třeba publikovat (pomocí tlačítka ***Publikovat***), aby bylo viditelné v ostatních sekcích aplikace a mohlo se podle něj provádět hodnocení.
 
-<img src="/docs/img/16-nastaveni-hodnoceni-publikace.png" title="Publikace schématu hodnocení" />
+<img src="img/16-nastaveni-hodnoceni-publikace.png" title="Publikace schématu hodnocení" />
 
 &nbsp;
 
 Aby bylo možné stávající schéma, které je publikováno, upravit, je třeba jej přepnout pomocí tlačítka ***Upravit*** do editačního režimu. Schéma je pak viditelné pouze zde, v nastavení hodnocení.
 
-<img src="/docs/img/16-nastaveni-hodnoceni-editace.png" title="Povolení editace schématu hodnocení" />
+<img src="img/16-nastaveni-hodnoceni-editace.png" title="Povolení editace schématu hodnocení" />
 
 &nbsp;
 
@@ -1393,7 +1393,7 @@ V dalším kroku lze již definovat metriky pomocí tlačítka ***Přidat metrik
   - **Metrika** – lze použít některou ze stávajících, již definovaných metrik v rámci jiných schémat hodnocení.
   - **Schéma hodnocení** – lze použít výsledné skóre jiného schématu hodnocení, jehož hodnotu lze převzít do této metriky. Při této volbě je třeba mít na paměti, že entita, která v rámci hodnocení přebírá výsledné skóre hodnocení jiné entity, musí být s touto entitou propojena vazbou rodič-potomek a zároveň, pokud je těmto entitám přiřazena některá metoda, musí být stejná.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="/docs/img/16-hodnoceni-metrika-typ.png" title="Typy metrik hodnocení" width="300"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="img/16-hodnoceni-metrika-typ.png" title="Typy metrik hodnocení" width="300"/>
 
 Níže uvedené dokumentuje postup a význam jednotlivých atributů pro volbu ***Vytvořit metriku***:
 - **Název** (např. *Dopad* nebo *Pravděpodobnost, Závažnost, Dostupnost, Integrita* atp.)
@@ -1406,14 +1406,14 @@ Níže uvedené dokumentuje postup a význam jednotlivých atributů pro volbu *
   - *Procenta (rozmezí)* - uživatel může zadat více procent v rozsahu *Od-Do* v rámci definovaných pásem (viz níže)
 - **Popis** – volitelná poznámka s doplňujícím popisem k názvu. Tyto popisky se pak mohou zobrazit uživateli, pokud při hodnocení podrží ukazatel myši nad příslušným polem heatmapy reprezentujícím předdefinovanou hodnotu v daném pásmu.
 
-<img src="/docs/img/16-hodnoceni-zobrazeni-popisu-k-nazvu.png" title="Definice metrik hodnocení" width="550"/>
+<img src="img/16-hodnoceni-zobrazeni-popisu-k-nazvu.png" title="Definice metrik hodnocení" width="550"/>
 
 &nbsp;
 
 **Pásmové rozmezí** – definice pásem, v rámci kterých budou zadávána vstupní data pro daný parametr. Pásma lze přidávat pomocí symbolu "**+**" a odebírat kliknutím na symbol koše v pásmu, které se má odstranit.    
 Pro každé pásmo lze definovat hodnotu (nebo procento, podle toho, jaký formát vstupních dat byl zvolen v předchozím kroku) a k této hodnotě (nebo procentu) zvolit úroveň, kterou má tato hodnota reprezentovat, včetně přednastavené barvy, kterou bude zobrazena v heatmapě. K výběru jsou tyto předdefinované úrovně hodnocení: *Nulové, Velmi nízké, Nízké, Velmi malé, Malé, Střední, Významné, Velmi významné, Vysoké, Velmi vysoké, Kritické*. Pro všechny tyto úrovně lze definovat vlastní názvy aktivací volby ***Definovat vlastní názvy***. Lze k nim také doplnit volitelnou poznámku aktivací volby ***Doprovodný popis***.    
 
-<img src="/docs/img/16-hodnoceni-vlatni-nazvy-urovni-metrik.png" title="Vlastní názvy úrovní metrik hodnocení" width="850"/>
+<img src="img/16-hodnoceni-vlatni-nazvy-urovni-metrik.png" title="Vlastní názvy úrovní metrik hodnocení" width="850"/>
 
 &nbsp;
 
@@ -1421,13 +1421,13 @@ Pro každé pásmo lze definovat hodnotu (nebo procento, podle toho, jaký form�
 Na obrázku níže je prezentován příklad výsledné definice pásem hodnocení dopadu na informační aktivum při narušení jeho *integrity*. Na dalším obrázku pak příklad možného vzorce výpočtu, který vedle integrity zahrnuje další dvě hodnocené vlastnosti bezpečnosti informací – *důvěrnost* a *dostupnost*.
 :::
 
-<img src="/docs/img/16-nastaveni-hodnoceni-pasma.png" title="Definice pásem ve schématu hodnocení" width="560"/>
+<img src="img/16-nastaveni-hodnoceni-pasma.png" title="Definice pásem ve schématu hodnocení" width="560"/>
 
 &nbsp;
 
 - **Vzorec výpočtu hodnocení** – výsledné skóre hodnocení se spočte na základě vstupních dat, která uživatel vybere z předdefinovaných hodnot pro jednotlivá pásma hodnocení. Vzorec je uživatelsky definovatelný. V rámci jeho definice lze použít všechny metriky definované v předchozím kroku a s nimi provádět základní operace, jako jsou sčítání, odčítání, násobení, dělení, funkce zaokrouhlení nahoru (*Round Up*), zaokrouhlení dolů (*Round Down*), vyhledání maxima z množiny hodnot (*MAX*), vyhledání minima z množiny hodnot (*MIN*). Použít lze přitom závorky, čárky pro oddělení hodnot při použití funkcí nebo libovolný celočíselný koeficient pro úpravu celého výpočtu.      
 
-<img src="/docs/img/16-nastaveni-hodnoceni-vzorec-definice.png" title="Definice vzorce ve schématu hodnocení" width="680"/>   
+<img src="img/16-nastaveni-hodnoceni-vzorec-definice.png" title="Definice vzorce ve schématu hodnocení" width="680"/>   
       
 :::note
 Použití základních funkcí:
@@ -1441,7 +1441,7 @@ Použití základních funkcí:
 
 Tlačítko ***Zkontrolovat*** provede kontrolu logické správnosti celého definovaného vzorce a oznámí, zda je matematicky správný nebo zda obsahuje chybu. Bez provedené kontroly nelze schéma hodnocení uložit.
       
-<img src="/docs/img/16-nastaveni-hodnoceni-vzorec-zkontrolovat.png" title="Kontrola vzorce ve schématu hodnocení" width="400"/>
+<img src="img/16-nastaveni-hodnoceni-vzorec-zkontrolovat.png" title="Kontrola vzorce ve schématu hodnocení" width="400"/>
       
 Výsledné pásmové hodnocení je heatmapa, která může zobrazovat jednoduché jednorozměrné hodnocení pouze v jedné ose X.
 Anebo může také kombinovat pásmová hodnocení v ose X a v ose Y v podobě dvourozměrné heatmapy – viz příklad na obr. níže. V takovém případě jsou definovány vzorce tři. Jeden, obsahující parametr/parametry v ose X, druhý, obsahující parametr/parametry v ose Y a třetí (tzv. *Matice*), který kombinuje výsledky výpočtu předchozích dvou (*Osa X celkem, Osa Y celkem*).
@@ -1449,13 +1449,13 @@ Anebo může také kombinovat pásmová hodnocení v ose X a v ose Y v podobě d
 Vzorec výpočtu hodnocení pro sestavení dvojrozměrné heatmapy v rámci hodnocení rizik dle Zákona o kybernetické bezpečnosti.
 :::
 
-<img src="/docs/img/16-hodnoceni-priklad-pro-osu-x-a-y.png" title="Definice heatmapy s výpočtem skóre ve schématu hodnocení" />
+<img src="img/16-hodnoceni-priklad-pro-osu-x-a-y.png" title="Definice heatmapy s výpočtem skóre ve schématu hodnocení" />
 
 &nbsp;
 #### Konfigurace nabídky strategií zvládání rizik
 Pro libovolné kombinace metrik, ze kterých je v nastavení příslušného schématu hodnocení rizik počítáno výsledné pásmové rozmezí úrovně rizika (neboli pro každý průsečík osy X a Y v matici heatmapy), lze definovat přípustné strategie zvládání rizika. A zohlednit přitom stanovený risk apetit.
 
-<img src="/docs/img/16-hodnoceni-strategie-zvladani.png" title="Definice heatmapy s nastavením strategie zvládání" /> 
+<img src="img/16-hodnoceni-strategie-zvladani.png" title="Definice heatmapy s nastavením strategie zvládání" /> 
 
 &nbsp;
 
@@ -1472,7 +1472,7 @@ Záložky ***Export*** a ***Import*** slouží pro zálohu a obnovu dat v aktuá
 Je-li aplikace Zoty provozována v cloudu formou předplatného jako služba (**Zoty cloud**), jsou data zálohována automaticky na denní bázi. Obnovení dat z databáze je pak provedeno na základě zákazníkova požadavku založeného v aplikaci Zoty Helpdesk nebo zaslaného na [Zoty podporu](#zoty-podpora).     
 Pokud je aplikace Zoty provozována na vlastním serveru zákazníka (**Zoty on-premise**), je zálohování dat uložených v databázi (PostgreSQL) plně v režii a odpovědnosti zákazníka. Zoty také umožňuje uživateli v roli administrátora exportovat většinu uživatelských dat z databáze v Zoty do souboru ve formátu JSON.
 
-<img src="/docs/img/16-zalohovani.png" title="Záloha a obnova dat" width="640"/>
+<img src="img/16-zalohovani.png" title="Záloha a obnova dat" width="640"/>
 
 &nbsp;
 
@@ -1498,7 +1498,7 @@ Záložka ***ARIS*** poskytuje funkcionality importu dat z  databáze SW nástro
 #### Plánovač úloh
 Schopnost vytvářet a plánovat specifické úlohy, spolu se schopnostmi [reportů](#1615reporty), zajišťují interoperabilitu Zoty s aplikacemi třetích stran. V administraci jsou všechny dostupné úlohy zobrazeny na záložce ***Naplánované úlohy***. Zde mohou být spouštěny buď manuálně nebo automatizovaně v pravidelných, předem definovaných časech. 
 
-<img src="/docs/img/16-task-scheduler.png"  title="Plánovač úloh pro spouštění reportů" width="700" />
+<img src="img/16-task-scheduler.png"  title="Plánovač úloh pro spouštění reportů" width="700" />
 
 &nbsp;
 
@@ -1540,7 +1540,7 @@ Nebo lze také metodu/metody rovnou předvybrat bez zásahu uživatele. Uživate
 ### 16.3	Koš
 Všechny smazané záznamy se přesouvají do koše, odkud je možné je obnovit nebo trvale odstranit. V koši se zobrazuje název, datum odstranění a typ záznamu (*Složka, Hodnocení, Riziko, Hrozba* atp.).
 
-<img src="/docs/img/16-kos.png" title="Koš" width="740"/>
+<img src="img/16-kos.png" title="Koš" width="740"/>
 
 &nbsp;
 

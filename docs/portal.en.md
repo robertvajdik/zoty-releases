@@ -21,7 +21,7 @@ After signing in you see the requests of your company:
 - **All types** – filter by request type. **Only mine** – only requests you raised.
 - Each row shows the key, summary, status, severity, who raised it and when it last changed.
 
-![Your company's requests with the Open / Resolved / All tabs, search and filters](uploads/manual/portal-list-en.png)
+![Your company's requests with the Open / Resolved / All tabs, search and filters](img/portal-list-en.png)
 
 ## New request
 
@@ -31,7 +31,7 @@ After signing in you see the requests of your company:
    - **Question** – using the app, licensing, how a feature works.
    - **Feature Request** – a new feature or a change to an existing one.
 
-![Choosing the request type – Support Incident, Question or Feature Request](uploads/manual/portal-types-en.png)
+![Choosing the request type – Support Incident, Question or Feature Request](img/portal-types-en.png)
 
 3. Fill in the form. Required fields are marked with an asterisk **\***.
 
@@ -45,7 +45,7 @@ After signing in you see the requests of your company:
 | **Attachments** | Screenshots, logs, documents – see below. |
 | **Severity \*** | How serious the problem is – see the table. |
 
-![The new request form: product, version, system, summary, description with toolbar, attachments and severity](uploads/manual/portal-form-en.png)
+![The new request form: product, version, system, summary, description with toolbar, attachments and severity](img/portal-form-en.png)
 
 4. Click **Send**. The request gets a key (your company code and a number, e.g. **ACME-12**) and support is notified.
 
@@ -77,11 +77,11 @@ Click a request to open its detail:
 - **Activity** – comments from you, your colleagues and **Zoty Support** (marked *Support*), plus status changes.
 - On the right: status, type, severity, product, version, system, who raised the request and when.
 
-![Request detail: description with an attachment, status and details on the right, activity and comment box below](uploads/manual/portal-ticket-en.png)
+![Request detail: description with an attachment, status and details on the right, activity and comment box below](img/portal-ticket-en.png)
 
 Once the fix is released, you'll see it under **Addressed in release notes**:
 
-![A resolved request linking to its release note, with the Reopen button](uploads/manual/portal-resolved-en.png)
+![A resolved request linking to its release note, with the Reopen button](img/portal-resolved-en.png)
 
 **Comment** in the box under the activity, optionally attach files, and click **Send**.
 If the request was waiting for you or resolved, your comment hands it back to support (status *Open*).

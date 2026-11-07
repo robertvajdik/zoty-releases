@@ -36,7 +36,7 @@ For installation and server configuration see `install.md` and `readme.txt`.
 The home page lists all **published** versions, newest first. Each version shows its release date,
 optional title and summary, and its entries (changes).
 
-![The public release notes: versions with their changes, search, filters and type chips](uploads/manual/public-home.png)
+![The public release notes: versions with their changes, search, filters and type chips](img/public-home.png)
 
 ### Finding changes
 
@@ -96,7 +96,7 @@ Each customer (company) has its own space. After sign-in you see **My requests**
 - **All types** filter and **Only mine** (only requests you raised).
 - Each row shows the key, summary, status, severity, who raised it and when it was last updated.
 
-![My requests – the customer's space](uploads/manual/portal-list-en.png)
+![My requests – the customer's space](img/portal-list-en.png)
 
 ### 2.3 Raising a new request
 
@@ -106,7 +106,7 @@ Each customer (company) has its own space. After sign-in you see **My requests**
    - **Question** – using the app, licensing, how something works.
    - **Feature Request** – a new feature or a change to an existing one.
 
-![Choosing the request type](uploads/manual/portal-types-en.png)
+![Choosing the request type](img/portal-types-en.png)
 
 3. Fill in the form. Fields marked with **\*** are required.
 
@@ -131,7 +131,7 @@ Each customer (company) has its own space. After sign-in you see **My requests**
 
 Choosing the right severity helps support prioritise and respond as quickly as possible.
 
-![The new request form](uploads/manual/portal-form-en.png)
+![The new request form](img/portal-form-en.png)
 
 4. Click **Send**. The request gets a key such as **ACME-12** (your company key + number) and support is notified.
 
@@ -153,7 +153,7 @@ Click a request in the list to open its detail:
   and **Activity** – comments from you, your colleagues and **Zoty Support** (marked *Support*), plus status changes.
 - **Right:** current status, request type, severity, product, version, OS, reporter, created and updated dates.
 
-![Request detail in the portal](uploads/manual/portal-ticket-en.png)
+![Request detail in the portal](img/portal-ticket-en.png)
 
 **Adding a comment** – write in the box under the activity, optionally attach files, click **Send**.
 If the request was *Waiting for customer*, *Resolved* or *Closed*, your comment puts it back to **Open**
@@ -198,7 +198,7 @@ Under the top bar there is a switch between two separate workspaces:
 The portal shows the help in the customer's language (falling back to the other one).
 It is not public: visitors who aren't signed in are sent to the sign-in page. Admins can preview it (**Zobrazit v portálu**).
 
-**Editing a manual:** click **Upravit manuál**.
+**Editing a manual:** click **Upravit manuál**. The **Název manuálu** field above the editor renames the manual (per language) – the name is shown in the manual tabs and, for the customer manual, as the page title in the portal. Leave it empty to use the default name.
 
 - Left: Markdown with the formatting toolbar (headings, bold, italic, lists, link, image, code, **table**, **divider**, quote).
   Right: live preview, rendered exactly like the published page.
@@ -210,10 +210,11 @@ It is not public: visitors who aren't signed in are sent to the sign-in page. Ad
 - If someone else saved the manual meanwhile, you get a warning and your text is kept; saving again overwrites their version.
 - A missing language version (e.g. the Czech admin manual) is created from the other language, ready to translate.
 - **Photos:** a photo on its own line is shown as a figure; its description in `![description](…)` becomes the caption,
-  and clicking it opens the full size. If a file named `name-mobile.png` exists next to `name.png` in `uploads/`,
-  phones see that version instead (the screenshots in `uploads/manual/` have both).
+  and clicking it opens the full size. Pictures of the manuals are stored in `docs/manual/img/` and written as `![caption](img/name.png)`
+  (an optional width: `![caption](img/name.png =400)`). If `name-mobile.png` exists next to `name.png`,
+  phones see that version instead (the app screenshots have both). They are shown only to signed-in users.
 
-![The manual editor with live preview](uploads/manual/admin-docs.png)
+![The manual editor with live preview](img/admin-docs.png)
 
 - **Obnovit výchozí text** replaces the manual with the original file (`MANUAL.md`, `docs/portal.cs.md`, `docs/portal.en.md`).
 
@@ -234,7 +235,7 @@ A version groups the entries released together.
 - **✉ Rozeslat** – sends this version to all confirmed subscribers by e-mail. After sending the button shows the date
   (**✉ Rozesláno dd.mm.**). It is disabled when there are no confirmed subscribers.
 
-![Versions – create, edit, hide/publish and send to subscribers](uploads/manual/admin-versions.png)
+![Versions – create, edit, hide/publish and send to subscribers](img/admin-versions.png)
 
 ### 4.2 Entries (Záznamy)
 
@@ -244,7 +245,7 @@ and counts at the top.
 - **Stáhnout MD (publikované)** / **Stáhnout MD (vč. konceptů)** export the current filter as Markdown.
 - Click a title to edit; row buttons publish/unpublish or delete.
 
-![Entries of the release notes with filters, counts and Markdown export](uploads/manual/admin-entries.png)
+![Entries of the release notes with filters, counts and Markdown export](img/admin-entries.png)
 
 **Creating an entry** (**+ Nový záznam**):
 
@@ -301,7 +302,7 @@ Further actions: **Upravit** (change name/e-mail, set a new password – leave e
 **Zablokovat / Odblokovat** (block sign-in), **Smazat** (the user's requests stay).
 **Smazat zákazníka** works only for customers without requests.
 
-![A customer with its portal users](uploads/manual/admin-customer.png)
+![A customer with its portal users](img/admin-customer.png)
 
 ### 5.2 Request queue (Požadavky)
 
@@ -312,7 +313,7 @@ Further actions: **Upravit** (change name/e-mail, set a new password – leave e
 - **řeší se** – in progress. **čeká na zákazníka** – waiting for the customer.
 - **vyřešeno za 7 dní** – resolved/closed in the last 7 days (and how many were created).
 
-![The support queue: overview tiles, status tabs and filters](uploads/manual/admin-queue.png)
+![The support queue: overview tiles, status tabs and filters](img/admin-queue.png)
 
 **Tabs** by status: Nevyřešené (all unresolved), Otevřeno, Řeší se, Čeká na zákazníka, Vyřešeno, Uzavřeno, Vše.
 **Filters:** text or key (`ACME-12`), customer, type, severity. Unresolved requests are listed first, most recently updated on top.
@@ -330,7 +331,7 @@ Open a request by its key or summary. The detail is the same as the customer see
 - **+ Zapsat do release notes** – create a release-note entry from the request ([section 6](#6-linking-tickets-and-release-notes)).
 - **Smazat požadavek** (bottom) – deletes the request with all comments and attachments. Cannot be undone.
 
-![A request in the admin: status and severity on the right, reply with status after sending](uploads/manual/admin-ticket.png)
+![A request in the admin: status and severity on the right, reply with status after sending](img/admin-ticket.png)
 
 In the activity, customers see your replies signed as **Zoty Support**; in the admin you see which admin wrote them.
 
@@ -363,13 +364,13 @@ title or description.
 | Key | Description "Požadavek NBU_ZOTY-12." |
 | Type: Incident / Feature / Question | Type: Oprava / Vylepšení / Úprava |
 
-![A new entry prefilled from request ACME-1](uploads/manual/admin-entry-from-ticket.png)
+![A new entry prefilled from request ACME-1](img/admin-entry-from-ticket.png)
 
 Pick the version, adjust the text and save.
 
 On the request page the customer then sees the release note:
 
-![The customer sees "Addressed in release notes" on the request](uploads/manual/portal-resolved-en.png)
+![The customer sees "Addressed in release notes" on the request](img/portal-resolved-en.png)
 
 ---
 

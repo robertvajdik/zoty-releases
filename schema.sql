@@ -143,6 +143,7 @@ CREATE TABLE IF NOT EXISTS `changelog_docs` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `slug`       VARCHAR(40)  NOT NULL COMMENT 'admin | portal',
   `lang`       VARCHAR(5)   NOT NULL,
+  `title`      VARCHAR(120) NOT NULL DEFAULT '' COMMENT 'manual name shown in tabs; empty = default',
   `body`       MEDIUMTEXT   NOT NULL COMMENT 'Markdown; created from MANUAL.md / docs/*.md on first view',
   `updated_at` DATETIME     NOT NULL,
   `updated_by` VARCHAR(160) NOT NULL DEFAULT '',

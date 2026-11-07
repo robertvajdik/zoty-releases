@@ -40,7 +40,7 @@ if ($isAdminArea && is_admin()) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= $base ?>assets/style.css?v=14">
-  <?php if ($isAdminArea || $isPortal): ?><link rel="stylesheet" href="<?= $base ?>assets/tickets.css?v=12"><?php endif; ?>
+  <?php if ($isAdminArea || $isPortal): ?><link rel="stylesheet" href="<?= $base ?>assets/tickets.css?v=17"><?php endif; ?>
   <?php if ($isAdminArea): ?><link rel="stylesheet" href="<?= $base ?>assets/admin.css?v=2"><?php endif; ?>
   <link rel="alternate" type="application/atom+xml" title="<?= h(tr('site.name')) ?>" href="<?= $base ?>feed.xml">
   <?= $headExtra ?? '' ?>

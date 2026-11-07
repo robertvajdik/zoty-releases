@@ -21,7 +21,7 @@ Po přihlášení uvidíte seznam požadavků vaší firmy:
 - **Všechny typy** – filtr podle typu požadavku. **Jen moje** – jen požadavky, které jste zadali vy.
 - U každého požadavku vidíte klíč, shrnutí, stav, závažnost, kdo ho zadal a kdy se naposledy změnil.
 
-![Seznam požadavků firmy se záložkami Otevřené / Vyřešené / Vše, vyhledáváním a filtry](uploads/manual/portal-list-cs.png)
+![Seznam požadavků firmy se záložkami Otevřené / Vyřešené / Vše, vyhledáváním a filtry](img/portal-list-cs.png)
 
 ## Nový požadavek
 
@@ -31,7 +31,7 @@ Po přihlášení uvidíte seznam požadavků vaší firmy:
    - **Dotaz** – používání aplikace, licence, jak funguje některá funkce.
    - **Návrh na vylepšení** – nová funkce nebo úprava stávající.
 
-![Výběr typu požadavku – Hlášení incidentu, Dotaz nebo Návrh na vylepšení](uploads/manual/portal-types-cs.png)
+![Výběr typu požadavku – Hlášení incidentu, Dotaz nebo Návrh na vylepšení](img/portal-types-cs.png)
 
 3. Vyplňte formulář. Povinná pole jsou označena hvězdičkou **\***.
 
@@ -45,7 +45,7 @@ Po přihlášení uvidíte seznam požadavků vaší firmy:
 | **Přílohy** | Snímky obrazovky, logy, dokumenty – viz níže. |
 | **Závažnost \*** | Jak vážný problém je – viz tabulka. |
 
-![Formulář nového požadavku: produkt, verze, systém, shrnutí, popis s panelem nástrojů, přílohy a závažnost](uploads/manual/portal-form-cs.png)
+![Formulář nového požadavku: produkt, verze, systém, shrnutí, popis s panelem nástrojů, přílohy a závažnost](img/portal-form-cs.png)
 
 4. Klikněte na **Odeslat**. Požadavek dostane klíč (zkratka vaší firmy a číslo, např. **ACME-12**) a podpora dostane upozornění.
 
@@ -77,11 +77,11 @@ Kliknutím na požadavek otevřete jeho detail:
 - **Aktivita** – komentáře vaše, vašich kolegů a **podpory Zoty** (označené *Podpora*) a změny stavu.
 - Vpravo stav, typ, závažnost, produkt, verze, systém, kdo požadavek zadal a kdy.
 
-![Detail požadavku: popis s přílohou, vpravo stav a údaje, dole aktivita a pole pro komentář](uploads/manual/portal-ticket-cs.png)
+![Detail požadavku: popis s přílohou, vpravo stav a údaje, dole aktivita a pole pro komentář](img/portal-ticket-cs.png)
 
 Když se oprava dostane do nové verze, uvidíte ji v sekci **Vyřešeno v přehledu změn**:
 
-![Vyřešený požadavek s odkazem na záznam v přehledu změn a tlačítkem Znovu otevřít](uploads/manual/portal-resolved-cs.png)
+![Vyřešený požadavek s odkazem na záznam v přehledu změn a tlačítkem Znovu otevřít](img/portal-resolved-cs.png)
 
 **Komentář** napíšete do pole pod aktivitou, můžete přiložit soubory a kliknout na **Odeslat**.
 Pokud požadavek čekal na vás nebo byl vyřešený, váš komentář ho vrátí podpoře (stav *Otevřeno*).

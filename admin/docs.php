@@ -4,19 +4,20 @@ require __DIR__ . '/../lib.php';
 require_admin();
 
 $slug = isset(DOCS[$_GET['doc'] ?? '']) ? (string)$_GET['doc'] : 'admin';
-$lang = in_array($_GET['lang'] ?? '', LANGS, true) ? (string)$_GET['lang'] : DOCS[$slug]['langs'][0];
+$lang = in_array($_GET['lang'] ?? '', LANGS, true) ? (string)$_GET['lang'] : doc_langs($slug)[0];
 $selfUrl = 'docs?doc=' . rawurlencode($slug) . '&lang=' . rawurlencode($lang);
 $doc = doc_get($slug, $lang);
 $who = (string)($_SESSION['zoty_admin'] ?? '');
 $errors = [];
 $notice = null;
+$title = $doc ? (string)$doc['title'] : '';
 
 if ($doc) {
     $body = (string)$doc['body'];
 } else {
     // new language version: start from another language of the same manual
     $from = doc_for($slug, $lang);
-    $body = $from ? (string)$from['body'] : '# ' . DOCS[$slug]['label'] . "\n\n";
+    $body = $from ? (string)$from['body'] : '# ' . doc_name($slug, $lang) . "\n\n";
     $notice = $from ? 'Verze ' . strtoupper($lang) . ' zatím neexistuje – předvyplněno textem verze ' . strtoupper($from['lang']) . ' k přeložení.' : null;
 }
 
@@ -29,6 +30,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     csrf_check();
+    if ($action === 'rename') {
+        $title = trim(preg_replace('/\s+/u', ' ', (string)($_POST['title'] ?? '')));
+        if ($doc && mb_strlen($title) <= DOC_NAME_MAX) {
+            doc_rename($slug, $lang, $title);
+            flash($title === '' ? 'Obnoven výchozí název manuálu.' : 'Manuál přejmenován na „' . $title . '“.');
+        }
+        header('Location: manual?doc=' . rawurlencode($slug) . '&lang=' . rawurlencode($lang));
+        exit;
+    }
     if ($action === 'reset') {
         $seed = doc_seed($slug, $lang);
         if ($seed !== null) {
@@ -40,6 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $body = str_replace("\r\n", "\n", (string)($_POST['body'] ?? ''));
     $seen = (string)($_POST['updated_at'] ?? '');
+    $title = trim(preg_replace('/\s+/u', ' ', (string)($_POST['title'] ?? '')));
+    if (mb_strlen($title) > DOC_NAME_MAX) $errors[] = 'Název manuálu může mít nejvýše ' . DOC_NAME_MAX . ' znaků.';
     if (trim($body) === '') $errors[] = 'Manuál nemůže být prázdný.';
     if (strlen($body) > 2000000) $errors[] = 'Text je příliš dlouhý.';
     if ($doc && $seen !== '' && $seen !== (string)$doc['updated_at']) {
@@ -47,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   . '). Váš text je níže – zkopírujte si změny, obnovte stránku a uložte znovu, nebo uložte ještě jednou a jeho změny přepíšete.';
     }
     if (!$errors) {
-        doc_save($slug, $lang, $body, $who);
+        doc_save($slug, $lang, $body, $who, $title);
         flash('Manuál byl uložen.');
         header('Location: ' . (isset($_POST['view']) ? 'manual?doc=' . rawurlencode($slug) . '&lang=' . rawurlencode($lang) : $selfUrl));
         exit;
@@ -61,18 +73,8 @@ require __DIR__ . '/../partials/header.php';
 ?>
 <main class="container admin admin--wide">
   <?php if ($m = flash()): ?><div class="flash"><?= h($m) ?> <a href="manual?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">Zobrazit manuál</a></div><?php endif; ?>
-  <div class="admin__head">
-    <h1><?= h(DOCS[$slug]['label']) ?> <span class="code-tag"><?= strtoupper($lang) ?></span></h1>
-    <div class="admin__actions">
-      <a class="button button--ghost" href="manual?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">← Zpět na manuál</a>
-    </div>
-  </div>
-
-  <nav class="tabs" aria-label="Manuály">
-    <?php foreach (DOCS as $s => $d): foreach ($d['langs'] as $l): ?>
-      <a href="docs?doc=<?= $s ?>&amp;lang=<?= $l ?>" <?= $s === $slug && $l === $lang ? 'aria-current="page"' : '' ?>><?= h($d['label']) ?> <b><?= strtoupper($l) ?></b></a>
-    <?php endforeach; endforeach; ?>
-  </nav>
+  <h1 class="visually-hidden">Upravit manuál: <?= h(doc_name($slug, $lang)) ?> (<?= strtoupper($lang) ?>)</h1>
+  <?php $barMode = 'edit'; require __DIR__ . '/../partials/doc-bar.php'; ?>
 
   <?php if ($errors): ?><div class="flash flash--error"><?= implode('<br>', array_map('h', $errors)) ?></div><?php endif; ?>
   <?php if ($notice): ?><div class="flash"><?= h($notice) ?></div><?php endif; ?>
@@ -82,6 +84,13 @@ require __DIR__ . '/../partials/header.php';
     <input type="hidden" name="action" value="save">
     <input type="hidden" name="updated_at" value="<?= h((string)($doc['updated_at'] ?? '')) ?>">
     <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple hidden data-img-input id="doc-img">
+
+    <div class="field doc-edit__name">
+      <label for="doc-title">Název manuálu <span class="muted">(<?= strtoupper($lang) ?>)</span></label>
+      <input type="text" id="doc-title" name="title" value="<?= h($title) ?>" maxlength="<?= DOC_NAME_MAX ?>"
+             placeholder="<?= h(DOCS[$slug]['label']) ?>" aria-describedby="doc-title-hint">
+      <small class="admin__hint" id="doc-title-hint">Zobrazuje se v záložkách manuálů<?= $slug === 'portal' ? ' a jako titulek stránky v zákaznickém portálu' : '' ?>. Prázdné = „<?= h(DOCS[$slug]['label']) ?>“.</small>
+    </div>
 
     <div class="doc-edit__cols">
       <div class="doc-edit__src">
@@ -103,7 +112,6 @@ require __DIR__ . '/../partials/header.php';
       <button class="button button--primary" type="submit">Uložit</button>
       <button class="button button--ghost" type="submit" name="view" value="1">Uložit a zobrazit</button>
       <a class="button button--ghost" href="manual?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">Zrušit</a>
-      <?php if ($doc && $doc['updated_at']): ?><span class="muted doc-edit__meta">Naposledy uloženo <?= h(date('d.m.Y H:i', strtotime((string)$doc['updated_at']))) ?><?= $doc['updated_by'] !== '' ? ' · ' . h($doc['updated_by']) : ' · výchozí text' ?></span><?php endif; ?>
     </div>
   </form>
 
@@ -132,6 +140,7 @@ require __DIR__ . '/../partials/header.php';
         .then(function (j) { if (my === seq && j.html !== undefined) out.innerHTML = j.html; })
         .catch(function () {});
     }
+    document.getElementById('doc-title').addEventListener('input', function () { dirty = true; status.textContent = 'Neuloženo'; });
     ta.addEventListener('input', function () {
       dirty = true;
       status.textContent = 'Neuloženo';
@@ -144,7 +153,7 @@ require __DIR__ . '/../partials/header.php';
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); dirty = false; form.submit(); }
     });
 
-    // images: toolbar button, paste, drag & drop -> admin/upload -> ![alt](uploads/…)
+    // images: toolbar button, paste, drag & drop -> admin/upload -> docs/manual/img -> ![alt](img/…)
     function insert(text) {
       var a = ta.selectionStart, b = ta.selectionEnd, v = ta.value;
       var before = v.slice(0, a), after = v.slice(b);
@@ -162,7 +171,7 @@ require __DIR__ . '/../partials/header.php';
         var fd = new FormData();
         fd.append('csrf', csrf);
         fd.append('image', f, f.name || 'obrazek.png');
-        fetch('upload', { method: 'POST', body: fd, credentials: 'same-origin' })
+        fetch('upload?for=doc', { method: 'POST', body: fd, credentials: 'same-origin' })
           .then(function (r) { return r.json(); })
           .then(function (j) { if (j.error) throw new Error(j.error); insert(j.markdown); status.textContent = 'Obrázek vložen – neuloženo'; })
           .catch(function (err) { status.textContent = 'Chyba: ' + (err.message || 'nahrání selhalo'); });
