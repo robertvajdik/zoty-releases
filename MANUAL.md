@@ -192,13 +192,13 @@ Under the top bar there is a switch between two separate workspaces:
 
 | Manual | Who reads it | Where |
 |---|---|---|
-| **Manuál administrace** (EN, CS) | administrators | `/admin/help` |
+| **Manuál administrace** (EN, CS) | administrators | `/admin/manual` |
 | **Manuál zákaznického portálu** (CS, EN) | signed-in customers only | `/portal/help` – link **Manuál / Manual** in the portal top bar |
 
 The portal shows the help in the customer's language (falling back to the other one).
 It is not public: visitors who aren't signed in are sent to the sign-in page. Admins can preview it (**Zobrazit v portálu**).
 
-**Editing a manual:** click **✎ Upravit**.
+**Editing a manual:** click **Upravit manuál**.
 
 - Left: Markdown with the formatting toolbar (headings, bold, italic, lists, link, image, code, **table**, **divider**, quote).
   Right: live preview, rendered exactly like the published page.
@@ -268,7 +268,10 @@ A module can be deleted only when no entry uses it. Modules also form the **Prod
 ### 4.4 Subscribers (Odběratelé)
 
 - List of e-mail subscribers with status (**Potvrzeno** = confirmed, **Čeká** = waiting for confirmation); **Odebrat** removes one.
-- **Test odesílání e-mailů** – send a test e-mail to check the mail settings; recent sending errors are shown below.
+- **Test odesílání e-mailů** – send a test e-mail to check the mail settings.
+- **Log odesílání e-mailů** – every e-mail the app sent or failed to send: time, status (**Odesláno** / **Chyba**),
+  recipient, subject, purpose (e.g. `ACME-1 → zákazník`, `Verze v1.42.07`, `Přístup ACME`, `Test`) and the error detail.
+  **Jen chyby** shows failures only; the last 500 entries are kept in `data/mail.log`.
 
 ---
 
@@ -438,7 +441,7 @@ Single line breaks are kept. HTML is never interpreted – it's shown as text.
 | **Test odesílání e-mailů** | the address you enter |
 
 Customer e-mails are sent in the language the user last signed in with (Czech or English).
-Failed sends are logged and shown under **Odběratelé → Test odesílání e-mailů**.
+Every send – successful or failed – is recorded in **Odběratelé → Log odesílání e-mailů**.
 
 ---
 

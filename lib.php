@@ -985,7 +985,7 @@ function subscriber_add(string $email): string
         '<p>' . h(tr('mail.confirm.hello')) . '</p><p>' . h(tr('mail.confirm.intro')) . '</p>'
         . '<p style="margin:28px 0"><a href="' . h($link) . '" style="background:#6144a3;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block">' . h(tr('mail.confirm.button')) . '</a></p>'
         . '<p style="color:#656565;font-size:13px">' . h(tr('mail.confirm.ignore')) . '</p>');
-    $res = mail_send([['to' => $email, 'subject' => tr('mail.confirm.subject'), 'text' => $text, 'html' => $html]]);
+    $res = mail_send([['to' => $email, 'subject' => tr('mail.confirm.subject'), 'text' => $text, 'html' => $html, 'tag' => 'Potvrzení odběru']]);
     if (!$res['sent']) {
         // allow an immediate retry; drop the row if it was just created
         if ($row) db()->prepare("UPDATE $tbl SET created_at = ? WHERE id = ?")->execute(['2000-01-01 00:00:00', $row['id']]);
@@ -1049,7 +1049,7 @@ function notify_subscribers(array $version): array
     foreach ($subs as $s) {
         $unsub = site_url('unsubscribe?t=' . $s['token']);
         [$subject, $text, $html] = version_email($version, $entries, $unsub);
-        $messages[] = ['to' => $s['email'], 'subject' => $subject, 'text' => $text, 'html' => $html, 'unsubscribe' => $unsub];
+        $messages[] = ['to' => $s['email'], 'subject' => $subject, 'text' => $text, 'html' => $html, 'unsubscribe' => $unsub, 'tag' => 'Verze ' . $version['version']];
     }
     $res = mail_send($messages);
     if ($res['sent']) {
@@ -1120,7 +1120,9 @@ function mail_send(array $messages): array
     $c = (config()['mail'] ?? []) + ['transport' => 'mail', 'from' => '', 'from_name' => 'Zoty'];
     $from = (string)$c['from'];
     if (!filter_var($from, FILTER_VALIDATE_EMAIL)) {
-        return ['sent' => 0, 'failed' => count($messages), 'error' => 'V config.php chybí platná adresa mail.from.'];
+        $err = 'V config.php chybí platná adresa mail.from.';
+        foreach ($messages as $m) mail_log_send($m, false, '', $err);
+        return ['sent' => 0, 'failed' => count($messages), 'error' => $err];
     }
     $sent = 0; $failed = 0; $error = null;
 
@@ -1139,59 +1141,104 @@ function mail_send(array $messages): array
                 $data = preg_replace('/^\./m', '..', $headers . "\r\n" . $body);
                 smtp_cmd($smtp, $data . "\r\n.", [250]);
                 $sent++;
+                mail_log_send($m, true, 'SMTP');
             } catch (RuntimeException $ex) {
                 $failed++;
                 $error = $ex->getMessage();
                 error_log('Zoty mail to ' . $m['to'] . ': ' . $error);
+                mail_log_send($m, false, 'SMTP', $error);
                 try { smtp_cmd($smtp, 'RSET', [250]); } catch (RuntimeException $ignored) {}
             }
         }
         try { smtp_cmd($smtp, 'QUIT', [221]); } catch (RuntimeException $ignored) {}
         fclose($smtp);
     } catch (RuntimeException $ex) {
-        mail_log('SMTP ' . $c['host'] . ':' . ($c['port'] ?? '') . ' – ' . $ex->getMessage());
+        $smtpErr = 'SMTP ' . $c['host'] . ':' . ($c['port'] ?? '') . ' – ' . $ex->getMessage();
+        error_log('Zoty mail: ' . $smtpErr);
         if ($sent === 0 && !empty($c['fallback_mail'])) {
             // connection / login failed before anything was sent: try the hosting's mail()
-            $res = mail_send_php($messages, $c);
+            $res = mail_send_php($messages, $c, $smtpErr);
             if ($res['sent']) return $res;
             $res['error'] = 'SMTP: ' . $ex->getMessage() . ' | mail(): ' . $res['error'];
-            mail_log($res['error']);
             return $res;
         }
+        foreach (array_slice($messages, $sent) as $m) mail_log_send($m, false, 'SMTP', $smtpErr);
         return ['sent' => $sent, 'failed' => count($messages) - $sent, 'error' => $ex->getMessage()];
     }
-    if ($error) mail_log('SMTP: ' . $error);
     return ['sent' => $sent, 'failed' => $failed, 'error' => $error];
 }
 
-function mail_send_php(array $messages, array $c): array
+function mail_send_php(array $messages, array $c, string $smtpError = ''): array
 {
     $sent = 0; $failed = 0;
+    $via = $smtpError !== '' ? 'mail() záložně' : 'mail()';
     foreach ($messages as $m) {
         [$headers, $body] = mail_build($m, $c);
         $hdr = preg_replace('/^(To|Subject):.*\r\n/mi', '', $headers);
         $ok = @mail($m['to'], mail_header_encode($m['subject']), $body, rtrim($hdr), '-f' . $c['from']);
         $ok ? $sent++ : $failed++;
+        $note = $ok ? $smtpError : trim($smtpError . ' | funkce mail() zprávu neodeslala', ' |');
+        mail_log_send($m, $ok, $via, $note);
     }
     $err = $failed ? 'funkce mail() zprávu neodeslala' : null;
-    if ($err) mail_log('mail(): ' . $err);
     return ['sent' => $sent, 'failed' => $failed, 'error' => $err];
 }
 
 /** Last mail errors go to data/mail.log (web access to data/ is denied) and the PHP error log. */
-function mail_log(string $msg): void
+const MAIL_LOG_KEEP = 500;   // lines kept in data/mail.log
+
+/** Appends one JSON line to data/mail.log (newest last, older lines trimmed). */
+function mail_log_write(array $entry): void
 {
-    error_log('Zoty mail: ' . $msg);
     $file = __DIR__ . '/data/mail.log';
-    $lines = is_file($file) ? array_slice(file($file, FILE_IGNORE_NEW_LINES) ?: [], -49) : [];
-    $lines[] = date('Y-m-d H:i:s') . '  ' . preg_replace('/\s+/', ' ', $msg);
+    $lines = is_file($file) ? array_slice(file($file, FILE_IGNORE_NEW_LINES) ?: [], -(MAIL_LOG_KEEP - 1)) : [];
+    $lines[] = json_encode(['t' => date('Y-m-d H:i:s')] + $entry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     @file_put_contents($file, implode("\n", $lines) . "\n", LOCK_EX);
 }
 
-function mail_log_tail(int $n = 10): array
+/** Logs one sent / failed message. $m may carry 'tag' – what the e-mail is for ("ACME-12 → zákazník", "Verze v1.42.07"). */
+function mail_log_send(array $m, bool $ok, string $via, string $error = ''): void
+{
+    mail_log_write(['ok' => $ok, 'via' => $via, 'to' => (string)($m['to'] ?? ''), 'subject' => (string)($m['subject'] ?? ''),
+                    'tag' => (string)($m['tag'] ?? ''), 'error' => preg_replace('/\s+/', ' ', $error)]);
+}
+
+/** A general error not tied to one message. */
+function mail_log(string $msg): void
+{
+    error_log('Zoty mail: ' . $msg);
+    mail_log_write(['ok' => false, 'via' => '', 'to' => '', 'subject' => '', 'tag' => '', 'error' => preg_replace('/\s+/', ' ', $msg)]);
+}
+
+/** Newest $n log entries, newest first (also reads the older plain-text lines). $onlyErrors keeps failures only. */
+function mail_log_tail(int $n = 10, bool $onlyErrors = false): array
 {
     $file = __DIR__ . '/data/mail.log';
-    return is_file($file) ? array_reverse(array_slice(file($file, FILE_IGNORE_NEW_LINES) ?: [], -$n)) : [];
+    $blank = ['ok' => false, 'via' => '', 'to' => '', 'subject' => '', 'tag' => '', 'error' => ''];
+    $out = [];
+    foreach (array_reverse(is_file($file) ? (file($file, FILE_IGNORE_NEW_LINES) ?: []) : []) as $line) {
+        if (trim($line) === '') continue;
+        $e = json_decode($line, true);
+        if (!is_array($e)) $e = ['t' => substr($line, 0, 19), 'error' => trim(substr($line, 19))];
+        $e += $blank;
+        if ($onlyErrors && !empty($e['ok'])) continue;
+        $out[] = $e;
+        if (count($out) >= $n) break;
+    }
+    return $out;
+}
+
+/** Counts of the whole log: ['ok' => n, 'failed' => n]. */
+function mail_log_stats(): array
+{
+    $file = __DIR__ . '/data/mail.log';
+    $ok = 0; $failed = 0;
+    foreach (is_file($file) ? (file($file, FILE_IGNORE_NEW_LINES) ?: []) : [] as $line) {
+        if (trim($line) === '') continue;
+        $e = json_decode($line, true);
+        !empty($e['ok']) ? $ok++ : $failed++;
+    }
+    return ['ok' => $ok, 'failed' => $failed];
 }
 
 /** @return resource */

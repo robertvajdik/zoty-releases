@@ -788,9 +788,8 @@ function notify_staff(array $ticket, string $what, string $body = ''): void
           . '<h2 style="margin:0 0 12px;font-size:20px">' . h($ticket['summary']) . '</h2>'
           . '<div style="color:#444">' . ticket_render($body !== '' ? $body : $ticket['description']) . '</div>'
           . '<p style="margin:24px 0 0"><a href="' . h($url) . '" style="background:#6144a3;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block">Otevřít požadavek</a></p>';
-    $msgs = array_map(fn($e) => ['to' => $e, 'subject' => $subject, 'text' => $text, 'html' => mail_layout($ticket['key'], $html)], $to);
-    $r = mail_send($msgs);
-    if (!empty($r['error'])) mail_log('Tiket ' . $ticket['key'] . ': ' . $r['error']);
+    $msgs = array_map(fn($e) => ['to' => $e, 'subject' => $subject, 'text' => $text, 'html' => mail_layout($ticket['key'], $html), 'tag' => $ticket['key'] . ' → podpora'], $to);
+    mail_send($msgs);
 }
 
 /** E-mails the reporter about a support reply or a status change. Failures are only logged. */
@@ -811,6 +810,5 @@ function notify_customer(array $ticket, string $body = '', string $newStatus = '
           . ($body !== '' ? '<div style="color:#444;border-left:3px solid #d8d0e8;padding-left:12px">' . ticket_render($body) . '</div>' : '')
           . '<p style="margin:24px 0 0"><a href="' . h($url) . '" style="background:#6144a3;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block">'
           . h(tr('ticket.mail.open', [], $L)) . '</a></p>';
-    $r = mail_send([['to' => $to, 'subject' => $subject, 'text' => $text, 'html' => mail_layout($ticket['key'], $html)]]);
-    if (!empty($r['error'])) mail_log('Tiket ' . $ticket['key'] . ': ' . $r['error']);
+    mail_send([['to' => $to, 'subject' => $subject, 'text' => $text, 'html' => mail_layout($ticket['key'], $html), 'tag' => $ticket['key'] . ' → zákazník']]);
 }

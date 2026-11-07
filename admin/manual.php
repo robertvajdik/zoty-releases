@@ -8,7 +8,7 @@ $doc = doc_get($slug, $lang);
 
 $tocLabel = 'Obsah';
 $updatedLabel = 'Naposledy upraveno';
-$docTools = '<a class="button button--primary button--sm" href="docs?doc=' . h($slug) . '&amp;lang=' . h($lang) . '">✎ Upravit</a>'
+$docTools = '<a class="button button--primary button--sm" href="docs?doc=' . h($slug) . '&amp;lang=' . h($lang) . '">Upravit manuál</a>'
           . ($slug === 'portal' ? ' <a class="button button--ghost button--sm" href="../portal/help?lang=' . h($lang) . '" target="_blank" rel="noopener">Zobrazit v portálu ↗</a>' : '');
 
 $base_path = '../';
@@ -20,7 +20,7 @@ require __DIR__ . '/../partials/header.php';
   <?php if ($m = flash()): ?><div class="flash"><?= h($m) ?></div><?php endif; ?>
   <nav class="tabs" aria-label="Manuály">
     <?php foreach (DOCS as $s => $d): foreach ($d['langs'] as $l): ?>
-      <a href="help?doc=<?= $s ?>&amp;lang=<?= $l ?>" <?= $s === $slug && $l === $lang ? 'aria-current="page"' : '' ?>><?= h($d['label']) ?> <b><?= strtoupper($l) ?></b></a>
+      <a href="manual?doc=<?= $s ?>&amp;lang=<?= $l ?>" <?= $s === $slug && $l === $lang ? 'aria-current="page"' : '' ?>><?= h($d['label']) ?> <b><?= strtoupper($l) ?></b></a>
     <?php endforeach; endforeach; ?>
   </nav>
   <?php if ($doc): ?>

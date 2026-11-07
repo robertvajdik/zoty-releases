@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$errors) {
         doc_save($slug, $lang, $body, $who);
         flash('Manuál byl uložen.');
-        header('Location: ' . (isset($_POST['view']) ? 'help?doc=' . rawurlencode($slug) . '&lang=' . rawurlencode($lang) : $selfUrl));
+        header('Location: ' . (isset($_POST['view']) ? 'manual?doc=' . rawurlencode($slug) . '&lang=' . rawurlencode($lang) : $selfUrl));
         exit;
     }
 }
@@ -60,11 +60,11 @@ $pageTitle = 'Upravit manuál';
 require __DIR__ . '/../partials/header.php';
 ?>
 <main class="container admin admin--wide">
-  <?php if ($m = flash()): ?><div class="flash"><?= h($m) ?> <a href="help?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">Zobrazit manuál</a></div><?php endif; ?>
+  <?php if ($m = flash()): ?><div class="flash"><?= h($m) ?> <a href="manual?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">Zobrazit manuál</a></div><?php endif; ?>
   <div class="admin__head">
     <h1><?= h(DOCS[$slug]['label']) ?> <span class="code-tag"><?= strtoupper($lang) ?></span></h1>
     <div class="admin__actions">
-      <a class="button button--ghost" href="help?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">← Zpět na manuál</a>
+      <a class="button button--ghost" href="manual?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">← Zpět na manuál</a>
     </div>
   </div>
 
@@ -102,7 +102,7 @@ require __DIR__ . '/../partials/header.php';
     <div class="form-actions doc-edit__actions">
       <button class="button button--primary" type="submit">Uložit</button>
       <button class="button button--ghost" type="submit" name="view" value="1">Uložit a zobrazit</button>
-      <a class="button button--ghost" href="help?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">Zrušit</a>
+      <a class="button button--ghost" href="manual?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">Zrušit</a>
       <?php if ($doc && $doc['updated_at']): ?><span class="muted doc-edit__meta">Naposledy uloženo <?= h(date('d.m.Y H:i', strtotime((string)$doc['updated_at']))) ?><?= $doc['updated_by'] !== '' ? ' · ' . h($doc['updated_by']) : ' · výchozí text' ?></span><?php endif; ?>
     </div>
   </form>

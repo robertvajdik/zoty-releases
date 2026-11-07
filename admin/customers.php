@@ -25,8 +25,7 @@ function send_access(array $user, string $password): bool
           . h(tr('portal.email', [], $L)) . ': <b>' . h($user['email']) . '</b><br>' . h(tr('portal.password', [], $L)) . ': <b>' . h($password) . '</b></p>'
           . '<p style="margin:24px 0"><a href="' . h($url) . '" style="background:#6144a3;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block">'
           . h(tr('access.mail.button', [], $L)) . '</a></p><p style="color:#656565;font-size:13px">' . h(tr('access.mail.change', [], $L)) . '</p>';
-    $r = mail_send([['to' => $user['email'], 'subject' => tr('access.mail.subject', [], $L), 'text' => $text, 'html' => mail_layout(tr('access.mail.subject', [], $L), $html)]]);
-    if (!empty($r['error'])) mail_log('Přístup ' . $user['email'] . ': ' . $r['error']);
+    $r = mail_send([['to' => $user['email'], 'subject' => tr('access.mail.subject', [], $L), 'text' => $text, 'html' => mail_layout(tr('access.mail.subject', [], $L), $html), 'tag' => 'Přístup ' . $user['customer_code']]]);
     return $r['sent'] > 0;
 }
 

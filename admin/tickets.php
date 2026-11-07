@@ -78,7 +78,7 @@ require __DIR__ . '/../partials/header.php';
         <tr>
           <td class="nowrap" data-label="Klíč"><a class="tkey" href="<?= h($url) ?>"><?= h($t['key']) ?></a></td>
           <td class="cell-title"><a class="tsum" href="<?= h($url) ?>"><span class="rt rt--<?= h($t['type']) ?>" title="<?= h(ticket_type_label($t['type'])) ?>"></span><?= h($t['summary']) ?></a>
-            <span class="tmeta"><?= h(ticket_type_label($t['type'])) ?> · <?= h(option_label($t['product'])) ?> <?= h(option_label($t['product_version'])) ?> · <?= h($t['reporter_name'] ?: $t['reporter_email']) ?><?= (int)$t['comment_count'] ? ' · 💬 ' . (int)$t['comment_count'] : '' ?></span></td>
+            <span class="tmeta"><?= h(ticket_type_label($t['type'])) ?> · <?= h(option_label($t['product'])) ?> <?= h(option_label($t['product_version'])) ?> · <?= h($t['reporter_name'] ?: $t['reporter_email']) ?><?= (int)$t['comment_count'] ? ' · <svg class="i-comment" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="visually-hidden">komentáře: </span>' . (int)$t['comment_count'] : '' ?></span></td>
           <td class="cell-muted" data-label="Zákazník"><?= h($t['customer_name']) ?></td>
           <td data-label="Stav"><?= status_lozenge($t['status']) ?></td>
           <td data-label="Závažnost"><?= severity_badge($t['severity']) ?></td>
