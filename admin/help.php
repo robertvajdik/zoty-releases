@@ -13,12 +13,12 @@ $docTools = '<a class="button button--primary button--sm" href="docs?doc=' . h($
 
 $base_path = '../';
 $admin_area = true;
-$pageTitle = 'Nápověda';
+$pageTitle = 'Manuál';
 require __DIR__ . '/../partials/header.php';
 ?>
 <main class="container admin">
   <?php if ($m = flash()): ?><div class="flash"><?= h($m) ?></div><?php endif; ?>
-  <nav class="tabs" aria-label="Příručky">
+  <nav class="tabs" aria-label="Manuály">
     <?php foreach (DOCS as $s => $d): foreach ($d['langs'] as $l): ?>
       <a href="help?doc=<?= $s ?>&amp;lang=<?= $l ?>" <?= $s === $slug && $l === $lang ? 'aria-current="page"' : '' ?>><?= h($d['label']) ?> <b><?= strtoupper($l) ?></b></a>
     <?php endforeach; endforeach; ?>

@@ -1,6 +1,7 @@
 <?php
-// Customer help – public (also readable before signing in).
+// Customer help – only for signed-in customers (admins may preview it).
 require __DIR__ . '/../lib.php';
+if (!is_admin()) require_portal_user();
 
 $doc = doc_for('portal', lang());
 $tocLabel = tr('help.toc');

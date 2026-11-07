@@ -77,7 +77,6 @@ $keyIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="
       <button class="auth__submit" type="submit"><?= h(tr('portal.login_button')) ?></button>
       <p class="auth__links">
         <?= h(tr('portal.no_account')) ?> <a href="https://zoty.cz/kontakt/"><?= h(tr('nav.contact')) ?></a>
-        · <a href="help"><?= h(tr('nav.help')) ?></a>
         · <?php foreach (LANGS as $code): if ($code === $L) continue; ?><a href="<?= h(lang_url($code)) ?>" hreflang="<?= $code ?>"><?= h(tr('lang.name', [], $code)) ?></a><?php endforeach; ?>
       </p>
     </form>

@@ -32,7 +32,6 @@ require __DIR__ . '/../partials/header.php';
       <h1><?= h(tr('portal.my_requests')) ?></h1>
       <p><?= h(tr('portal.space_of', ['customer' => $me['customer_name']])) ?></p>
     </div>
-    <a class="button button--primary" href="new"><?= h(tr('portal.new_request')) ?></a>
   </div>
 
   <nav class="tabs" aria-label="<?= h(tr('portal.filter_status')) ?>">

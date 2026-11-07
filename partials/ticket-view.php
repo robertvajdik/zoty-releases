@@ -34,7 +34,7 @@ $fmt = fn(string $dt): string => fmt_date($dt) . ' ' . h(date('H:i', strtotime($
 $reporter = $ticket['reporter_name'] ?: ($ticket['reporter_email'] ?: tr('ticket.deleted_user'));
 ?>
 <div class="tk">
-  <div class="tk__main">
+  <div class="tk__head">
     <nav class="crumbs" aria-label="<?= h(tr('ticket.breadcrumb')) ?>">
       <a href="<?= h($listUrl) ?>"><?= h($isStaff ? 'Požadavky' : tr('portal.my_requests')) ?></a>
       <span aria-hidden="true">/</span>
@@ -44,7 +44,9 @@ $reporter = $ticket['reporter_name'] ?: ($ticket['reporter_email'] ?: tr('ticket
     <p class="tk__by"><?= $avatar($reporter) ?>
       <span><?= trh('ticket.raised_by', ['name' => $reporter],['date' => '<time datetime="' . h(date('c', strtotime($ticket['created_at']))) . '">' . $fmt($ticket['created_at']) . '</time>']) ?></span>
     </p>
+  </div>
 
+  <div class="tk__main">
     <?php if ($errors): ?><div class="flash flash--error"><?= implode('<br>', array_map('h', $errors)) ?></div><?php endif; ?>
 
     <section class="tk__section">

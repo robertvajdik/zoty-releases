@@ -33,22 +33,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $seed = doc_seed($slug, $lang);
         if ($seed !== null) {
             doc_save($slug, $lang, $seed, $who);
-            flash('Obnoven výchozí text příručky.');
+            flash('Obnoven výchozí text manuálu.');
         }
         header('Location: ' . $selfUrl);
         exit;
     }
     $body = str_replace("\r\n", "\n", (string)($_POST['body'] ?? ''));
     $seen = (string)($_POST['updated_at'] ?? '');
-    if (trim($body) === '') $errors[] = 'Příručka nemůže být prázdná.';
+    if (trim($body) === '') $errors[] = 'Manuál nemůže být prázdný.';
     if (strlen($body) > 2000000) $errors[] = 'Text je příliš dlouhý.';
     if ($doc && $seen !== '' && $seen !== (string)$doc['updated_at']) {
-        $errors[] = 'Příručku mezitím uložil někdo jiný (' . ($doc['updated_by'] ?: 'systém') . ', ' . date('d.m.Y H:i', strtotime((string)$doc['updated_at']))
+        $errors[] = 'Manuál mezitím uložil někdo jiný (' . ($doc['updated_by'] ?: 'systém') . ', ' . date('d.m.Y H:i', strtotime((string)$doc['updated_at']))
                   . '). Váš text je níže – zkopírujte si změny, obnovte stránku a uložte znovu, nebo uložte ještě jednou a jeho změny přepíšete.';
     }
     if (!$errors) {
         doc_save($slug, $lang, $body, $who);
-        flash('Příručka byla uložena.');
+        flash('Manuál byl uložen.');
         header('Location: ' . (isset($_POST['view']) ? 'help?doc=' . rawurlencode($slug) . '&lang=' . rawurlencode($lang) : $selfUrl));
         exit;
     }
@@ -56,19 +56,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $base_path = '../';
 $admin_area = true;
-$pageTitle = 'Upravit příručku';
+$pageTitle = 'Upravit manuál';
 require __DIR__ . '/../partials/header.php';
 ?>
 <main class="container admin admin--wide">
-  <?php if ($m = flash()): ?><div class="flash"><?= h($m) ?> <a href="help?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">Zobrazit příručku</a></div><?php endif; ?>
+  <?php if ($m = flash()): ?><div class="flash"><?= h($m) ?> <a href="help?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">Zobrazit manuál</a></div><?php endif; ?>
   <div class="admin__head">
     <h1><?= h(DOCS[$slug]['label']) ?> <span class="code-tag"><?= strtoupper($lang) ?></span></h1>
     <div class="admin__actions">
-      <a class="button button--ghost" href="help?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">← Zpět na příručku</a>
+      <a class="button button--ghost" href="help?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">← Zpět na manuál</a>
     </div>
   </div>
 
-  <nav class="tabs" aria-label="Příručky">
+  <nav class="tabs" aria-label="Manuály">
     <?php foreach (DOCS as $s => $d): foreach ($d['langs'] as $l): ?>
       <a href="docs?doc=<?= $s ?>&amp;lang=<?= $l ?>" <?= $s === $slug && $l === $lang ? 'aria-current="page"' : '' ?>><?= h($d['label']) ?> <b><?= strtoupper($l) ?></b></a>
     <?php endforeach; endforeach; ?>
@@ -90,7 +90,7 @@ require __DIR__ . '/../partials/header.php';
           <span class="doc-edit__status" id="doc-status" aria-live="polite"></span>
         </div>
         <?php $edName = 'body'; $edId = 'doc-body'; $edValue = $body; $edRequired = false; $edInvalid = false; $edDoc = true;
-              $edPlaceholder = '# Název příručky';
+              $edPlaceholder = '# Název manuálu';
               require __DIR__ . '/../partials/ticket-editor.php'; ?>
       </div>
       <div class="doc-edit__preview">
@@ -108,7 +108,7 @@ require __DIR__ . '/../partials/header.php';
   </form>
 
   <?php if (doc_seed($slug, $lang) !== null && $doc): ?>
-    <form method="post" class="danger-zone" onsubmit="return confirm('Nahradit text příručky výchozím textem ze souboru? Vaše úpravy se ztratí.')">
+    <form method="post" class="danger-zone" onsubmit="return confirm('Nahradit text manuálu výchozím textem ze souboru? Vaše úpravy se ztratí.')">
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="reset">
       <button class="button button--danger button--sm" type="submit">Obnovit výchozí text</button>

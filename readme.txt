@@ -118,7 +118,7 @@ PUBLIC SITE
                   list of the customer's requests, new request
                   (Support Incident / Question / Feature Request),
                   request detail with comments and attachments
-/portal/help      customer help (public, CS/EN, edited in admin)
+/portal/help      customer help (signed-in customers only, CS/EN, edited in admin)
 /feed.xml         Atom feed
 /sitemap.xml      sitemap
 /robots.txt       robots

@@ -7,8 +7,8 @@ declare(strict_types=1);
  */
 
 const DOCS = [
-    'admin'  => ['label' => 'Příručka administrace', 'langs' => ['en', 'cs'], 'seed' => ['en' => 'MANUAL.md']],
-    'portal' => ['label' => 'Nápověda zákaznického portálu', 'langs' => ['cs', 'en'], 'seed' => ['cs' => 'docs/portal.cs.md', 'en' => 'docs/portal.en.md']],
+    'admin'  => ['label' => 'Manuál administrace', 'langs' => ['en', 'cs'], 'seed' => ['en' => 'MANUAL.md']],
+    'portal' => ['label' => 'Manuál zákaznického portálu', 'langs' => ['cs', 'en'], 'seed' => ['cs' => 'docs/portal.cs.md', 'en' => 'docs/portal.en.md']],
 ];
 
 function migrate_docs(PDO $pdo, string $driver): void
@@ -175,7 +175,23 @@ function doc_render(string $md, ?array &$toc = null): string
     $html = '';
     $para = [];
     $flush = function () use (&$para, &$html) {
-        if ($para) { $html .= '<p>' . implode("<br>\n", array_map('doc_inline', $para)) . '</p>'; $para = []; }
+        if (!$para) return;
+        // a photo on its own line becomes a figure: the alt text is its caption, a click opens the full size
+        if (count($para) === 1 && preg_match('/^!\[([^\]]*)\]\(((?:https?:\/\/|uploads\/)[^)\s]+)\)$/u', $para[0], $m)) {
+            $src = str_starts_with($m[2], 'uploads/') ? site_url($m[2]) : $m[2];
+            // phones get "name-mobile.png" when it exists next to "name.png"
+            $mobile = '';
+            if (str_starts_with($m[2], 'uploads/')) {
+                $mob = preg_replace('/(\.[a-z0-9]+)$/i', '-mobile$1', $m[2]);
+                if ($mob !== $m[2] && is_file(__DIR__ . '/' . $mob)) $mobile = '<source media="(max-width: 600px)" srcset="' . h(site_url($mob)) . '">';
+            }
+            $html .= '<figure class="doc-fig' . ($mobile ? ' doc-fig--mobile' : '') . '"><a href="' . h($src) . '" target="_blank" rel="noopener"><picture>' . $mobile
+                   . '<img src="' . h($src) . '" alt="' . h($m[1]) . '" loading="lazy"></picture></a>'
+                   . ($m[1] !== '' ? '<figcaption>' . doc_inline($m[1]) . '</figcaption>' : '') . '</figure>';
+        } else {
+            $html .= '<p>' . implode("<br>\n", array_map('doc_inline', $para)) . '</p>';
+        }
+        $para = [];
     };
     $isList = fn(string $l) => (bool)preg_match('/^(\s*)([-*+]|\d{1,3}[.)])\s+/', $l);
 

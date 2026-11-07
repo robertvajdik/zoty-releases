@@ -1,4 +1,4 @@
-# Nápověda zákaznické podpory Zoty
+# Manuál zákaznické podpory Zoty
 
 V zákaznickém portálu zadáváte požadavky na podporu Zoty a sledujete, jak se řeší.
 Každá firma má svůj vlastní prostor – vidíte požadavky svých kolegů, ale nikdy požadavky jiných zákazníků.
@@ -21,6 +21,8 @@ Po přihlášení uvidíte seznam požadavků vaší firmy:
 - **Všechny typy** – filtr podle typu požadavku. **Jen moje** – jen požadavky, které jste zadali vy.
 - U každého požadavku vidíte klíč, shrnutí, stav, závažnost, kdo ho zadal a kdy se naposledy změnil.
 
+![Seznam požadavků firmy se záložkami Otevřené / Vyřešené / Vše, vyhledáváním a filtry](uploads/manual/portal-list-cs.png)
+
 ## Nový požadavek
 
 1. Klikněte na **+ Nový požadavek**.
@@ -28,6 +30,9 @@ Po přihlášení uvidíte seznam požadavků vaší firmy:
    - **Hlášení incidentu** – pomoc s instalací, nastavením nebo řešením problému.
    - **Dotaz** – používání aplikace, licence, jak funguje některá funkce.
    - **Návrh na vylepšení** – nová funkce nebo úprava stávající.
+
+![Výběr typu požadavku – Hlášení incidentu, Dotaz nebo Návrh na vylepšení](uploads/manual/portal-types-cs.png)
+
 3. Vyplňte formulář. Povinná pole jsou označena hvězdičkou **\***.
 
 | Pole | Co vyplnit |
@@ -39,6 +44,8 @@ Po přihlášení uvidíte seznam požadavků vaší firmy:
 | **Popis \*** | Co nejvíc podrobností: co se stalo, postup k zopakování, co jste očekávali, chybové hlášky. |
 | **Přílohy** | Snímky obrazovky, logy, dokumenty – viz níže. |
 | **Závažnost \*** | Jak vážný problém je – viz tabulka. |
+
+![Formulář nového požadavku: produkt, verze, systém, shrnutí, popis s panelem nástrojů, přílohy a závažnost](uploads/manual/portal-form-cs.png)
 
 4. Klikněte na **Odeslat**. Požadavek dostane klíč (zkratka vaší firmy a číslo, např. **ACME-12**) a podpora dostane upozornění.
 
@@ -69,6 +76,12 @@ Kliknutím na požadavek otevřete jeho detail:
 - **Vyřešeno v přehledu změn** – když se oprava dostala do nové verze, uvidíte tu odkaz na záznam v přehledu změn.
 - **Aktivita** – komentáře vaše, vašich kolegů a **podpory Zoty** (označené *Podpora*) a změny stavu.
 - Vpravo stav, typ, závažnost, produkt, verze, systém, kdo požadavek zadal a kdy.
+
+![Detail požadavku: popis s přílohou, vpravo stav a údaje, dole aktivita a pole pro komentář](uploads/manual/portal-ticket-cs.png)
+
+Když se oprava dostane do nové verze, uvidíte ji v sekci **Vyřešeno v přehledu změn**:
+
+![Vyřešený požadavek s odkazem na záznam v přehledu změn a tlačítkem Znovu otevřít](uploads/manual/portal-resolved-cs.png)
 
 **Komentář** napíšete do pole pod aktivitou, můžete přiložit soubory a kliknout na **Odeslat**.
 Pokud požadavek čekal na vás nebo byl vyřešený, váš komentář ho vrátí podpoře (stav *Otevřeno*).

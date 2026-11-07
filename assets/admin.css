@@ -52,6 +52,13 @@ a.ov:hover { border-color: var(--purple-100); }
   .subnav__links::-webkit-scrollbar { display: none; }
   .is-admin .tk__side { top: auto; }
 }
+@media (max-width: 760px) {
+  .overview { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .ov { padding: 10px 12px; }
+  .ov b { font-size: 20px; }
+  .ov span { font-size: 12px; line-height: 1.35; display: block; }
+  .ov:last-child { grid-column: 1 / -1; }
+}
 @media (max-width: 480px) {
   .ws-switch a { padding: 6px 9px; font-size: 13px; }
   .ws-switch svg { display: none; }
