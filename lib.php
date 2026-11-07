@@ -900,7 +900,7 @@ function auth_verify(string $user, string $password): ?string
     $row = $st->fetch();
     // verify against a dummy hash when the user is unknown, so timing does not leak usernames
     $hash = $row['password_hash'] ?? password_hash('dummy-password', PASSWORD_DEFAULT);
-    return (password_verify($password, $hash) && $row) ? $row['username'] : null;
+    return (password_matches($password, $hash) && $row) ? $row['username'] : null;
 }
 
 function auth_create(string $user, string $password): void

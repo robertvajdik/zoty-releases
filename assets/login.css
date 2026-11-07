@@ -164,3 +164,5 @@ body.auth {
 .grecaptcha-badge { visibility: hidden; }
 .recaptcha-note { margin: 14px 0 0; text-align: center; font-size: 12px; color: #77727a; }
 .recaptcha-note a { color: inherit; }
+
+.auth__msg a { color: inherit; font-weight: 600; text-decoration: underline; }

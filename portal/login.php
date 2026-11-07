@@ -17,7 +17,8 @@ $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $human = recaptcha_check('portal_login');
-    $user = $human ? customer_verify((string)($_POST['user'] ?? ''), (string)($_POST['password'] ?? '')) : null;
+    $login = $human ? customer_login((string)($_POST['user'] ?? ''), (string)($_POST['password'] ?? '')) : ['status' => 'invalid'];
+    $user = $login['user'] ?? null;
     if ($user) {
         session_regenerate_id(true);
         $_SESSION['zoty_customer'] = (int)$user['id'];
@@ -25,7 +26,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     usleep(400000);
-    $error = $human ? tr('portal.login_error') : tr('recaptcha.failed');
+    if (!$human) {
+        $error = tr('recaptcha.failed');
+    } elseif ($login['status'] === 'inactive') {
+        $error = tr('portal.login_inactive');
+    } elseif (auth_verify(trim((string)($_POST['user'] ?? '')), (string)($_POST['password'] ?? ''))) {
+        // the administrator's account typed into the customer portal
+        $error = tr('portal.login_is_admin');
+        $errorLink = ['href' => '../admin/login', 'text' => tr('portal.login_admin_link')];
+    } else {
+        $error = tr('portal.login_error');
+    }
 }
 
 $L = lang();
@@ -44,7 +55,7 @@ $keyIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/login.css?v=3">
+  <link rel="stylesheet" href="../assets/login.css?v=4">
   <link rel="stylesheet" href="../assets/tickets.css?v=1">
 </head>
 <body class="auth">
@@ -54,7 +65,7 @@ $keyIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="
         <img src="../assets/img/zoty-logo.png" alt="">
       </div>
       <p class="auth__note"><?= h(tr('portal.login_intro')) ?></p>
-      <div class="auth__msg" role="alert" aria-live="polite"><?= $error ? h($error) : '' ?></div>
+      <div class="auth__msg" role="alert" aria-live="polite"><?= $error ? h($error) : '' ?><?php if (!empty($errorLink)): ?> <a href="<?= h($errorLink['href']) ?>"><?= h($errorLink['text']) ?></a><?php endif; ?></div>
 
       <?= csrf_field() ?>
       <input type="hidden" name="next" value="<?= h($next) ?>">

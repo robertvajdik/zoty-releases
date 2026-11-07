@@ -265,15 +265,34 @@ function delete_customer_user(int $id): void
 
 /* ---------------------------------------------------------------- customer login (portal) */
 
-function customer_verify(string $email, string $password): ?array
+/** password_verify() that also accepts the password without surrounding spaces (copied from an e-mail). */
+function password_matches(string $password, string $hash): bool
+{
+    if (password_verify($password, $hash)) return true;
+    $trim = trim($password);
+    return $trim !== $password && $trim !== '' && password_verify($trim, $hash);
+}
+
+/**
+ * Portal sign-in. ['status' => 'ok', 'user' => row] | ['status' => 'inactive'] (right password, access turned off)
+ * | ['status' => 'invalid'].
+ */
+function customer_login(string $email, string $password): array
 {
     $st = db()->prepare('SELECT id, password_hash, active FROM ' . t('changelog_customer_users') . ' WHERE email = ?');
     $st->execute([mb_strtolower(trim($email))]);
     $row = $st->fetch();
     $hash = $row['password_hash'] ?? password_hash('dummy-password', PASSWORD_DEFAULT);
-    if (!password_verify($password, $hash) || !$row || !(int)$row['active']) return null;
+    if (!password_matches($password, $hash) || !$row) return ['status' => 'invalid'];
+    if (!(int)$row['active']) return ['status' => 'inactive'];
     db()->prepare('UPDATE ' . t('changelog_customer_users') . ' SET last_login = ?, lang = ? WHERE id = ?')->execute([now(), lang(), $row['id']]);
-    return get_customer_user((int)$row['id']);
+    return ['status' => 'ok', 'user' => get_customer_user((int)$row['id'])];
+}
+
+function customer_verify(string $email, string $password): ?array
+{
+    $r = customer_login($email, $password);
+    return $r['status'] === 'ok' ? $r['user'] : null;
 }
 
 /** The signed-in portal user (with customer_name / customer_code), or null. */

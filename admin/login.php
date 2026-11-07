@@ -42,7 +42,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         usleep(400000);
-        $error = 'Nesprávný email nebo heslo.';
+        $error = 'Nesprávný e-mail nebo heslo.';
+        if (customer_login($user, $pass)['status'] !== 'invalid') {
+            // a customer's portal account typed into the administration
+            $error = 'Toto je účet zákaznického portálu, ne administrace.';
+            $errorLink = ['href' => '../portal/login', 'text' => 'Přihlásit se do portálu'];
+        }
     }
 }
 
@@ -62,7 +67,7 @@ $keyIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/login.css?v=3">
+  <link rel="stylesheet" href="../assets/login.css?v=4">
 </head>
 <body class="auth">
   <main class="auth__wrap">
@@ -75,7 +80,7 @@ $keyIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="
         <p class="auth__note">První spuštění: vytvořte účet administrátora changelogu.</p>
       <?php endif; ?>
 
-      <div class="auth__msg" role="alert" aria-live="polite"><?= $error ? h($error) : '' ?></div>
+      <div class="auth__msg" role="alert" aria-live="polite"><?= $error ? h($error) : '' ?><?php if (!empty($errorLink)): ?> <a href="<?= h($errorLink['href']) ?>"><?= h($errorLink['text']) ?></a><?php endif; ?></div>
 
       <?= csrf_field() ?>
 
