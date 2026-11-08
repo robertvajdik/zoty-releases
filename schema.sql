@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS `changelog_customers` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `name`       VARCHAR(160) NOT NULL,
   `code`       VARCHAR(10)  NOT NULL COMMENT 'ticket key prefix, e.g. ACME -> ACME-12',
+  `contract`   VARCHAR(60)  NOT NULL DEFAULT '' COMMENT 'maintenance contract number, shown in the portal',
   `created_at` DATETIME     NOT NULL,
   UNIQUE KEY `uq_code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;

@@ -9,7 +9,7 @@ if ($id && !$customer) {
     exit('Zákazník nenalezen.');
 }
 $errors = [];
-$cf = ['name' => $customer['name'] ?? '', 'code' => $customer['code'] ?? ''];
+$cf = ['name' => $customer['name'] ?? '', 'code' => $customer['code'] ?? '', 'contract' => $customer['contract'] ?? ''];
 $uf = ['id' => 0, 'email' => '', 'name' => '', 'password' => '', 'send' => true];
 
 /** E-mails portal access to a customer user. */
@@ -36,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'save_customer') {
         $cf['name'] = trim(preg_replace('/\s+/u', ' ', (string)($_POST['name'] ?? '')));
+        $cf['contract'] = trim(preg_replace('/\s+/u', ' ', (string)($_POST['contract'] ?? '')));
         // tolerant input: "nbu zoty" / "NBU-ZOTY" -> NBU_ZOTY (diacritics and other characters are dropped)
         $raw = (string)($_POST['code'] ?? '');
         $raw = function_exists('iconv') ? (string)@iconv('UTF-8', 'ASCII//TRANSLIT', $raw) : $raw;
@@ -44,9 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $cnt = fetch_tickets(['customer_id' => $customer['id']]);
             if ($cnt) $errors[] = 'Klíč nelze změnit – zákazník už má požadavky (' . $customer['code'] . '-…).';
         }
-        $errors = array_merge($errors, validate_customer($cf['name'], $cf['code'], $customer['id'] ?? 0));
+        $errors = array_merge($errors, validate_customer($cf['name'], $cf['code'], $customer['id'] ?? 0, $cf['contract']));
         if (!$errors) {
-            $newId = save_customer($cf['name'], $cf['code'], $customer['id'] ?? 0);
+            $newId = save_customer($cf['name'], $cf['code'], $customer['id'] ?? 0, $cf['contract']);
             flash($customer ? 'Zákazník byl uložen.' : 'Zákazník ' . $cf['name'] . ' byl založen. Teď mu přidejte uživatele.');
             header('Location: customers?id=' . $newId);
             exit;
@@ -132,13 +133,14 @@ require __DIR__ . '/../partials/header.php';
     <?php if (!$customer): ?>
       <div class="table-wrap card" style="margin-top:0">
         <table class="table table--cards">
-          <thead><tr><th>Zákazník</th><th>Klíč</th><th>Uživatelé</th><th>Otevřené</th></tr></thead>
+          <thead><tr><th>Zákazník</th><th>Klíč</th><th>Smlouva</th><th>Uživatelé</th><th>Otevřené</th></tr></thead>
           <tbody>
-          <?php if (!$customers): ?><tr><td colspan="4" class="cell-empty">Zatím žádní zákazníci.</td></tr><?php endif; ?>
+          <?php if (!$customers): ?><tr><td colspan="5" class="cell-empty">Zatím žádní zákazníci.</td></tr><?php endif; ?>
           <?php foreach ($customers as $c): ?>
             <tr>
               <td class="cell-title"><a href="customers?id=<?= (int)$c['id'] ?>"><?= h($c['name']) ?></a></td>
               <td data-label="Klíč"><span class="code-tag"><?= h($c['code']) ?></span></td>
+              <td data-label="Smlouva"><?= ($c['contract'] ?? '') !== '' ? h($c['contract']) : '<span class="muted">—</span>' ?></td>
               <td data-label="Uživatelé"><?= (int)$c['user_count'] ?></td>
               <td data-label="Otevřené"><?= (int)$c['open_count'] ?> <span class="muted">/ <?= (int)$c['ticket_count'] ?></span></td>
             </tr>
@@ -162,6 +164,11 @@ require __DIR__ . '/../partials/header.php';
           <input id="code" name="code" required maxlength="10" value="<?= h($cf['code']) ?>" placeholder="ACME"
                  autocapitalize="characters" autocomplete="off" spellcheck="false" style="text-transform:uppercase">
           <small>Požadavky se číslují ACME-1, ACME-2… (NBU_ZOTY-1). 2–10 znaků A–Z, 0–9 nebo _, nelze změnit, jakmile existují požadavky.</small>
+        </div>
+        <div class="field full">
+          <label for="contract">Číslo servisní smlouvy</label>
+          <input id="contract" name="contract" maxlength="60" value="<?= h($cf['contract']) ?>" placeholder="např. SS-2026/014" autocomplete="off" spellcheck="false">
+          <small>ID smlouvy o údržbě. Zákazník ho vidí v portálu.</small>
         </div>
       </div>
       <div class="form-actions">

@@ -10,6 +10,8 @@
 .portal__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
 .portal__head h1 { margin: 0; font-size: 26px; }
 .portal__head p { margin: 4px 0 0; color: var(--muted); }
+.portal__head .portal__contract { font-size: 14px; }
+.portal__contract b { color: var(--text); font-weight: 600; }
 .nav-user { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
 .nav-user span, .nav-user__name { max-width: 16em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav-count { display: inline-block; min-width: 1.6em; padding: 0 .45em; border-radius: 99px; background: var(--red); color: #fff; font: 600 11px/1.6 var(--font-head); text-align: center; vertical-align: 1px; }

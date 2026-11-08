@@ -42,6 +42,7 @@ require __DIR__ . '/../partials/header.php';
     <div>
       <h1><?= h(tr('portal.my_requests')) ?></h1>
       <p><?= h(tr('portal.space_of', ['customer' => $me['customer_name']])) ?></p>
+      <?php if (($me['customer_contract'] ?? '') !== ''): ?><p class="portal__contract"><?= h(tr('portal.contract')) ?> <b><?= h($me['customer_contract']) ?></b></p><?php endif; ?>
     </div>
     <form class="news-toggle<?= $newsOn ? ' is-on' : '' ?>" method="post">
       <?= csrf_field() ?>

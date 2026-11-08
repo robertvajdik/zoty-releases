@@ -41,6 +41,7 @@ function migrate_tickets(PDO $pdo, string $driver): void
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             code TEXT NOT NULL UNIQUE,
+            contract TEXT NOT NULL DEFAULT '',
             created_at TEXT NOT NULL)");
         $pdo->exec("CREATE TABLE IF NOT EXISTS $cu (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,6 +88,7 @@ function migrate_tickets(PDO $pdo, string $driver): void
             size INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL)");
         $pdo->exec("CREATE INDEX IF NOT EXISTS {$fl}_ticket ON $fl (ticket_id)");
+        migrate_customer_contract($pdo, $driver);
         return;
     }
     $opts = 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci';
@@ -94,6 +96,7 @@ function migrate_tickets(PDO $pdo, string $driver): void
         id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(160) NOT NULL,
         code VARCHAR(10) NOT NULL,
+        contract VARCHAR(60) NOT NULL DEFAULT '',
         created_at DATETIME NOT NULL,
         UNIQUE KEY uq_code (code)
     ) $opts");
@@ -154,6 +157,20 @@ function migrate_tickets(PDO $pdo, string $driver): void
         KEY idx_ticket (ticket_id),
         CONSTRAINT fk_{$fl}_ticket FOREIGN KEY (ticket_id) REFERENCES `$tk` (id) ON DELETE CASCADE
     ) $opts");
+    migrate_customer_contract($pdo, $driver);
+}
+
+/** v2: number of the customer's maintenance (support) contract, shown in the portal. */
+function migrate_customer_contract(PDO $pdo, string $driver): void
+{
+    $c = t('changelog_customers');
+    try {
+        $pdo->query("SELECT contract FROM $c WHERE 1 = 0");
+    } catch (PDOException $ex) {
+        $pdo->exec($driver === 'sqlite'
+            ? "ALTER TABLE $c ADD COLUMN contract TEXT NOT NULL DEFAULT ''"
+            : "ALTER TABLE `$c` ADD COLUMN contract VARCHAR(60) NOT NULL DEFAULT '' AFTER code");
+    }
 }
 
 /* ---------------------------------------------------------------- customers & their users */
@@ -175,9 +192,10 @@ function get_customer(int $id): ?array
     return $st->fetch() ?: null;
 }
 
-function validate_customer(string $name, string $code, int $id = 0): array
+function validate_customer(string $name, string $code, int $id = 0, string $contract = ''): array
 {
     $err = [];
+    if (mb_strlen($contract) > 60) $err[] = 'Číslo smlouvy může mít max. 60 znaků.';
     if ($name === '' || mb_strlen($name) > 160) $err[] = 'Vyplňte název zákazníka (max. 160 znaků).';
     if (!preg_match('/^[A-Z][A-Z0-9_]{0,8}[A-Z0-9]$/', $code)) $err[] = 'Klíč musí mít 2–10 znaků A–Z, 0–9 nebo _, začínat písmenem a nekončit _ (např. ACME nebo NBU_ZOTY).';
     $st = db()->prepare('SELECT id FROM ' . t('changelog_customers') . ' WHERE code = ? AND id <> ?');
@@ -186,13 +204,13 @@ function validate_customer(string $name, string $code, int $id = 0): array
     return $err;
 }
 
-function save_customer(string $name, string $code, int $id = 0): int
+function save_customer(string $name, string $code, int $id = 0, string $contract = ''): int
 {
     if ($id) {
-        db()->prepare('UPDATE ' . t('changelog_customers') . ' SET name = ?, code = ? WHERE id = ?')->execute([$name, $code, $id]);
+        db()->prepare('UPDATE ' . t('changelog_customers') . ' SET name = ?, code = ?, contract = ? WHERE id = ?')->execute([$name, $code, $contract, $id]);
         return $id;
     }
-    db()->prepare('INSERT INTO ' . t('changelog_customers') . ' (name, code, created_at) VALUES (?, ?, ?)')->execute([$name, $code, now()]);
+    db()->prepare('INSERT INTO ' . t('changelog_customers') . ' (name, code, contract, created_at) VALUES (?, ?, ?, ?)')->execute([$name, $code, $contract, now()]);
     return (int)db()->lastInsertId();
 }
 
@@ -216,7 +234,7 @@ function fetch_customer_users(int $customerId): array
 
 function get_customer_user(int $id): ?array
 {
-    $st = db()->prepare('SELECT u.*, c.name AS customer_name, c.code AS customer_code FROM ' . t('changelog_customer_users') . ' u'
+    $st = db()->prepare('SELECT u.*, c.name AS customer_name, c.code AS customer_code, c.contract AS customer_contract FROM ' . t('changelog_customer_users') . ' u'
         . ' JOIN ' . t('changelog_customers') . ' c ON c.id = u.customer_id WHERE u.id = ?');
     $st->execute([$id]);
     return $st->fetch() ?: null;
