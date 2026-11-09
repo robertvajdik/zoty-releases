@@ -34,7 +34,7 @@ return [
     // Customer support portal (/portal/): who gets an e-mail about new requests and customer comments.
     'support' => [
         'notify' => ['hellozoty@basketub.cz'],
-        // 'os' => ['Windows 11', 'Windows 10', 'Windows Server 2022', 'Windows Server 2019', 'Linux', 'macOS'],
+        // 'os' => ['Windows 11', 'Windows Server 2022', 'Windows Server 2019', 'Linux', 'OpenShift', 'Kubernetes Rancher'],
     ],
     'keywords' => ['Zoty', 'přehled změn', 'release notes', 'changelog', 'novinky', 'aktualizace', 'vylepšení', 'opravy', 'verze'],
 ];
