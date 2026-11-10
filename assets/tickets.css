@@ -429,3 +429,8 @@ select.tf__plain { appearance: auto; }
 /* admins: notification switch in the table */
 .admin-notify { display: inline-flex; align-items: center; gap: 10px; }
 .admin-notify__label { font-size: 13px; color: var(--muted); }
+
+/* portal: download center */
+.download { max-width: 760px; }
+.download__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.download__head h2 { margin: 0; font-size: 20px; }

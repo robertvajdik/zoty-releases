@@ -35,7 +35,7 @@ return [
         // who gets an e-mail about new requests and customer comments
         'notify' => ['podpora@example.cz'],
         // choices for "Operating System" on the request form ("Jiné" / "Other" is always added)
-        'os' => ['Windows 11', 'Windows Server 2022', 'Windows Server 2019', 'Linux', 'OpenShift', 'Kubernetes Rancher'],
+        'os' => ['Windows 11', 'Windows Server 2022', 'Windows Server 2019', 'Linux', 'OpenShift', 'Kubernetes', 'Rancher'],
     ],
     // Google reCAPTCHA v3 (invisible) on the login forms and the subscription form.
     // Keys: https://www.google.com/recaptcha/admin (type "Score based (v3)", add your domain).
