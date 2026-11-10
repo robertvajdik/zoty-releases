@@ -24,6 +24,9 @@ require __DIR__ . '/../partials/header.php';
       <h2><?= h(tr('downloads.docker.title')) ?></h2>
       <a class="button button--primary button--sm" href="<?= h(DOCKER_HUB_URL) ?>" target="_blank" rel="noopener"><?= h(tr('downloads.docker.hub')) ?> ↗</a>
     </div>
+    <p><?= h(tr('downloads.docker.text')) ?></p>
+    <pre class="download__cmd"><code>docker pull idsacz/zoty:tagname</code></pre>
+    <p class="download__note"><?= h(tr('downloads.docker.tags')) ?></p>
   </section>
 </main>
 <?php require __DIR__ . '/../partials/footer.php'; ?>

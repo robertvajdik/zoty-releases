@@ -42,6 +42,7 @@ function migrate_tickets(PDO $pdo, string $driver): void
             name TEXT NOT NULL,
             code TEXT NOT NULL UNIQUE,
             contract TEXT NOT NULL DEFAULT '',
+            active INTEGER NOT NULL DEFAULT 1,
             created_at TEXT NOT NULL)");
         $pdo->exec("CREATE TABLE IF NOT EXISTS $cu (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,6 +90,7 @@ function migrate_tickets(PDO $pdo, string $driver): void
             created_at TEXT NOT NULL)");
         $pdo->exec("CREATE INDEX IF NOT EXISTS {$fl}_ticket ON $fl (ticket_id)");
         migrate_customer_contract($pdo, $driver);
+        migrate_customer_active($pdo, $driver);
         return;
     }
     $opts = 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci';
@@ -97,6 +99,7 @@ function migrate_tickets(PDO $pdo, string $driver): void
         name VARCHAR(160) NOT NULL,
         code VARCHAR(10) NOT NULL,
         contract VARCHAR(60) NOT NULL DEFAULT '',
+        active TINYINT(1) NOT NULL DEFAULT 1,
         created_at DATETIME NOT NULL,
         UNIQUE KEY uq_code (code)
     ) $opts");
@@ -158,6 +161,7 @@ function migrate_tickets(PDO $pdo, string $driver): void
         CONSTRAINT fk_{$fl}_ticket FOREIGN KEY (ticket_id) REFERENCES `$tk` (id) ON DELETE CASCADE
     ) $opts");
     migrate_customer_contract($pdo, $driver);
+    migrate_customer_active($pdo, $driver);
 }
 
 /** v2: number of the customer's maintenance (support) contract, shown in the portal. */
@@ -170,6 +174,19 @@ function migrate_customer_contract(PDO $pdo, string $driver): void
         $pdo->exec($driver === 'sqlite'
             ? "ALTER TABLE $c ADD COLUMN contract TEXT NOT NULL DEFAULT ''"
             : "ALTER TABLE `$c` ADD COLUMN contract VARCHAR(60) NOT NULL DEFAULT '' AFTER code");
+    }
+}
+
+/** v3: a customer can be deactivated – none of its users can sign in to the portal. */
+function migrate_customer_active(PDO $pdo, string $driver): void
+{
+    $c = t('changelog_customers');
+    try {
+        $pdo->query("SELECT active FROM $c WHERE 1 = 0");
+    } catch (PDOException $ex) {
+        $pdo->exec($driver === 'sqlite'
+            ? "ALTER TABLE $c ADD COLUMN active INTEGER NOT NULL DEFAULT 1"
+            : "ALTER TABLE `$c` ADD COLUMN active TINYINT(1) NOT NULL DEFAULT 1 AFTER contract");
     }
 }
 
@@ -214,6 +231,11 @@ function save_customer(string $name, string $code, int $id = 0, string $contract
     return (int)db()->lastInsertId();
 }
 
+function customer_set_active(int $id, bool $active): void
+{
+    db()->prepare('UPDATE ' . t('changelog_customers') . ' SET active = ? WHERE id = ?')->execute([$active ? 1 : 0, $id]);
+}
+
 /** A customer can be deleted only while it has no tickets (its users go with it). */
 function delete_customer(int $id): bool
 {
@@ -234,7 +256,7 @@ function fetch_customer_users(int $customerId): array
 
 function get_customer_user(int $id): ?array
 {
-    $st = db()->prepare('SELECT u.*, c.name AS customer_name, c.code AS customer_code, c.contract AS customer_contract FROM ' . t('changelog_customer_users') . ' u'
+    $st = db()->prepare('SELECT u.*, c.name AS customer_name, c.code AS customer_code, c.contract AS customer_contract, c.active AS customer_active FROM ' . t('changelog_customer_users') . ' u'
         . ' JOIN ' . t('changelog_customers') . ' c ON c.id = u.customer_id WHERE u.id = ?');
     $st->execute([$id]);
     return $st->fetch() ?: null;
@@ -297,12 +319,13 @@ function password_matches(string $password, string $hash): bool
  */
 function customer_login(string $email, string $password): array
 {
-    $st = db()->prepare('SELECT id, password_hash, active FROM ' . t('changelog_customer_users') . ' WHERE email = ?');
+    $st = db()->prepare('SELECT u.id, u.password_hash, u.active, c.active AS customer_active FROM ' . t('changelog_customer_users') . ' u'
+        . ' JOIN ' . t('changelog_customers') . ' c ON c.id = u.customer_id WHERE u.email = ?');
     $st->execute([mb_strtolower(trim($email))]);
     $row = $st->fetch();
     $hash = $row['password_hash'] ?? password_hash('dummy-password', PASSWORD_DEFAULT);
     if (!password_matches($password, $hash) || !$row) return ['status' => 'invalid'];
-    if (!(int)$row['active']) return ['status' => 'inactive'];
+    if (!(int)$row['active'] || !(int)$row['customer_active']) return ['status' => 'inactive'];
     db()->prepare('UPDATE ' . t('changelog_customer_users') . ' SET last_login = ?, lang = ? WHERE id = ?')->execute([now(), lang(), $row['id']]);
     return ['status' => 'ok', 'user' => get_customer_user((int)$row['id'])];
 }
@@ -320,7 +343,7 @@ function portal_user(): ?array
     if ($u !== false) return $u;
     $id = (int)($_SESSION['zoty_customer'] ?? 0);
     $u = $id ? get_customer_user($id) : null;
-    if ($u && !(int)$u['active']) {
+    if ($u && (!(int)$u['active'] || !(int)$u['customer_active'])) {
         unset($_SESSION['zoty_customer']);
         $u = null;
     }

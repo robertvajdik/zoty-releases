@@ -434,3 +434,6 @@ select.tf__plain { appearance: auto; }
 .download { max-width: 760px; }
 .download__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .download__head h2 { margin: 0; font-size: 20px; }
+.download__cmd { margin: 0; background: var(--code-bg); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font: 14px/1.5 ui-monospace, Consolas, monospace; }
+.download__cmd code { background: none; border: 0; padding: 0; font-size: inherit; }
+.download__note { margin: 12px 0 0; color: var(--muted); font-size: 14px; }

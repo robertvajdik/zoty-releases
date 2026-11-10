@@ -56,6 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         flash(delete_customer($customer['id']) ? 'Zákazník ' . $customer['name'] . ' byl smazán.' : 'Zákazníka nelze smazat, protože má požadavky.');
         header('Location: customers');
         exit;
+    } elseif ($action === 'toggle_customer' && $customer) {
+        $on = !(int)$customer['active'];
+        customer_set_active($customer['id'], $on);
+        flash('Zákazník ' . $customer['name'] . ($on ? ' byl znovu aktivován. Jeho uživatelé se opět mohou přihlásit.' : ' byl deaktivován. Nikdo z jeho uživatelů se nepřihlásí do portálu.'));
+        header('Location: ' . $back);
+        exit;
     } elseif ($action === 'save_user' && $customer) {
         $uf['id']       = (int)($_POST['user_id'] ?? 0);
         $uf['email']    = mb_strtolower(trim((string)($_POST['email'] ?? '')));
@@ -118,7 +124,7 @@ require __DIR__ . '/../partials/header.php';
 <main class="container admin">
   <?php if ($m = flash()): ?><div class="flash<?= str_contains($m, 'nelze') || str_contains($m, 'nepodařilo') ? ' flash--error' : '' ?>"><?= h($m) ?></div><?php endif; ?>
   <div class="admin__head">
-    <h1><?= $customer ? h($customer['name']) . ' <span class="code-tag">' . h($customer['code']) . '</span>' : 'Zákazníci' ?></h1>
+    <h1><?= $customer ? h($customer['name']) . ' <span class="code-tag">' . h($customer['code']) . '</span>' . ((int)$customer['active'] ? '' : ' <span class="tag tag--draft">Deaktivován</span>') : 'Zákazníci' ?></h1>
     <div class="admin__actions">
       <?php if ($customer): ?>
         <a class="button button--ghost" href="tickets?status=all&amp;customer=<?= $customer['id'] ?>">Požadavky zákazníka</a>
@@ -133,14 +139,15 @@ require __DIR__ . '/../partials/header.php';
     <?php if (!$customer): ?>
       <div class="table-wrap card" style="margin-top:0">
         <table class="table table--cards">
-          <thead><tr><th>Zákazník</th><th>Klíč</th><th>Smlouva</th><th>Uživatelé</th><th>Otevřené</th></tr></thead>
+          <thead><tr><th>Zákazník</th><th>Klíč</th><th>Smlouva</th><th>Stav</th><th>Uživatelé</th><th>Otevřené</th></tr></thead>
           <tbody>
-          <?php if (!$customers): ?><tr><td colspan="5" class="cell-empty">Zatím žádní zákazníci.</td></tr><?php endif; ?>
+          <?php if (!$customers): ?><tr><td colspan="6" class="cell-empty">Zatím žádní zákazníci.</td></tr><?php endif; ?>
           <?php foreach ($customers as $c): ?>
             <tr>
               <td class="cell-title"><a href="customers?id=<?= (int)$c['id'] ?>"><?= h($c['name']) ?></a></td>
               <td data-label="Klíč"><span class="code-tag"><?= h($c['code']) ?></span></td>
               <td data-label="Smlouva"><?= ($c['contract'] ?? '') !== '' ? h($c['contract']) : '<span class="muted">—</span>' ?></td>
+              <td data-label="Stav"><?= (int)$c['active'] ? '<span class="tag tag--new">Aktivní</span>' : '<span class="tag tag--draft">Deaktivován</span>' ?></td>
               <td data-label="Uživatelé"><?= (int)$c['user_count'] ?></td>
               <td data-label="Otevřené"><?= (int)$c['open_count'] ?> <span class="muted">/ <?= (int)$c['ticket_count'] ?></span></td>
             </tr>
@@ -179,6 +186,7 @@ require __DIR__ . '/../partials/header.php';
     <?php if ($customer): ?>
       <section class="card" id="users">
         <h2 class="card__title">Uživatelé portálu</h2>
+        <?php if (!(int)$customer['active']): ?><p class="flash flash--error">Zákazník je deaktivovaný – nikdo z uživatelů níže se teď nepřihlásí do portálu.</p><?php endif; ?>
         <p class="admin__hint">Každý uživatel se přihlásí na <a href="../portal/" target="_blank"><?= h(site_url('portal/')) ?></a> a vidí všechny požadavky zákazníka <?= h($customer['name']) ?>.</p>
         <div class="table-wrap">
           <table class="table table--cards">
@@ -240,6 +248,13 @@ require __DIR__ . '/../partials/header.php';
           </div>
         </form>
       </section>
+
+      <form method="post" class="danger-zone"<?php if ((int)$customer['active']): ?> onsubmit="return confirm(<?= h(json_encode('Deaktivovat zákazníka ' . $customer['name'] . '? Nikdo z jeho uživatelů se nepřihlásí do portálu.', JSON_UNESCAPED_UNICODE)) ?>)"<?php endif; ?>>
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="toggle_customer">
+        <button class="button button--ghost button--sm" type="submit"><?= (int)$customer['active'] ? 'Deaktivovat zákazníka' : 'Znovu aktivovat zákazníka' ?></button>
+        <small class="muted"><?= (int)$customer['active'] ? 'Uživatelé se nepřihlásí do portálu, požadavky i data zůstávají.' : 'Uživatelé se opět mohou přihlásit (kromě jednotlivě zablokovaných).' ?></small>
+      </form>
 
       <form method="post" class="danger-zone" onsubmit="return confirm(<?= h(json_encode('Smazat zákazníka ' . $customer['name'] . ' i s jeho uživateli?', JSON_UNESCAPED_UNICODE)) ?>)">
         <?= csrf_field() ?>
