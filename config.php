@@ -30,6 +30,11 @@ return [
         // when the SMTP connection or login fails, try the hosting's PHP mail() instead
         'fallback_mail' => true,
     ],
+    // Google Analytics 4 on all pages (public, portal, admin). Every visitor is tracked, no consent banner.
+    // Measurement ID from GA → Admin → Data streams, e.g. 'G-XXXXXXXXXX'. Leave empty to turn it off.
+    'analytics' => [
+        'ga_id' => '',
+    ],
     // Klíčová slova (meta keywords + JSON-LD). Module names are added automatically.
     // Customer support portal (/portal/): who gets an e-mail about new requests and customer comments.
     'support' => [

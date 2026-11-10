@@ -1015,6 +1015,21 @@ function csrf_check(): void
     }
 }
 
+/* ---------------------------------------------------------------- Google Analytics 4 (config 'analytics') */
+
+/**
+ * GA4 gtag.js snippet for <head>. Tracks every visitor right away (no consent banner).
+ * Off when config.php has no measurement ID.
+ */
+function analytics_script(): string
+{
+    $id = trim((string)(config()['analytics']['ga_id'] ?? ''));
+    if ($id === '') return '';
+    return '<script async src="https://www.googletagmanager.com/gtag/js?id=' . rawurlencode($id) . '"></script>'
+         . '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}'
+         . 'gtag("js",new Date());gtag("config",' . json_encode($id) . ');</script>';
+}
+
 /* ---------------------------------------------------------------- reCAPTCHA v3 (config 'recaptcha') */
 
 /** On when config.php has both reCAPTCHA keys. */

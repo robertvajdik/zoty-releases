@@ -45,6 +45,11 @@ return [
         'secret'    => '6LfdpxQuAAAAAP6Afx2jXhcA2xR-CCsgG9npRpY5',
         'min_score' => 0.5,
     ],
+    // Google Analytics 4 on all pages (public, portal, admin). Every visitor is tracked, no consent banner.
+    // Measurement ID from GA → Admin → Data streams, e.g. 'G-XXXXXXXXXX'. Leave empty to turn it off.
+    'analytics' => [
+        'ga_id' => '',
+    ],
     // Klíčová slova (meta keywords + JSON-LD). Module names are added automatically.
     'keywords' => ['Zoty', 'přehled změn', 'release notes', 'changelog', 'novinky', 'aktualizace', 'vylepšení', 'opravy', 'verze'],
 ];

@@ -46,6 +46,7 @@ if ($isAdminArea && is_admin()) {
   <?php if ($isAdminArea): ?><link rel="stylesheet" href="<?= $base ?>assets/admin.css?v=2"><?php endif; ?>
   <link rel="alternate" type="application/atom+xml" title="<?= h(tr('site.name')) ?>" href="<?= $base ?>feed.xml">
   <?= $headExtra ?? '' ?>
+  <?= analytics_script() ?>
 </head>
 <body class="<?= $isAdminArea ? 'is-admin is-admin--' . $adminSection : ($isPortal ? 'is-portal' : '') ?>">
 <header class="header">

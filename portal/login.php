@@ -57,6 +57,7 @@ $keyIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/login.css?v=4">
   <link rel="stylesheet" href="../assets/tickets.css?v=1">
+  <?= analytics_script() ?>
 </head>
 <body class="auth">
   <main class="auth__wrap">
