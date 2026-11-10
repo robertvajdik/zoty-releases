@@ -19,6 +19,22 @@ require __DIR__ . '/../partials/header.php';
     </div>
   </div>
 
+  <?php if ($docs = fetch_downloads(is_admin() && !portal_user() ? null : lang())): ?>
+  <section class="card download">
+    <div class="download__head">
+      <h2><?= h(tr('downloads.docs.title')) ?></h2>
+    </div>
+    <ul class="download__files">
+      <?php foreach ($docs as $d): ?>
+        <li>
+          <a href="document?id=<?= (int)$d['id'] ?>"><?= h($d['title']) ?></a>
+          <span class="download__meta">PDF · <?= h(fmt_bytes((int)$d['size'])) ?> · <?= fmt_date(substr((string)$d['created_at'], 0, 10)) ?></span>
+        </li>
+      <?php endforeach; ?>
+    </ul>
+  </section>
+  <?php endif; ?>
+
   <section class="card download">
     <div class="download__head">
       <h2><?= h(tr('downloads.docker.title')) ?></h2>

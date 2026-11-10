@@ -7,7 +7,7 @@ $portalUser = $isPortal ? portal_user() : null;
 $self = basename($_SERVER['SCRIPT_NAME'] ?? '');
 $L = $isAdminArea ? 'cs' : lang();
 // Admin has two workspaces: release notes (changelog) and support (customer requests).
-$adminSection = $admin_section ?? (in_array($self, ['tickets.php', 'ticket.php', 'customers.php', 'admins.php'], true) ? 'support'
+$adminSection = $admin_section ?? (in_array($self, ['tickets.php', 'ticket.php', 'customers.php', 'downloads.php', 'admins.php'], true) ? 'support'
     : (in_array($self, ['manual.php', 'docs.php'], true) ? 'help' : 'releases'));
 $adminNav = [];
 if ($isAdminArea && is_admin()) {
@@ -18,6 +18,7 @@ if ($isAdminArea && is_admin()) {
     ] : ($adminSection === 'support' ? [
         ['tickets',   'Požadavky', ['tickets.php', 'ticket.php'], $tStats['open'] + $tStats['in_progress'] + $tStats['waiting']],
         ['customers', 'Zákazníci a přístupy', ['customers.php'], 0],
+        ['downloads', 'Ke stažení', ['downloads.php'], 0],
         ['admins',    'Administrátoři', ['admins.php'], 0],
     ] : [
         ['./',          'Záznamy',    ['index.php', 'edit.php'], 0],

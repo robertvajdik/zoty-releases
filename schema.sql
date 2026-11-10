@@ -153,3 +153,15 @@ CREATE TABLE IF NOT EXISTS `changelog_docs` (
   `updated_by` VARCHAR(160) NOT NULL DEFAULT '',
   UNIQUE KEY `uq_slug_lang` (`slug`, `lang`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
+
+-- ---------------------------------------------------------------- download center (admin/downloads, portal/downloads)
+
+CREATE TABLE IF NOT EXISTS `changelog_downloads` (
+  `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `title`      VARCHAR(160) NOT NULL,
+  `lang`       VARCHAR(5)   NOT NULL DEFAULT '' COMMENT 'cs | en | empty = every language',
+  `name`       VARCHAR(255) NOT NULL COMMENT 'original file name offered for download',
+  `path`       VARCHAR(255) NOT NULL COMMENT 'file name in data/downloads/',
+  `size`       INT UNSIGNED NOT NULL DEFAULT 0,
+  `created_at` DATETIME     NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;

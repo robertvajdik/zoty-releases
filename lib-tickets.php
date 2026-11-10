@@ -5,6 +5,7 @@ declare(strict_types=1);
  * Loaded from lib.php. Tables: changelog_customers, changelog_customer_users,
  * changelog_tickets, changelog_ticket_comments, changelog_ticket_files.
  * Attachments live in data/tickets/<ticket id>/ (not web-accessible) and are served by portal/file.php.
+ * Download-center PDFs (changelog_downloads) live in data/downloads/ and are served by portal/document.php.
  */
 
 const TICKET_TYPES      = ['incident', 'question', 'feature'];
@@ -162,6 +163,7 @@ function migrate_tickets(PDO $pdo, string $driver): void
     ) $opts");
     migrate_customer_contract($pdo, $driver);
     migrate_customer_active($pdo, $driver);
+    migrate_downloads($pdo, $driver);
 }
 
 /** v2: number of the customer's maintenance (support) contract, shown in the portal. */
@@ -188,6 +190,110 @@ function migrate_customer_active(PDO $pdo, string $driver): void
             ? "ALTER TABLE $c ADD COLUMN active INTEGER NOT NULL DEFAULT 1"
             : "ALTER TABLE `$c` ADD COLUMN active TINYINT(1) NOT NULL DEFAULT 1 AFTER contract");
     }
+}
+
+/** v4: PDF documents (e.g. installation manual) offered in the portal download center. */
+function migrate_downloads(PDO $pdo, string $driver): void
+{
+    $d = t('changelog_downloads');
+    if ($driver === 'sqlite') {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS $d (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            lang TEXT NOT NULL DEFAULT '',
+            name TEXT NOT NULL,
+            path TEXT NOT NULL,
+            size INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL)");
+        return;
+    }
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `$d` (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(160) NOT NULL,
+        lang VARCHAR(5) NOT NULL DEFAULT '',
+        name VARCHAR(255) NOT NULL,
+        path VARCHAR(255) NOT NULL,
+        size INT UNSIGNED NOT NULL DEFAULT 0,
+        created_at DATETIME NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci");
+}
+
+/* ---------------------------------------------------------------- download center documents (PDF) */
+
+const DOWNLOAD_MAX = 50 * 1024 * 1024;   // bytes per PDF
+
+function download_dir(): string
+{
+    return __DIR__ . '/data/downloads';
+}
+
+/** Documents, newest first; $lang limits to that language plus the language-neutral ones. */
+function fetch_downloads(?string $lang = null): array
+{
+    $sql = 'SELECT * FROM ' . t('changelog_downloads');
+    $args = [];
+    if ($lang !== null) { $sql .= " WHERE lang = '' OR lang = ?"; $args[] = $lang; }
+    try {
+        $st = db()->prepare($sql . ' ORDER BY created_at DESC, id DESC');
+        $st->execute($args);
+        return $st->fetchAll();
+    } catch (PDOException $ex) {
+        return [];   // table missing (auto_migrate off and schema.sql not applied)
+    }
+}
+
+function get_download(int $id): ?array
+{
+    $st = db()->prepare('SELECT * FROM ' . t('changelog_downloads') . ' WHERE id = ?');
+    $st->execute([$id]);
+    return $st->fetch() ?: null;
+}
+
+function download_path(array $d): string
+{
+    return download_dir() . '/' . basename((string)$d['path']);
+}
+
+/** Validates and stores an uploaded PDF; returns error messages (empty = saved). */
+function add_download(string $title, string $lang, ?array $f): array
+{
+    $title = trim(preg_replace('/\s+/u', ' ', $title));
+    if (!in_array($lang, LANGS, true)) $lang = '';
+    if (!$f || ($f['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) return ['Vyberte soubor PDF.'];
+    if ($f['error'] !== UPLOAD_ERR_OK) {
+        return [in_array($f['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
+            ? 'Soubor je příliš velký (limit serveru upload_max_filesize / post_max_size).' : 'Soubor se nepodařilo nahrát.'];
+    }
+    if ($f['size'] > DOWNLOAD_MAX) return ['Soubor je příliš velký (max. ' . DOWNLOAD_MAX / 1048576 . ' MB).'];
+    $head = (string)@file_get_contents($f['tmp_name'], false, null, 0, 5);
+    if ($head !== '%PDF-') return ['Povolený je pouze formát PDF.'];
+
+    $name = trim(preg_replace('/[\x00-\x1f"\\\\\/]+/u', '_', (string)$f['name'])) ?: 'document.pdf';
+    if (!str_ends_with(strtolower($name), '.pdf')) $name .= '.pdf';
+    if ($title === '') $title = pathinfo($name, PATHINFO_FILENAME);
+
+    $dir = download_dir();
+    if (!is_dir($dir) && !mkdir($dir, 0750, true)) return ['Nelze vytvořit složku data/downloads.'];
+    $stored = bin2hex(random_bytes(12)) . '.pdf';
+    if (!move_uploaded_file($f['tmp_name'], $dir . '/' . $stored)) return ['Soubor se nepodařilo uložit.'];
+    @chmod($dir . '/' . $stored, 0640);
+    db()->prepare('INSERT INTO ' . t('changelog_downloads') . ' (title, lang, name, path, size, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+        ->execute([mb_substr($title, 0, 160), $lang, mb_substr($name, 0, 255), $stored, (int)$f['size'], now()]);
+    return [];
+}
+
+function rename_download(int $id, string $title, string $lang): void
+{
+    $title = trim(preg_replace('/\s+/u', ' ', $title));
+    if ($title === '') return;
+    if (!in_array($lang, LANGS, true)) $lang = '';
+    db()->prepare('UPDATE ' . t('changelog_downloads') . ' SET title = ?, lang = ? WHERE id = ?')->execute([mb_substr($title, 0, 160), $lang, $id]);
+}
+
+function delete_download(int $id): void
+{
+    if ($d = get_download($id)) @unlink(download_path($d));
+    db()->prepare('DELETE FROM ' . t('changelog_downloads') . ' WHERE id = ?')->execute([$id]);
 }
 
 /* ---------------------------------------------------------------- customers & their users */
