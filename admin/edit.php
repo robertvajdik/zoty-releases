@@ -154,6 +154,7 @@ require __DIR__ . '/../partials/header.php';
         <textarea id="body" name="body" placeholder="Volitelný popis změny…"><?= h($e['body']) ?></textarea>
         <div class="upload-row">
           <button class="button button--ghost button--sm" type="button" id="img-btn">🖼 Vložit obrázek</button>
+          <button class="button button--ghost button--sm" type="button" id="img-clip" hidden>📋 Vložit ze schránky</button>
           <input type="file" id="img-file" accept="image/jpeg,image/png,image/gif,image/webp" multiple hidden>
           <span id="img-status" class="upload-status" aria-live="polite"></span>
         </div>
@@ -207,13 +208,13 @@ require __DIR__ . '/../partials/header.php';
 
     function upload(files) {
       files = Array.prototype.filter.call(files, function (f) { return /^image\//.test(f.type); });
-      if (!files.length) return;
+      if (!files.length) { status.textContent = 'Ve schránce není obrázek.'; return; }
       var left = files.length;
       status.textContent = 'Nahrávám…';
       files.forEach(function (f) {
         var fd = new FormData();
         fd.append('csrf', csrf);
-        fd.append('image', f, f.name || 'obrazek.png');
+        fd.append('image', f, f.name && f.name !== 'image.png' ? f.name : 'obrazek-' + Date.now() + '.' + (f.type.split('/')[1] || 'png'));
         fetch('upload', { method: 'POST', body: fd, credentials: 'same-origin' })
           .then(function (r) { return r.json(); })
           .then(function (j) {
@@ -227,10 +228,52 @@ require __DIR__ . '/../partials/header.php';
 
     document.getElementById('img-btn').addEventListener('click', function () { file.click(); });
     file.addEventListener('change', function () { upload(file.files); file.value = ''; });
-    ta.addEventListener('paste', function (e) {
-      var files = e.clipboardData && e.clipboardData.files;
-      if (files && files.length) { e.preventDefault(); upload(files); }
+    // images from the clipboard: files (screenshots, "copy image"), items, or data: images inside pasted HTML (Word, Outlook)
+    function dataUrlToFile(src) {
+      var m = /^data:(image\/[\w+.-]+);base64,(.*)$/.exec(src);
+      if (!m) return null;
+      var bin = atob(m[2]), buf = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      return new File([buf], 'obrazek.' + m[1].split('/')[1], { type: m[1] });
+    }
+    function clipboardImages(cd) {
+      if (!cd) return [];
+      var out = Array.prototype.filter.call(cd.files || [], function (f) { return /^image\//.test(f.type); });
+      if (!out.length && cd.items) {
+        Array.prototype.forEach.call(cd.items, function (it) {
+          if (it.kind === 'file' && /^image\//.test(it.type)) { var f = it.getAsFile(); if (f) out.push(f); }
+        });
+      }
+      if (!out.length) {
+        var html = cd.getData('text/html') || '', re = /<img[^>]+src=["'](data:image\/[^"']+)["']/gi, m;
+        while ((m = re.exec(html))) { var f = dataUrlToFile(m[1]); if (f) out.push(f); }
+      }
+      return out;
+    }
+    // Ctrl+V anywhere on the page (not in another text field) inserts into the description
+    document.addEventListener('paste', function (e) {
+      var t = e.target, inOther = t !== ta && t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+      if (inOther) return;
+      var files = clipboardImages(e.clipboardData);
+      if (files.length) { e.preventDefault(); if (t !== ta) ta.focus(); upload(files); }
     });
+    // explicit button (needs HTTPS and the browser's permission)
+    var clipBtn = document.getElementById('img-clip');
+    if (navigator.clipboard && navigator.clipboard.read && window.isSecureContext) {
+      clipBtn.hidden = false;
+      clipBtn.addEventListener('click', function () {
+        navigator.clipboard.read().then(function (items) {
+          var jobs = [];
+          items.forEach(function (it) {
+            var type = it.types.filter(function (x) { return /^image\//.test(x); })[0];
+            if (type) jobs.push(it.getType(type).then(function (b) { return new File([b], 'obrazek.' + type.split('/')[1], { type: type }); }));
+          });
+          return Promise.all(jobs);
+        }).then(upload).catch(function (err) {
+          status.textContent = 'Schránku nelze přečíst' + (err && err.name === 'NotAllowedError' ? ' – povolte přístup v prohlížeči, nebo použijte Ctrl+V.' : '.');
+        });
+      });
+    }
     ta.addEventListener('dragover', function (e) { e.preventDefault(); });
     ta.addEventListener('drop', function (e) {
       if (e.dataTransfer && e.dataTransfer.files.length) { e.preventDefault(); upload(e.dataTransfer.files); }
