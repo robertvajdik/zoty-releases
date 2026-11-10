@@ -180,6 +180,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--purple); }
 .footer__links { display: flex; gap: 18px; flex-wrap: wrap; }
 .footer__links a { color: var(--muted); text-decoration: none; font-weight: 400; }
 .footer__links a:hover { color: var(--purple); }
+.footer__admin { display: inline-flex; align-items: center; }
 .footer__copy { margin: 0 0 0 auto; color: var(--muted); font-size: 14px; }
 
 /* ---------- admin */
