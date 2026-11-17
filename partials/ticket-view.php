@@ -7,6 +7,9 @@
  * @var array $releaseEntries  release-note entries that mention this ticket
  */
 $releaseEntries = $releaseEntries ?? [];
+$participants = $participants ?? [];          // colleagues the ticket is shared with
+$shareCandidates = $shareCandidates ?? [];    // portal only: colleagues it can still be shared with
+$shareUrl = $shareUrl ?? '';                  // portal only: link to copy
 $filesByComment = [];
 foreach ($files as $f) $filesByComment[(int)($f['comment_id'] ?? 0)][] = $f;
 $done = in_array($ticket['status'], TICKET_DONE, true);
@@ -177,5 +180,50 @@ $reporter = $ticket['reporter_name'] ?: ($ticket['reporter_email'] ?: tr('ticket
         <dt><?= h(tr('ticket.updated')) ?></dt><dd><?= $fmt($ticket['updated_at']) ?></dd>
       </dl>
     </div>
+
+    <section class="side-card share" aria-labelledby="share-h">
+      <h2 class="share__h" id="share-h"><?= h($isStaff ? 'Sdíleno s' : tr('ticket.share.title')) ?></h2>
+      <?php if ($participants): ?>
+        <ul class="share__list">
+          <?php foreach ($participants as $p): $pName = $p['name'] ?: $p['email']; ?>
+            <li class="share__item<?= (int)$p['active'] ? '' : ' is-inactive' ?>">
+              <?= $avatar($pName) ?>
+              <span class="share__who"><?= h($pName) ?><?php if ($p['name'] !== ''): ?><small><?= h($p['email']) ?></small><?php endif; ?></span>
+              <?php if (!$isStaff): ?>
+                <form method="post" class="side-form">
+                  <?= csrf_field() ?>
+                  <input type="hidden" name="action" value="unshare">
+                  <input type="hidden" name="user_id" value="<?= (int)$p['id'] ?>">
+                  <button class="share__remove" type="submit" title="<?= h(tr('ticket.share.remove', ['name' => $pName])) ?>"
+                          aria-label="<?= h(tr('ticket.share.remove', ['name' => $pName])) ?>">×</button>
+                </form>
+              <?php endif; ?>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      <?php else: ?>
+        <p class="share__none"><?= h($isStaff ? 'Zákazník požadavek s nikým nesdílí.' : tr('ticket.share.none')) ?></p>
+      <?php endif; ?>
+      <?php if (!$isStaff): ?>
+        <?php if ($shareCandidates): ?>
+          <form method="post" class="share__form">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="share">
+            <label class="visually-hidden" for="share-user"><?= h(tr('ticket.share.with')) ?></label>
+            <select id="share-user" name="user_id" required>
+              <option value=""><?= h(tr('ticket.share.pick')) ?></option>
+              <?php foreach ($shareCandidates as $u): ?>
+                <option value="<?= (int)$u['id'] ?>"><?= h($u['name'] !== '' ? $u['name'] . ' (' . $u['email'] . ')' : $u['email']) ?></option>
+              <?php endforeach; ?>
+            </select>
+            <button class="button button--primary button--sm" type="submit"><?= h(tr('ticket.share.button')) ?></button>
+          </form>
+        <?php endif; ?>
+        <p class="share__hint"><?= h(tr('ticket.share.hint')) ?></p>
+        <?php if ($shareUrl !== ''): ?>
+          <button class="button button--ghost button--sm share__copy" type="button" data-copy="<?= h($shareUrl) ?>"><?= h(tr('ticket.share.copy_link')) ?></button>
+        <?php endif; ?>
+      <?php endif; ?>
+    </section>
   </aside>
 </div>

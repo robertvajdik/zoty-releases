@@ -141,6 +141,16 @@ CREATE TABLE IF NOT EXISTS `changelog_ticket_files` (
   CONSTRAINT `fk_changelog_ticket_files_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `changelog_tickets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
+CREATE TABLE IF NOT EXISTS `changelog_ticket_participants` (
+  `ticket_id`  INT UNSIGNED NOT NULL,
+  `user_id`    INT UNSIGNED NOT NULL COMMENT 'customer user the ticket is shared with',
+  `created_at` DATETIME     NOT NULL,
+  PRIMARY KEY (`ticket_id`, `user_id`),
+  KEY `idx_user` (`user_id`),
+  CONSTRAINT `fk_changelog_ticket_participants_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `changelog_tickets` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_changelog_ticket_participants_user` FOREIGN KEY (`user_id`) REFERENCES `changelog_customer_users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
+
 -- ---------------------------------------------------------------- manuals (admin/help, portal/help)
 
 CREATE TABLE IF NOT EXISTS `changelog_docs` (

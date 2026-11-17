@@ -3,7 +3,7 @@ declare(strict_types=1);
 /**
  * Zoty Release Notes – support tickets (customer portal + admin queue).
  * Loaded from lib.php. Tables: changelog_customers, changelog_customer_users,
- * changelog_tickets, changelog_ticket_comments, changelog_ticket_files.
+ * changelog_tickets, changelog_ticket_comments, changelog_ticket_files, changelog_ticket_participants.
  * Attachments live in data/tickets/<ticket id>/ (not web-accessible) and are served by portal/file.php.
  * Download-center PDFs (changelog_downloads) live in data/downloads/ and are served by portal/document.php.
  */
@@ -12,6 +12,7 @@ const TICKET_TYPES      = ['incident', 'question', 'feature'];
 const TICKET_SEVERITIES = ['crisis', 'high', 'medium', 'low'];
 const TICKET_STATUSES   = ['open', 'in_progress', 'waiting', 'resolved', 'closed'];
 const TICKET_DONE       = ['resolved', 'closed'];
+const TICKET_CLOUD_VERSION = 'zoty.cloud';    // product version for customers on the hosted service
 const TICKET_DEFAULT_OS = ['Windows 11', 'Windows Server 2022', 'Windows Server 2019', 'Linux', 'OpenShift', 'Kubernetes', 'Rancher'];
 const TICKET_FILE_MAX   = 10 * 1024 * 1024;   // bytes per file
 const TICKET_FILE_COUNT = 10;                  // files per upload
@@ -92,6 +93,7 @@ function migrate_tickets(PDO $pdo, string $driver): void
         $pdo->exec("CREATE INDEX IF NOT EXISTS {$fl}_ticket ON $fl (ticket_id)");
         migrate_customer_contract($pdo, $driver);
         migrate_customer_active($pdo, $driver);
+        migrate_ticket_participants($pdo, $driver);
         return;
     }
     $opts = 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci';
@@ -164,6 +166,7 @@ function migrate_tickets(PDO $pdo, string $driver): void
     migrate_customer_contract($pdo, $driver);
     migrate_customer_active($pdo, $driver);
     migrate_downloads($pdo, $driver);
+    migrate_ticket_participants($pdo, $driver);
 }
 
 /** v2: number of the customer's maintenance (support) contract, shown in the portal. */
@@ -215,6 +218,31 @@ function migrate_downloads(PDO $pdo, string $driver): void
         path VARCHAR(255) NOT NULL,
         size INT UNSIGNED NOT NULL DEFAULT 0,
         created_at DATETIME NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci");
+}
+
+/** v5: a request can be shared with colleagues of the same customer – they get the support e-mails too. */
+function migrate_ticket_participants(PDO $pdo, string $driver): void
+{
+    $p  = t('changelog_ticket_participants');
+    $tk = t('changelog_tickets');
+    $cu = t('changelog_customer_users');
+    if ($driver === 'sqlite') {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS $p (
+            ticket_id INTEGER NOT NULL REFERENCES $tk(id) ON DELETE CASCADE,
+            user_id INTEGER NOT NULL REFERENCES $cu(id) ON DELETE CASCADE,
+            created_at TEXT NOT NULL,
+            PRIMARY KEY (ticket_id, user_id))");
+        return;
+    }
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `$p` (
+        ticket_id INT UNSIGNED NOT NULL,
+        user_id INT UNSIGNED NOT NULL,
+        created_at DATETIME NOT NULL,
+        PRIMARY KEY (ticket_id, user_id),
+        KEY idx_user (user_id),
+        CONSTRAINT fk_{$p}_ticket FOREIGN KEY (ticket_id) REFERENCES `$tk` (id) ON DELETE CASCADE,
+        CONSTRAINT fk_{$p}_user FOREIGN KEY (user_id) REFERENCES `$cu` (id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci");
 }
 
@@ -406,6 +434,7 @@ function customer_user_set_active(int $id, bool $active): void
 
 function delete_customer_user(int $id): void
 {
+    db()->prepare('DELETE FROM ' . t('changelog_ticket_participants') . ' WHERE user_id = ?')->execute([$id]);
     db()->prepare('DELETE FROM ' . t('changelog_customer_users') . ' WHERE id = ?')->execute([$id]);
 }
 
@@ -566,12 +595,12 @@ function support_overview(): array
     ];
 }
 
-/** Form options: products = modules, versions = published versions, os from config. */
+/** Form options: products = modules, versions = zoty.cloud + published versions, os from config. */
 function ticket_options(): array
 {
     return [
         'product' => module_names(),
-        'product_version' => array_map(fn($v) => $v['version'], fetch_versions(true)),
+        'product_version' => array_merge([TICKET_CLOUD_VERSION], array_map(fn($v) => $v['version'], fetch_versions(true))),
         'os' => array_values(array_filter(array_map('strval', (array)support_config()['os']))),
     ];
 }
@@ -670,8 +699,51 @@ function delete_ticket(int $id): void
     foreach (ticket_files($id) as $f) @unlink(ticket_file_path($f));
     @rmdir(__DIR__ . '/data/tickets/' . $id);
     db()->prepare('DELETE FROM ' . t('changelog_ticket_files') . ' WHERE ticket_id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('changelog_ticket_participants') . ' WHERE ticket_id = ?')->execute([$id]);
     db()->prepare('DELETE FROM ' . t('changelog_ticket_comments') . ' WHERE ticket_id = ?')->execute([$id]);
     db()->prepare('DELETE FROM ' . t('changelog_tickets') . ' WHERE id = ?')->execute([$id]);
+}
+
+/* ---------------------------------------------------------------- sharing (participants) */
+
+/** Colleagues the ticket is shared with (customer users), in the order they were added. */
+function ticket_participants(int $ticketId): array
+{
+    $st = db()->prepare('SELECT u.id, u.name, u.email, u.lang, u.active FROM ' . t('changelog_ticket_participants') . ' p'
+        . ' JOIN ' . t('changelog_customer_users') . ' u ON u.id = p.user_id WHERE p.ticket_id = ? ORDER BY p.created_at, u.id');
+    $st->execute([$ticketId]);
+    return $st->fetchAll();
+}
+
+/** Active users of the ticket's customer it can still be shared with (not the reporter, not already shared). */
+function ticket_share_candidates(array $ticket, array $participants): array
+{
+    $skip = array_map(fn($p) => (int)$p['id'], $participants);
+    if ($ticket['user_id'] !== null) $skip[] = $ticket['user_id'];
+    return array_values(array_filter(fetch_customer_users($ticket['customer_id']),
+        fn($u) => (int)$u['active'] && !in_array((int)$u['id'], $skip, true)));
+}
+
+/** Shares the ticket with a colleague; returns the colleague, or null when not allowed / already shared. */
+function ticket_share(array $ticket, int $userId, array $by): ?array
+{
+    $u = get_customer_user($userId);
+    if (!$u || (int)$u['customer_id'] !== $ticket['customer_id'] || !(int)$u['active'] || (int)$u['id'] === $ticket['user_id']) return null;
+    foreach (ticket_participants($ticket['id']) as $p) if ((int)$p['id'] === $userId) return null;
+    db()->prepare('INSERT INTO ' . t('changelog_ticket_participants') . ' (ticket_id, user_id, created_at) VALUES (?, ?, ?)')
+        ->execute([$ticket['id'], $userId, now()]);
+    ticket_add_comment($ticket['id'], '', $by, '', 'shared:' . $userId);
+    return $u;
+}
+
+/** Stops sharing the ticket with a colleague; returns false when they were not a participant. */
+function ticket_unshare(array $ticket, int $userId, array $by): bool
+{
+    $st = db()->prepare('DELETE FROM ' . t('changelog_ticket_participants') . ' WHERE ticket_id = ? AND user_id = ?');
+    $st->execute([$ticket['id'], $userId]);
+    if (!$st->rowCount()) return false;
+    ticket_add_comment($ticket['id'], '', $by, '', 'unshared:' . $userId);
+    return true;
 }
 
 /* ---------------------------------------------------------------- attachments */
@@ -928,6 +1000,14 @@ function event_text(string $event): string
         return tr('ticket.event.' . $m[1], ['from' => $f($m[2]), 'to' => $f($m[3])]);
     }
     if ($event === 'created') return tr('ticket.event.created');
+    if (preg_match('/^(shared|unshared):(\d+)$/', $event, $m)) {
+        static $names = [];
+        if (!isset($names[$m[2]])) {
+            $u = get_customer_user((int)$m[2]);
+            $names[$m[2]] = $u ? ($u['name'] ?: $u['email']) : tr('ticket.deleted_user');
+        }
+        return tr('ticket.event.' . $m[1], ['name' => $names[$m[2]]]);
+    }
     return $event;
 }
 
@@ -963,15 +1043,33 @@ function notify_staff(array $ticket, string $what, string $body = ''): void
     mail_send($msgs);
 }
 
-/** E-mails the reporter about a support reply or a status change. Failures are only logged. */
+/** E-mails the reporter and the colleagues the ticket is shared with about a support reply or a status change. Failures are only logged. */
 function notify_customer(array $ticket, string $body = '', string $newStatus = ''): void
 {
-    $to = $ticket['reporter_email'];
-    if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return;
-    $L = in_array($ticket['reporter_lang'] ?? '', LANGS, true) ? $ticket['reporter_lang'] : 'cs';
+    $to = [];
+    if (filter_var($ticket['reporter_email'], FILTER_VALIDATE_EMAIL)) $to[mb_strtolower($ticket['reporter_email'])] = [$ticket['reporter_email'], (string)($ticket['reporter_lang'] ?? '')];
+    foreach (ticket_participants($ticket['id']) as $p) {
+        if ((int)$p['active'] && filter_var($p['email'], FILTER_VALIDATE_EMAIL)) $to[mb_strtolower($p['email'])] ??= [$p['email'], (string)$p['lang']];
+    }
+    if (!$to) return;
+    mail_send(array_map(fn($r) => customer_mail($ticket, $r[0], $r[1], $body, $newStatus), array_values($to)));
+}
+
+/** E-mails a colleague that the ticket has been shared with them. Failures are only logged. */
+function notify_shared(array $ticket, array $user, array $by): void
+{
+    if (!filter_var($user['email'], FILTER_VALIDATE_EMAIL)) return;
+    mail_send([customer_mail($ticket, $user['email'], (string)$user['lang'], '', '', ($by['name'] ?? '') ?: $by['email'])]);
+}
+
+/** One customer e-mail about the ticket, in the recipient's language. */
+function customer_mail(array $ticket, string $to, string $lang, string $body = '', string $newStatus = '', string $sharedBy = ''): array
+{
+    $L = in_array($lang, LANGS, true) ? $lang : 'cs';
     $url = site_url('portal/ticket?key=' . rawurlencode($ticket['key']));
     $subject = '[' . $ticket['key'] . '] ' . $ticket['summary'];
     $lines = [];
+    if ($sharedBy !== '') $lines[] = tr('ticket.mail.shared', ['name' => $sharedBy, 'key' => $ticket['key']], $L);
     if ($body !== '') $lines[] = tr('ticket.mail.reply', [], $L);
     if ($newStatus !== '') $lines[] = tr('ticket.mail.status', ['status' => status_label($newStatus, $L)], $L);
     $text = implode("\r\n", $lines) . "\r\n\r\n" . ($body !== '' ? $body . "\r\n\r\n" : '') . $url . "\r\n";
@@ -981,5 +1079,5 @@ function notify_customer(array $ticket, string $body = '', string $newStatus = '
           . ($body !== '' ? '<div style="color:#444;border-left:3px solid #d8d0e8;padding-left:12px">' . ticket_render($body) . '</div>' : '')
           . '<p style="margin:24px 0 0"><a href="' . h($url) . '" style="background:#6144a3;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block">'
           . h(tr('ticket.mail.open', [], $L)) . '</a></p>';
-    mail_send([['to' => $to, 'subject' => $subject, 'text' => $text, 'html' => mail_layout($ticket['key'], $html), 'tag' => $ticket['key'] . ' → zákazník']]);
+    return ['to' => $to, 'subject' => $subject, 'text' => $text, 'html' => mail_layout($ticket['key'], $html), 'tag' => $ticket['key'] . ' → zákazník'];
 }

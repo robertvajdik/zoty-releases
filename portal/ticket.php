@@ -35,6 +35,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$_POST && !empty($_SERVER['CONTENT
         header('Location: ' . $selfUrl);
         exit;
     }
+    if ($action === 'share') {
+        // share with a colleague of the same customer: they get the support e-mails too
+        if ($u = ticket_share($ticket, (int)($_POST['user_id'] ?? 0), $me)) {
+            notify_shared($ticket, $u, $me);
+            flash(tr('portal.shared', ['name' => $u['name'] ?: $u['email']]));
+        }
+        header('Location: ' . $selfUrl);
+        exit;
+    }
+    if ($action === 'unshare') {
+        $uid = (int)($_POST['user_id'] ?? 0);
+        $u = get_customer_user($uid);
+        if ($u && ticket_unshare($ticket, $uid, $me)) flash(tr('portal.unshared', ['name' => $u['name'] ?: $u['email']]));
+        header('Location: ' . $selfUrl);
+        exit;
+    }
     if ($action === 'comment') {
         $draft = str_replace("\r\n", "\n", trim((string)($_POST['body'] ?? '')));
         $files = uploaded_list($_FILES['files'] ?? null);
@@ -61,6 +77,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$_POST && !empty($_SERVER['CONTENT
 $comments = ticket_comments($ticket['id']);
 $files = ticket_files($ticket['id']);
 $releaseEntries = entries_for_ticket($ticket['key'], true);
+$participants = ticket_participants($ticket['id']);
+$shareCandidates = ticket_share_candidates($ticket, $participants);
+$shareUrl = site_url('portal/' . $selfUrl);
 $isStaff = false;
 $listUrl = './';
 $fileUrl = 'file?id=';

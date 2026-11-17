@@ -8,7 +8,7 @@ $opt = ticket_options();
 $d = ['type' => $type, 'product' => '', 'product_version' => '', 'os' => '', 'summary' => '', 'description' => '',
       'severity' => $type === 'incident' ? '' : 'low'];
 if (count($opt['product']) === 1) $d['product'] = $opt['product'][0];
-if ($opt['product_version']) $d['product_version'] = $opt['product_version'][0];   // newest version preselected
+$d['product_version'] = $opt['product_version'][1] ?? $opt['product_version'][0];   // newest version preselected (zoty.cloud is first)
 $err = [];
 $fileErr = [];
 

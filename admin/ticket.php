@@ -63,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$_POST && !empty($_SERVER['CONTENT
 $comments = ticket_comments($ticket['id']);
 $files = ticket_files($ticket['id']);
 $releaseEntries = entries_for_ticket($ticket['key'], false);
+$participants = ticket_participants($ticket['id']);
 $isStaff = true;
 $listUrl = 'tickets';
 $fileUrl = '../portal/file?id=';

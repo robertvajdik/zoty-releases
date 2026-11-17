@@ -443,3 +443,18 @@ select.tf__plain { appearance: auto; }
 .download__files li:first-child { border-top: 0; padding-top: 0; }
 .download__files a { font-weight: 600; overflow-wrap: anywhere; }
 .download__meta { color: var(--muted); font-size: 14px; white-space: nowrap; }
+
+/* sharing a request with colleagues (ticket side column) */
+.tk__side .side-card + .side-card { margin-top: 14px; }
+.share__h { margin: 0 0 10px; font: 600 14px/1.4 var(--font-head); }
+.share__list { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 8px; }
+.share__item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.share__item.is-inactive { opacity: .55; }
+.share__who { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.share__who small { display: block; color: var(--muted); font-size: 12px; }
+.share__remove { border: 0; background: none; color: var(--muted); font-size: 18px; line-height: 1; padding: 2px 6px; border-radius: 6px; cursor: pointer; }
+.share__remove:hover, .share__remove:focus-visible { color: var(--text); background: var(--purple-50); }
+.share__none { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.share__form { display: flex; gap: 8px; margin: 0; }
+.share__form select { flex: 1; min-width: 0; padding: 5px 8px; font-size: 14px; }
+.share__hint { margin: 10px 0 12px; color: var(--muted); font-size: 12.5px; line-height: 1.5; }

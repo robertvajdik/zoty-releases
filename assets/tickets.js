@@ -299,6 +299,21 @@
   }
   document.querySelectorAll('[data-drop]').forEach(drop);
 
+  /* ---------------------------------------------------------- copy a link (share a request) */
+  document.querySelectorAll('[data-copy]').forEach(function (b) {
+    var label = b.textContent;
+    b.addEventListener('click', function () {
+      var url = b.getAttribute('data-copy');
+      var done = function () { b.textContent = t('copied', 'Copied'); setTimeout(function () { b.textContent = label; }, 2000); };
+      if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(url).then(done, function () { window.prompt('', url); }); return; }
+      var ta = document.createElement('textarea');
+      ta.value = url; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { /* ignore */ }
+      document.body.removeChild(ta);
+    });
+  });
+
   /* ---------------------------------------------------------- forms: no double submit, required check */
   document.querySelectorAll('form[data-ticket-form]').forEach(function (form) {
     form.addEventListener('submit', function (e) {
