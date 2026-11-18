@@ -700,7 +700,10 @@ function site_url(string $path = ''): string
               || strtolower((string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
         $host  = preg_replace('/[^A-Za-z0-9.\-:\[\]]/', '', (string)($_SERVER['HTTP_HOST'] ?? 'localhost'));
         $dir   = str_replace(chr(92), '/', dirname((string)($_SERVER['SCRIPT_NAME'] ?? '/')));
-        $dir   = preg_replace('#/(admin|portal)$#', '', $dir);   // called from admin/*.php or portal/*.php
+        // called from admin/*.php or portal/*.php: go one level up to the app root
+        // (checked on disk, so an app installed in a folder named "portal" keeps its path)
+        $scriptDir = realpath(dirname((string)($_SERVER['SCRIPT_FILENAME'] ?? '')));
+        if ($scriptDir !== false && $scriptDir !== realpath(__DIR__)) $dir = str_replace(chr(92), "/", dirname($dir));
         $base  = ($https ? 'https' : 'http') . '://' . $host . rtrim($dir, '/') . '/';
     }
     return rtrim($base, '/') . '/' . ltrim($path, '/');

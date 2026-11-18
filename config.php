@@ -1,6 +1,8 @@
 <?php
 // Copy this file as config.php and fill in the database credentials.
 return [
+    // Absolute URL of the app root (trailing slash). Empty = auto-detect.
+    'base_url' => 'https://zoty.cz/dev/releases/',
     'db' => [
         // 'mysql' = MySQL / MariaDB (production), 'sqlite' = local file for development
         'driver' => 'mysql',

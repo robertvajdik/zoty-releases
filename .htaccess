@@ -4,16 +4,10 @@ AddDefaultCharset UTF-8
   Require all denied
 </FilesMatch>
 
-# Links use *.php; old extensionless URLs (/admin/edit) still resolve to admin/edit.php
 <IfModule mod_rewrite.c>
   RewriteEngine On
   # Generated files
   RewriteRule ^sitemap\.xml$ sitemap.php [L]
   RewriteRule ^robots\.txt$ robots.php [L]
   RewriteRule ^feed\.xml$ feed.php [L]
-  # Serve extensionless URL from the matching .php file (old links in e-mails)
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_FILENAME}.php -f
-  RewriteRule ^(.+?)/?$ $1.php [L]
 </IfModule>
