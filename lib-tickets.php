@@ -221,29 +221,49 @@ function migrate_downloads(PDO $pdo, string $driver): void
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci");
 }
 
-/** v5: a request can be shared with colleagues of the same customer – they get the support e-mails too. */
+/**
+ * v5: a request can be shared with anyone by e-mail. A colleague with a portal account signs in as usual,
+ * anyone else opens the request read-only through their personal link portal/shared?t=<token>.
+ */
 function migrate_ticket_participants(PDO $pdo, string $driver): void
 {
     $p  = t('changelog_ticket_participants');
     $tk = t('changelog_tickets');
-    $cu = t('changelog_customer_users');
-    if ($driver === 'sqlite') {
-        $pdo->exec("CREATE TABLE IF NOT EXISTS $p (
-            ticket_id INTEGER NOT NULL REFERENCES $tk(id) ON DELETE CASCADE,
-            user_id INTEGER NOT NULL REFERENCES $cu(id) ON DELETE CASCADE,
-            created_at TEXT NOT NULL,
-            PRIMARY KEY (ticket_id, user_id))");
+    $carry = [];
+    try {
+        $pdo->query("SELECT token FROM $p WHERE 1 = 0");
         return;
+    } catch (PDOException $ex) {
+        // missing, or the first version keyed by user_id (colleagues only) – keep its shares, then recreate it
+        try {
+            $carry = $pdo->query("SELECT p.ticket_id, u.email, p.created_at FROM $p p JOIN " . t('changelog_customer_users') . ' u ON u.id = p.user_id')->fetchAll();
+            $pdo->exec($driver === 'sqlite' ? "DROP TABLE $p" : "DROP TABLE `$p`");
+        } catch (PDOException $ex) {
+            // no table yet
+        }
     }
-    $pdo->exec("CREATE TABLE IF NOT EXISTS `$p` (
+    if ($driver === 'sqlite') {
+        $pdo->exec("CREATE TABLE $p (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticket_id INTEGER NOT NULL REFERENCES $tk(id) ON DELETE CASCADE,
+            email TEXT NOT NULL,
+            token TEXT NOT NULL UNIQUE,
+            shared_by TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL,
+            UNIQUE (ticket_id, email))");
+    } else $pdo->exec("CREATE TABLE `$p` (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
         ticket_id INT UNSIGNED NOT NULL,
-        user_id INT UNSIGNED NOT NULL,
+        email VARCHAR(190) NOT NULL,
+        token CHAR(48) NOT NULL,
+        shared_by VARCHAR(190) NOT NULL DEFAULT '',
         created_at DATETIME NOT NULL,
-        PRIMARY KEY (ticket_id, user_id),
-        KEY idx_user (user_id),
-        CONSTRAINT fk_{$p}_ticket FOREIGN KEY (ticket_id) REFERENCES `$tk` (id) ON DELETE CASCADE,
-        CONSTRAINT fk_{$p}_user FOREIGN KEY (user_id) REFERENCES `$cu` (id) ON DELETE CASCADE
+        UNIQUE KEY uq_ticket_email (ticket_id, email),
+        UNIQUE KEY uq_token (token),
+        CONSTRAINT fk_{$p}_ticket FOREIGN KEY (ticket_id) REFERENCES `$tk` (id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci");
+    $ins = $pdo->prepare("INSERT INTO $p (ticket_id, email, token, created_at) VALUES (?, ?, ?, ?)");
+    foreach ($carry as $r) $ins->execute([$r['ticket_id'], mb_strtolower($r['email']), bin2hex(random_bytes(24)), $r['created_at']]);
 }
 
 /* ---------------------------------------------------------------- download center documents (PDF) */
@@ -434,7 +454,6 @@ function customer_user_set_active(int $id, bool $active): void
 
 function delete_customer_user(int $id): void
 {
-    db()->prepare('DELETE FROM ' . t('changelog_ticket_participants') . ' WHERE user_id = ?')->execute([$id]);
     db()->prepare('DELETE FROM ' . t('changelog_customer_users') . ' WHERE id = ?')->execute([$id]);
 }
 
@@ -706,44 +725,81 @@ function delete_ticket(int $id): void
 
 /* ---------------------------------------------------------------- sharing (participants) */
 
-/** Colleagues the ticket is shared with (customer users), in the order they were added. */
-function ticket_participants(int $ticketId): array
+const TICKET_SHARE_MAX = 30;   // people per ticket
+
+/**
+ * People the ticket is shared with, in the order they were added. Each row: id, email, token, created_at,
+ * name, lang, member (1 = an active portal user of the ticket's customer, signs in; 0 = guest, uses the link)
+ * and blocked (1 = a deactivated portal user of the customer – no e-mails, the link does not work).
+ */
+function ticket_participants(array $ticket): array
 {
-    $st = db()->prepare('SELECT u.id, u.name, u.email, u.lang, u.active FROM ' . t('changelog_ticket_participants') . ' p'
-        . ' JOIN ' . t('changelog_customer_users') . ' u ON u.id = p.user_id WHERE p.ticket_id = ? ORDER BY p.created_at, u.id');
-    $st->execute([$ticketId]);
-    return $st->fetchAll();
+    $st = db()->prepare('SELECT p.id, p.email, p.token, p.created_at, u.name, u.lang, u.active FROM ' . t('changelog_ticket_participants') . ' p'
+        . ' LEFT JOIN ' . t('changelog_customer_users') . ' u ON LOWER(u.email) = p.email AND u.customer_id = ?'
+        . ' WHERE p.ticket_id = ? ORDER BY p.created_at, p.id');
+    $st->execute([$ticket['customer_id'], $ticket['id']]);
+    return array_map(fn($r) => ['name' => (string)$r['name'], 'lang' => (string)($r['lang'] ?? ''), 'member' => (int)($r['active'] ?? 0),
+        'blocked' => (int)($r['active'] !== null && !(int)$r['active'])] + $r, $st->fetchAll());
 }
 
-/** Active users of the ticket's customer it can still be shared with (not the reporter, not already shared). */
+/** Active colleagues (same customer) offered as suggestions in the share field: not the reporter, not already shared. */
 function ticket_share_candidates(array $ticket, array $participants): array
 {
-    $skip = array_map(fn($p) => (int)$p['id'], $participants);
-    if ($ticket['user_id'] !== null) $skip[] = $ticket['user_id'];
+    $skip = array_map(fn($p) => $p['email'], $participants);
+    $skip[] = mb_strtolower($ticket['reporter_email']);
     return array_values(array_filter(fetch_customer_users($ticket['customer_id']),
-        fn($u) => (int)$u['active'] && !in_array((int)$u['id'], $skip, true)));
+        fn($u) => (int)$u['active'] && !in_array(mb_strtolower($u['email']), $skip, true)));
 }
 
-/** Shares the ticket with a colleague; returns the colleague, or null when not allowed / already shared. */
-function ticket_share(array $ticket, int $userId, array $by): ?array
+/**
+ * Shares the ticket with an e-mail address. Returns [participant row, ''] on success,
+ * or [null, error translation key].
+ */
+function ticket_share(array $ticket, string $email, array $by): array
 {
-    $u = get_customer_user($userId);
-    if (!$u || (int)$u['customer_id'] !== $ticket['customer_id'] || !(int)$u['active'] || (int)$u['id'] === $ticket['user_id']) return null;
-    foreach (ticket_participants($ticket['id']) as $p) if ((int)$p['id'] === $userId) return null;
-    db()->prepare('INSERT INTO ' . t('changelog_ticket_participants') . ' (ticket_id, user_id, created_at) VALUES (?, ?, ?)')
-        ->execute([$ticket['id'], $userId, now()]);
-    ticket_add_comment($ticket['id'], '', $by, '', 'shared:' . $userId);
-    return $u;
+    $email = mb_strtolower(trim($email));
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 190) return [null, 'ticket.share.err_email'];
+    if ($email === mb_strtolower($ticket['reporter_email'])) return [null, 'ticket.share.err_reporter'];
+    $list = ticket_participants($ticket);
+    foreach ($list as $p) if ($p['email'] === $email) return [null, 'ticket.share.err_exists'];
+    if (count($list) >= TICKET_SHARE_MAX) return [null, 'ticket.share.err_max'];
+    db()->prepare('INSERT INTO ' . t('changelog_ticket_participants') . ' (ticket_id, email, token, shared_by, created_at) VALUES (?, ?, ?, ?, ?)')
+        ->execute([$ticket['id'], $email, bin2hex(random_bytes(24)), $by['email'], now()]);
+    ticket_add_comment($ticket['id'], '', $by, '', mb_substr('shared:' . $email, 0, 60));
+    foreach (ticket_participants($ticket) as $p) if ($p['email'] === $email) return [$p, ''];
+    return [null, 'ticket.share.err_email'];
 }
 
-/** Stops sharing the ticket with a colleague; returns false when they were not a participant. */
-function ticket_unshare(array $ticket, int $userId, array $by): bool
+/** Stops sharing the ticket with one participant (by participant id); returns their e-mail, or null. */
+function ticket_unshare(array $ticket, int $participantId, array $by): ?string
 {
-    $st = db()->prepare('DELETE FROM ' . t('changelog_ticket_participants') . ' WHERE ticket_id = ? AND user_id = ?');
-    $st->execute([$ticket['id'], $userId]);
-    if (!$st->rowCount()) return false;
-    ticket_add_comment($ticket['id'], '', $by, '', 'unshared:' . $userId);
-    return true;
+    foreach (ticket_participants($ticket) as $p) {
+        if ((int)$p['id'] !== $participantId) continue;
+        db()->prepare('DELETE FROM ' . t('changelog_ticket_participants') . ' WHERE id = ?')->execute([$participantId]);
+        ticket_add_comment($ticket['id'], '', $by, '', mb_substr('unshared:' . $p['email'], 0, 60));
+        return $p['email'];
+    }
+    return null;
+}
+
+/** Guest access: [ticket, participant] for a personal share link token, or null. */
+function ticket_by_share_token(string $token): ?array
+{
+    if (!preg_match('/^[0-9a-f]{48}$/', $token)) return null;
+    $st = db()->prepare('SELECT ticket_id, id FROM ' . t('changelog_ticket_participants') . ' WHERE token = ?');
+    $st->execute([$token]);
+    $r = $st->fetch();
+    $ticket = $r ? get_ticket((int)$r['ticket_id']) : null;
+    $customer = $ticket ? get_customer($ticket['customer_id']) : null;
+    if (!$ticket || !$customer || !(int)$customer['active']) return null;   // a deactivated customer: nobody gets in
+    foreach (ticket_participants($ticket) as $p) if ((int)$p['id'] === (int)$r['id']) return $p['blocked'] ? null : [$ticket, $p];
+    return null;
+}
+
+/** Where a participant opens the ticket: the portal for colleagues with an account, the personal link for guests. */
+function participant_url(array $ticket, array $p): string
+{
+    return $p['member'] ? site_url('portal/ticket?key=' . rawurlencode($ticket['key'])) : site_url('portal/shared?t=' . $p['token']);
 }
 
 /* ---------------------------------------------------------------- attachments */
@@ -1000,13 +1056,13 @@ function event_text(string $event): string
         return tr('ticket.event.' . $m[1], ['from' => $f($m[2]), 'to' => $f($m[3])]);
     }
     if ($event === 'created') return tr('ticket.event.created');
-    if (preg_match('/^(shared|unshared):(\d+)$/', $event, $m)) {
-        static $names = [];
-        if (!isset($names[$m[2]])) {
-            $u = get_customer_user((int)$m[2]);
-            $names[$m[2]] = $u ? ($u['name'] ?: $u['email']) : tr('ticket.deleted_user');
+    if (preg_match('/^(shared|unshared):(.+)$/', $event, $m)) {
+        $who = $m[2];
+        if (ctype_digit($who)) {   // first version stored the user id
+            $u = get_customer_user((int)$who);
+            $who = $u ? ($u['name'] ?: $u['email']) : tr('ticket.deleted_user');
         }
-        return tr('ticket.event.' . $m[1], ['name' => $names[$m[2]]]);
+        return tr('ticket.event.' . $m[1], ['name' => $who]);
     }
     return $event;
 }
@@ -1043,33 +1099,32 @@ function notify_staff(array $ticket, string $what, string $body = ''): void
     mail_send($msgs);
 }
 
-/** E-mails the reporter and the colleagues the ticket is shared with about a support reply or a status change. Failures are only logged. */
+/** E-mails the reporter and everyone the ticket is shared with about a support reply or a status change. Failures are only logged. */
 function notify_customer(array $ticket, string $body = '', string $newStatus = ''): void
 {
     $to = [];
-    if (filter_var($ticket['reporter_email'], FILTER_VALIDATE_EMAIL)) $to[mb_strtolower($ticket['reporter_email'])] = [$ticket['reporter_email'], (string)($ticket['reporter_lang'] ?? '')];
-    foreach (ticket_participants($ticket['id']) as $p) {
-        if ((int)$p['active'] && filter_var($p['email'], FILTER_VALIDATE_EMAIL)) $to[mb_strtolower($p['email'])] ??= [$p['email'], (string)$p['lang']];
+    if (filter_var($ticket['reporter_email'], FILTER_VALIDATE_EMAIL)) {
+        $to[mb_strtolower($ticket['reporter_email'])] = [$ticket['reporter_email'], (string)($ticket['reporter_lang'] ?? ''), site_url('portal/ticket?key=' . rawurlencode($ticket['key']))];
     }
+    foreach (ticket_participants($ticket) as $p) if (!$p['blocked']) $to[$p['email']] ??= [$p['email'], $p['lang'], participant_url($ticket, $p)];
     if (!$to) return;
-    mail_send(array_map(fn($r) => customer_mail($ticket, $r[0], $r[1], $body, $newStatus), array_values($to)));
+    mail_send(array_map(fn($r) => customer_mail($ticket, $r[0], $r[1], $r[2], $body, $newStatus), array_values($to)));
 }
 
-/** E-mails a colleague that the ticket has been shared with them. Failures are only logged. */
-function notify_shared(array $ticket, array $user, array $by): void
+/** E-mails a person that the ticket has been shared with them. Failures are only logged. */
+function notify_shared(array $ticket, array $p, array $by): void
 {
-    if (!filter_var($user['email'], FILTER_VALIDATE_EMAIL)) return;
-    mail_send([customer_mail($ticket, $user['email'], (string)$user['lang'], '', '', ($by['name'] ?? '') ?: $by['email'])]);
+    $lang = $p['lang'] !== '' ? $p['lang'] : (string)($by['lang'] ?? '');   // a guest gets the sharer's language
+    mail_send([customer_mail($ticket, $p['email'], $lang, participant_url($ticket, $p), '', '', ($by['name'] ?? '') ?: $by['email'])]);
 }
 
 /** One customer e-mail about the ticket, in the recipient's language. */
-function customer_mail(array $ticket, string $to, string $lang, string $body = '', string $newStatus = '', string $sharedBy = ''): array
+function customer_mail(array $ticket, string $to, string $lang, string $url, string $body = '', string $newStatus = '', string $sharedBy = ''): array
 {
     $L = in_array($lang, LANGS, true) ? $lang : 'cs';
-    $url = site_url('portal/ticket?key=' . rawurlencode($ticket['key']));
     $subject = '[' . $ticket['key'] . '] ' . $ticket['summary'];
     $lines = [];
-    if ($sharedBy !== '') $lines[] = tr('ticket.mail.shared', ['name' => $sharedBy, 'key' => $ticket['key']], $L);
+    if ($sharedBy !== '') $lines[] = tr('ticket.mail.shared', ['name' => $sharedBy, 'customer' => $ticket['customer_name']], $L);
     if ($body !== '') $lines[] = tr('ticket.mail.reply', [], $L);
     if ($newStatus !== '') $lines[] = tr('ticket.mail.status', ['status' => status_label($newStatus, $L)], $L);
     $text = implode("\r\n", $lines) . "\r\n\r\n" . ($body !== '' ? $body . "\r\n\r\n" : '') . $url . "\r\n";

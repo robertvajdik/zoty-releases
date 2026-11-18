@@ -142,13 +142,15 @@ CREATE TABLE IF NOT EXISTS `changelog_ticket_files` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
 CREATE TABLE IF NOT EXISTS `changelog_ticket_participants` (
+  `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `ticket_id`  INT UNSIGNED NOT NULL,
-  `user_id`    INT UNSIGNED NOT NULL COMMENT 'customer user the ticket is shared with',
+  `email`      VARCHAR(190) NOT NULL COMMENT 'anyone; a portal user of the customer signs in, others use the token link',
+  `token`      CHAR(48)     NOT NULL COMMENT 'personal read-only link portal/shared?t=<token>',
+  `shared_by`  VARCHAR(190) NOT NULL DEFAULT '' COMMENT 'e-mail of the portal user who shared it',
   `created_at` DATETIME     NOT NULL,
-  PRIMARY KEY (`ticket_id`, `user_id`),
-  KEY `idx_user` (`user_id`),
-  CONSTRAINT `fk_changelog_ticket_participants_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `changelog_tickets` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_changelog_ticket_participants_user` FOREIGN KEY (`user_id`) REFERENCES `changelog_customer_users` (`id`) ON DELETE CASCADE
+  UNIQUE KEY `uq_ticket_email` (`ticket_id`, `email`),
+  UNIQUE KEY `uq_token` (`token`),
+  CONSTRAINT `fk_changelog_ticket_participants_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `changelog_tickets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
 -- ---------------------------------------------------------------- manuals (admin/help, portal/help)

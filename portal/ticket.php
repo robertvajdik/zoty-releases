@@ -18,6 +18,8 @@ if (!$ticket) {
 $selfUrl = 'ticket?key=' . rawurlencode($ticket['key']);
 $errors = [];
 $draft = '';
+$shareError = '';
+$shareEmail = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$_POST && !empty($_SERVER['CONTENT_LENGTH'])) {
     $errors[] = tr('ticket.err.post_size');   // a POST larger than post_max_size arrives empty
@@ -36,18 +38,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$_POST && !empty($_SERVER['CONTENT
         exit;
     }
     if ($action === 'share') {
-        // share with a colleague of the same customer: they get the support e-mails too
-        if ($u = ticket_share($ticket, (int)($_POST['user_id'] ?? 0), $me)) {
-            notify_shared($ticket, $u, $me);
-            flash(tr('portal.shared', ['name' => $u['name'] ?: $u['email']]));
+        // share with anyone by e-mail: colleagues sign in, others get a personal read-only link; all get the support e-mails
+        $shareEmail = trim((string)($_POST['email'] ?? ''));
+        [$p, $err] = ticket_share($ticket, $shareEmail, $me);
+        if ($p) {
+            notify_shared($ticket, $p, $me);
+            flash(tr('portal.shared', ['name' => $p['name'] ?: $p['email']]));
+            header('Location: ' . $selfUrl);
+            exit;
         }
-        header('Location: ' . $selfUrl);
-        exit;
+        $shareError = tr($err);
     }
     if ($action === 'unshare') {
-        $uid = (int)($_POST['user_id'] ?? 0);
-        $u = get_customer_user($uid);
-        if ($u && ticket_unshare($ticket, $uid, $me)) flash(tr('portal.unshared', ['name' => $u['name'] ?: $u['email']]));
+        if ($email = ticket_unshare($ticket, (int)($_POST['participant'] ?? 0), $me)) flash(tr('portal.unshared', ['name' => $email]));
         header('Location: ' . $selfUrl);
         exit;
     }
@@ -77,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$_POST && !empty($_SERVER['CONTENT
 $comments = ticket_comments($ticket['id']);
 $files = ticket_files($ticket['id']);
 $releaseEntries = entries_for_ticket($ticket['key'], true);
-$participants = ticket_participants($ticket['id']);
+$participants = ticket_participants($ticket);
 $shareCandidates = ticket_share_candidates($ticket, $participants);
 $shareUrl = site_url('portal/' . $selfUrl);
 $isStaff = false;
