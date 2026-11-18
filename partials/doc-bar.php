@@ -5,7 +5,7 @@
  * @var string $slug  @var string $lang  @var ?array $doc  @var string $barMode 'view' | 'edit'
  */
 $barMode = $barMode ?? 'view';
-$page = $barMode === 'edit' ? 'docs' : 'manual';
+$page = $barMode === 'edit' ? 'docs.php' : 'manual.php';
 $url = fn(string $s, string $l) => $page . '?doc=' . rawurlencode($s) . '&amp;lang=' . rawurlencode($l);
 ?>
 <nav class="tabs doc-tabs" aria-label="Manuály">
@@ -27,7 +27,7 @@ $url = fn(string $s, string $l) => $page . '?doc=' . rawurlencode($s) . '&amp;la
         <a class="doc-bar__lang" href="<?= $url($slug, $l) ?>" lang="<?= $l ?>" <?= $l === $lang ? 'aria-current="true"' : '' ?>
            title="<?= h(doc_name($slug, $l)) ?>"><?= strtoupper($l) ?></a>
       <?php else: ?>
-        <a class="doc-bar__lang doc-bar__lang--add" href="docs?doc=<?= h(rawurlencode($slug)) ?>&amp;lang=<?= $l ?>"
+        <a class="doc-bar__lang doc-bar__lang--add" href="docs.php?doc=<?= h(rawurlencode($slug)) ?>&amp;lang=<?= $l ?>"
            title="Vytvořit jazykovou verzi <?= strtoupper($l) ?>">+ <?= strtoupper($l) ?></a>
       <?php endif; ?>
     <?php endforeach; ?>
@@ -49,7 +49,7 @@ $url = fn(string $s, string $l) => $page . '?doc=' . rawurlencode($s) . '&amp;la
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
         Přejmenovat
       </summary>
-      <form method="post" action="docs?doc=<?= h(rawurlencode($slug)) ?>&amp;lang=<?= h($lang) ?>" class="doc-name__form">
+      <form method="post" action="docs.php?doc=<?= h(rawurlencode($slug)) ?>&amp;lang=<?= h($lang) ?>" class="doc-name__form">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="rename">
         <label class="visually-hidden" for="doc-rename">Název manuálu (<?= strtoupper($lang) ?>)</label>
@@ -61,11 +61,11 @@ $url = fn(string $s, string $l) => $page . '?doc=' . rawurlencode($s) . '&amp;la
     </details>
       <?php endif; ?>
       <?php if (!empty(DOCS[$slug]['portal'])): ?>
-        <a class="button button--ghost button--sm" href="../portal/help?doc=<?= h(rawurlencode($slug)) ?>&amp;lang=<?= h($lang) ?>" target="_blank" rel="noopener">Zobrazit v portálu ↗</a>
+        <a class="button button--ghost button--sm" href="../portal/help.php?doc=<?= h(rawurlencode($slug)) ?>&amp;lang=<?= h($lang) ?>" target="_blank" rel="noopener">Zobrazit v portálu ↗</a>
       <?php endif; ?>
-      <a class="button button--primary button--sm" href="docs?doc=<?= h(rawurlencode($slug)) ?>&amp;lang=<?= h($lang) ?>"><?= $doc ? 'Upravit manuál' : 'Vytvořit' ?></a>
+      <a class="button button--primary button--sm" href="docs.php?doc=<?= h(rawurlencode($slug)) ?>&amp;lang=<?= h($lang) ?>"><?= $doc ? 'Upravit manuál' : 'Vytvořit' ?></a>
     <?php else: ?>
-      <a class="button button--ghost button--sm" href="manual?doc=<?= h(rawurlencode($slug)) ?>&amp;lang=<?= h($lang) ?>">← Zpět na manuál</a>
+      <a class="button button--ghost button--sm" href="manual.php?doc=<?= h(rawurlencode($slug)) ?>&amp;lang=<?= h($lang) ?>">← Zpět na manuál</a>
     <?php endif; ?>
   </div>
 </div>

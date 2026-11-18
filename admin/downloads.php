@@ -13,20 +13,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'delete' && ($target = get_download((int)($_POST['id'] ?? 0)))) {
         delete_download((int)$target['id']);
         flash('Dokument ' . $target['title'] . ' byl smazán.');
-        header('Location: downloads');
+        header('Location: downloads.php');
         exit;
     }
     if ($action === 'save' && $editing) {
         rename_download((int)$editing['id'], (string)($_POST['title'] ?? ''), (string)($_POST['lang'] ?? ''));
         flash('Dokument byl uložen.');
-        header('Location: downloads');
+        header('Location: downloads.php');
         exit;
     }
     if ($action === 'upload') {
         $errors = add_download((string)($_POST['title'] ?? ''), (string)($_POST['lang'] ?? ''), $_FILES['file'] ?? null);
         if (!$errors) {
             flash('Dokument byl nahrán.');
-            header('Location: downloads');
+            header('Location: downloads.php');
             exit;
         }
     }
@@ -44,13 +44,13 @@ require __DIR__ . '/../partials/header.php';
 
   <div class="admin__head">
     <h1>Ke stažení</h1>
-    <a class="button button--ghost" href="../portal/downloads" target="_blank" rel="noopener">Zobrazit v portálu ↗</a>
+    <a class="button button--ghost" href="../portal/downloads.php" target="_blank" rel="noopener">Zobrazit v portálu ↗</a>
   </div>
 
   <?php if ($errors): ?><div class="flash flash--error"><?= implode('<br>', array_map('h', $errors)) ?></div><?php endif; ?>
 
   <?php if ($editing): ?>
-  <form class="card" method="post" action="downloads?id=<?= (int)$editing['id'] ?>" id="form">
+  <form class="card" method="post" action="downloads.php?id=<?= (int)$editing['id'] ?>" id="form">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="save">
     <h2 class="card__title">Upravit dokument <?= h($editing['name']) ?></h2>
@@ -70,11 +70,11 @@ require __DIR__ . '/../partials/header.php';
     </div>
     <div class="form-actions">
       <button class="button button--primary" type="submit">Uložit</button>
-      <a class="button button--ghost" href="downloads">Zrušit</a>
+      <a class="button button--ghost" href="downloads.php">Zrušit</a>
     </div>
   </form>
   <?php else: ?>
-  <form class="card" method="post" action="downloads" enctype="multipart/form-data" id="form">
+  <form class="card" method="post" action="downloads.php" enctype="multipart/form-data" id="form">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="upload">
     <h2 class="card__title">Nahrát dokument PDF</h2>
@@ -116,13 +116,13 @@ require __DIR__ . '/../partials/header.php';
       <?php endif; ?>
       <?php foreach ($docs as $d): ?>
         <tr<?= $editing && (int)$editing['id'] === (int)$d['id'] ? ' class="is-current"' : '' ?>>
-          <td class="cell-title" data-label="Dokument"><a href="../portal/document?id=<?= (int)$d['id'] ?>"><?= h($d['title']) ?></a><br><small><?= h($d['name']) ?></small></td>
+          <td class="cell-title" data-label="Dokument"><a href="../portal/document.php?id=<?= (int)$d['id'] ?>"><?= h($d['title']) ?></a><br><small><?= h($d['name']) ?></small></td>
           <td data-label="Jazyk"><?= h($langNames[$d['lang']] ?? $d['lang']) ?></td>
           <td class="nowrap" data-label="Velikost"><?= h(fmt_bytes((int)$d['size'])) ?></td>
           <td class="nowrap" data-label="Nahráno"><?= h(date('j. n. Y', strtotime((string)$d['created_at']))) ?></td>
           <td class="cell-actions">
             <div class="row-actions">
-              <a class="button button--ghost button--sm" href="downloads?id=<?= (int)$d['id'] ?>#form">Upravit</a>
+              <a class="button button--ghost button--sm" href="downloads.php?id=<?= (int)$d['id'] ?>#form">Upravit</a>
               <form method="post" onsubmit="return confirm(<?= h(json_encode('Opravdu smazat dokument ' . $d['title'] . '?', JSON_UNESCAPED_UNICODE)) ?>)">
                 <?= csrf_field() ?><input type="hidden" name="id" value="<?= (int)$d['id'] ?>"><input type="hidden" name="action" value="delete">
                 <button class="button button--danger button--sm" type="submit">Smazat</button>

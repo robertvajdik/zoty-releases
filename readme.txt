@@ -14,7 +14,7 @@ REQUIREMENTS
 - PHP 8.0 or newer with the pdo_mysql extension
   (or pdo_sqlite for local development)
 - MySQL or MariaDB
-- Apache with mod_rewrite (for clean URLs and the .htaccess protections)
+- Apache (.htaccess protections; mod_rewrite optional, maps feed.xml/sitemap.xml/robots.txt)
 
 
 INSTALLATION
@@ -112,18 +112,18 @@ PUBLIC SITE
 
 /                 changelog with search and filters
                   (version, type, module, date range)
-/export           Markdown export, same filters as the page,
-                  e.g. export?version=v1.42.07&type=fixed
+/export.php       Markdown export, same filters as the page,
+                  e.g. export.php?version=v1.42.07&type=fixed
 /portal/          customer support portal (sign-in for customer users):
                   list of the customer's requests, new request
                   (Support Incident / Question / Feature Request),
                   request detail with comments and attachments
-/portal/help      customer help (signed-in customers only, CS/EN, edited in admin)
+/portal/help.php  customer help (signed-in customers only, CS/EN, edited in admin)
 /feed.xml         Atom feed
 /sitemap.xml      sitemap
 /robots.txt       robots
-/subscribe        e-mail subscription (double opt-in)
-/unsubscribe      cancel subscription
+/subscribe.php    e-mail subscription (double opt-in)
+/unsubscribe.php  cancel subscription
 
 Languages: Czech and English. Texts are in lang/cs.properties and
 lang/en.properties.

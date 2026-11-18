@@ -7,7 +7,7 @@ if (!$ticket) {
     http_response_code(404);
     exit('Požadavek nenalezen.');
 }
-$selfUrl = 'ticket?key=' . rawurlencode($ticket['key']);
+$selfUrl = 'ticket.php?key=' . rawurlencode($ticket['key']);
 $staff = (string)($_SESSION['zoty_admin'] ?? 'Podpora');
 $errors = [];
 $draft = '';
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$_POST && !empty($_SERVER['CONTENT
     if ($action === 'delete') {
         delete_ticket($ticket['id']);
         flash('Požadavek ' . $ticket['key'] . ' byl smazán.');
-        header('Location: tickets');
+        header('Location: tickets.php');
         exit;
     }
     if ($action === 'comment') {
@@ -65,8 +65,8 @@ $files = ticket_files($ticket['id']);
 $releaseEntries = entries_for_ticket($ticket['key'], false);
 $participants = ticket_participants($ticket);
 $isStaff = true;
-$listUrl = 'tickets';
-$fileUrl = '../portal/file?id=';
+$listUrl = 'tickets.php';
+$fileUrl = '../portal/file.php?id=';
 
 $base_path = '../';
 $admin_area = true;

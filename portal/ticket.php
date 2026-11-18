@@ -15,7 +15,7 @@ if (!$ticket) {
     require __DIR__ . '/../partials/footer.php';
     exit;
 }
-$selfUrl = 'ticket?key=' . rawurlencode($ticket['key']);
+$selfUrl = 'ticket.php?key=' . rawurlencode($ticket['key']);
 $errors = [];
 $draft = '';
 $shareError = '';
@@ -92,7 +92,7 @@ $shareCandidates = ticket_share_candidates($ticket, $participants);
 $shareUrl = ticket_share_link($ticket);   // unique token link, opens the request read-only without signing in
 $isStaff = false;
 $listUrl = './';
-$fileUrl = 'file?id=';
+$fileUrl = 'file.php?id=';
 
 $base_path = '../';
 $portal_area = true;

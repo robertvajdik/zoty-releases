@@ -5,7 +5,7 @@ require_admin();
 
 $slug = isset(DOCS[$_GET['doc'] ?? '']) ? (string)$_GET['doc'] : 'admin';
 $lang = in_array($_GET['lang'] ?? '', LANGS, true) ? (string)$_GET['lang'] : doc_langs($slug)[0];
-$selfUrl = 'docs?doc=' . rawurlencode($slug) . '&lang=' . rawurlencode($lang);
+$selfUrl = 'docs.php?doc=' . rawurlencode($slug) . '&lang=' . rawurlencode($lang);
 $doc = doc_get($slug, $lang);
 $who = (string)($_SESSION['zoty_admin'] ?? '');
 $errors = [];
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             doc_rename($slug, $lang, $title);
             flash($title === '' ? 'Obnoven výchozí název manuálu.' : 'Manuál přejmenován na „' . $title . '“.');
         }
-        header('Location: manual?doc=' . rawurlencode($slug) . '&lang=' . rawurlencode($lang));
+        header('Location: manual.php?doc=' . rawurlencode($slug) . '&lang=' . rawurlencode($lang));
         exit;
     }
     if ($action === 'reset') {
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$errors) {
         doc_save($slug, $lang, $body, $who, $title);
         flash('Manuál byl uložen.');
-        header('Location: ' . (isset($_POST['view']) ? 'manual?doc=' . rawurlencode($slug) . '&lang=' . rawurlencode($lang) : $selfUrl));
+        header('Location: ' . (isset($_POST['view']) ? 'manual.php?doc=' . rawurlencode($slug) . '&lang=' . rawurlencode($lang) : $selfUrl));
         exit;
     }
 }
@@ -72,7 +72,7 @@ $pageTitle = 'Upravit manuál';
 require __DIR__ . '/../partials/header.php';
 ?>
 <main class="container admin admin--wide">
-  <?php if ($m = flash()): ?><div class="flash"><?= h($m) ?> <a href="manual?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">Zobrazit manuál</a></div><?php endif; ?>
+  <?php if ($m = flash()): ?><div class="flash"><?= h($m) ?> <a href="manual.php?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">Zobrazit manuál</a></div><?php endif; ?>
   <h1 class="visually-hidden">Upravit manuál: <?= h(doc_name($slug, $lang)) ?> (<?= strtoupper($lang) ?>)</h1>
   <?php $barMode = 'edit'; require __DIR__ . '/../partials/doc-bar.php'; ?>
 
@@ -111,7 +111,7 @@ require __DIR__ . '/../partials/header.php';
     <div class="form-actions doc-edit__actions">
       <button class="button button--primary" type="submit">Uložit</button>
       <button class="button button--ghost" type="submit" name="view" value="1">Uložit a zobrazit</button>
-      <a class="button button--ghost" href="manual?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">Zrušit</a>
+      <a class="button button--ghost" href="manual.php?doc=<?= h($slug) ?>&amp;lang=<?= h($lang) ?>">Zrušit</a>
     </div>
   </form>
 
@@ -153,7 +153,7 @@ require __DIR__ . '/../partials/header.php';
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); dirty = false; form.submit(); }
     });
 
-    // images: toolbar button, paste, drag & drop -> admin/upload -> docs/manual/img -> ![alt](img/…)
+    // images: toolbar button, paste, drag & drop -> admin/upload.php -> docs/manual/img -> ![alt](img/…)
     function insert(text) {
       var a = ta.selectionStart, b = ta.selectionEnd, v = ta.value;
       var before = v.slice(0, a), after = v.slice(b);
@@ -171,7 +171,7 @@ require __DIR__ . '/../partials/header.php';
         var fd = new FormData();
         fd.append('csrf', csrf);
         fd.append('image', f, f.name || 'obrazek.png');
-        fetch('upload?for=doc', { method: 'POST', body: fd, credentials: 'same-origin' })
+        fetch('upload.php?for=doc', { method: 'POST', body: fd, credentials: 'same-origin' })
           .then(function (r) { return r.json(); })
           .then(function (j) { if (j.error) throw new Error(j.error); insert(j.markdown); status.textContent = 'Obrázek vložen – neuloženo'; })
           .catch(function (err) { status.textContent = 'Chyba: ' + (err.message || 'nahrání selhalo'); });

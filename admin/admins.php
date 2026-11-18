@@ -36,13 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $msg = 'Administrátor ' . $nf['email'] . ' byl přidán.';
             if ($nf['send']) $msg .= send_admin_access($nf['email'], $nf['password']) ? ' Přístup byl odeslán e-mailem.' : ' E-mail s přístupem se nepodařilo odeslat – předejte heslo jinak.';
             flash($msg);
-            header('Location: admins');
+            header('Location: admins.php');
             exit;
         }
     } elseif ($target && $action === 'notify') {
         admin_set_notify((int)$target['id'], !(int)$target['notify_tickets']);
         flash((int)$target['notify_tickets'] ? 'E-maily o požadavcích pro ' . $target['username'] . ' vypnuty.' : 'E-maily o požadavcích pro ' . $target['username'] . ' zapnuty.');
-        header('Location: admins');
+        header('Location: admins.php');
         exit;
     } elseif ($target && $action === 'password') {
         $pw = (string)($_POST['password'] ?? '');
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             admin_set_password((int)$target['id'], $pw);
             flash('Heslo pro ' . $target['username'] . ' bylo změněno.');
-            header('Location: admins');
+            header('Location: admins.php');
             exit;
         }
     } elseif ($target && $action === 'delete') {
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             admin_delete((int)$target['id']);
             flash('Administrátor ' . $target['username'] . ' byl smazán.');
-            header('Location: admins');
+            header('Location: admins.php');
             exit;
         }
     }
@@ -111,7 +111,7 @@ require __DIR__ . '/../partials/header.php';
             <td class="cell-muted" data-label="Přihlášení"><?= $a['last_login'] ? h(date('d.m.Y H:i', strtotime((string)$a['last_login']))) : '—' ?></td>
             <td class="cell-actions">
               <div class="row-actions">
-                <a class="button button--ghost button--sm" href="admins?password=<?= (int)$a['id'] ?>#pw-form">Změnit heslo</a>
+                <a class="button button--ghost button--sm" href="admins.php?password=<?= (int)$a['id'] ?>#pw-form">Změnit heslo</a>
                 <?php if (!$isMe && count($admins) > 1): ?>
                   <form method="post" onsubmit="return confirm(<?= h(json_encode('Smazat administrátora ' . $a['username'] . '?', JSON_UNESCAPED_UNICODE)) ?>)">
                     <?= csrf_field() ?><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int)$a['id'] ?>">
@@ -143,7 +143,7 @@ require __DIR__ . '/../partials/header.php';
         </div>
         <div class="form-actions">
           <button class="button button--primary" type="submit">Změnit heslo</button>
-          <a class="button button--ghost" href="admins">Zrušit</a>
+          <a class="button button--ghost" href="admins.php">Zrušit</a>
         </div>
       </form>
     <?php endif; ?>

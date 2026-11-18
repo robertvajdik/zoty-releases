@@ -14,14 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'html' => mail_layout('Testovací e-mail', '<p>Testovací e-mail z administrace přehledu změn Zoty.</p><p><b>Odesílání funguje.</b></p>'), 'tag' => 'Test']]);
             flash($r['sent'] ? 'Testovací e-mail byl odeslán na ' . $to . '.' : 'Odeslání selhalo: ' . ($r['error'] ?? 'neznámá chyba'));
         }
-        header('Location: subscribers#mail-log');
+        header('Location: subscribers.php#mail-log');
         exit;
     }
     if (($_POST['action'] ?? '') === 'delete' && ($id = (int)($_POST['id'] ?? 0))) {
         subscriber_delete($id);
         flash('Odběratel byl odebrán.');
     }
-    header('Location: subscribers');
+    header('Location: subscribers.php');
     exit;
 }
 
@@ -43,7 +43,7 @@ require __DIR__ . '/../partials/header.php';
   <div class="admin__head">
     <h1>Odběratelé novinek</h1>
     <div class="admin__actions">
-      <a class="button button--ghost" href="versions">Rozeslat verzi…</a>
+      <a class="button button--ghost" href="versions.php">Rozeslat verzi…</a>
     </div>
   </div>
 
@@ -52,7 +52,7 @@ require __DIR__ . '/../partials/header.php';
     <div class="stat"><b><?= count($subs) - $confirmed ?></b><span>čeká na potvrzení</span></div>
   </div>
 
-  <p class="admin__hint">E-mail o nové verzi rozešlete v sekci <a href="versions">Verze</a> tlačítkem <b>Rozeslat</b>. Dostanou ho jen potvrzení odběratelé.</p>
+  <p class="admin__hint">E-mail o nové verzi rozešlete v sekci <a href="versions.php">Verze</a> tlačítkem <b>Rozeslat</b>. Dostanou ho jen potvrzení odběratelé.</p>
 
   <div class="table-wrap card">
     <table class="table table--cards">
@@ -98,8 +98,8 @@ require __DIR__ . '/../partials/header.php';
     <div class="mail-log-card__head">
       <h2 class="card__title" id="mail-log-h">Log odesílání e-mailů</h2>
       <nav class="tabs tabs--compact" aria-label="Filtr logu">
-        <a href="subscribers#mail-log" <?= !$logErrors ? 'aria-current="page"' : '' ?>>Vše<b><?= $logStats['ok'] + $logStats['failed'] ?></b></a>
-        <a href="subscribers?log=errors#mail-log" <?= $logErrors ? 'aria-current="page"' : '' ?>>Jen chyby<b><?= $logStats['failed'] ?></b></a>
+        <a href="subscribers.php#mail-log" <?= !$logErrors ? 'aria-current="page"' : '' ?>>Vše<b><?= $logStats['ok'] + $logStats['failed'] ?></b></a>
+        <a href="subscribers.php?log=errors#mail-log" <?= $logErrors ? 'aria-current="page"' : '' ?>>Jen chyby<b><?= $logStats['failed'] ?></b></a>
       </nav>
     </div>
     <p class="admin__hint">Každý odeslaný i neodeslaný e-mail: potvrzení odběru, rozesílky verzí, upozornění k požadavkům, přístupy do portálu a testy. Uchovává se posledních <?= MAIL_LOG_KEEP ?> záznamů (<code>data/mail.log</code>).</p>
@@ -124,7 +124,7 @@ require __DIR__ . '/../partials/header.php';
       </table>
     </div>
     <?php if ($logLimit < MAIL_LOG_KEEP && count($mailLog) >= $logLimit): ?>
-      <p class="mail-log-card__more"><a href="subscribers?<?= $logErrors ? 'log=errors&amp;' : '' ?>all=1#mail-log">Zobrazit celý log</a></p>
+      <p class="mail-log-card__more"><a href="subscribers.php?<?= $logErrors ? 'log=errors&amp;' : '' ?>all=1#mail-log">Zobrazit celý log</a></p>
     <?php endif; ?>
   </section>
 </main>

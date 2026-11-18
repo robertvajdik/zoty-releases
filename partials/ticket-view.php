@@ -2,7 +2,7 @@
 /**
  * Ticket detail, shared by portal/ticket.php and admin/ticket.php.
  * @var array $ticket  @var array $comments  @var array $files  @var bool $isStaff
- * @var string $listUrl  link back to the list   @var string $fileUrl  prefix for attachment links ("file?id=")
+ * @var string $listUrl  link back to the list   @var string $fileUrl  prefix for attachment links ("file.php?id=")
  * @var array $errors   form errors              @var string $draft  unsent comment text
  * @var array $releaseEntries  release-note entries that mention this ticket
  * @var bool $readOnly  guest view (portal/shared.php)
@@ -70,7 +70,7 @@ $reporter = $ticket['reporter_name'] ?: ($ticket['reporter_email'] ?: tr('ticket
           <?php foreach ($releaseEntries as $re): ?>
             <li>
               <span class="tag tag--<?= h($re['type']) ?>"><?= h(type_label($re['type'])) ?></span>
-              <a href="<?= h($isStaff ? 'edit?id=' . $re['id'] : site_url('?version=' . rawurlencode($re['version']) . '#e' . $re['id'])) ?>"><?= h($re['title']) ?></a>
+              <a href="<?= h($isStaff ? 'edit.php?id=' . $re['id'] : site_url('?version=' . rawurlencode($re['version']) . '#e' . $re['id'])) ?>"><?= h($re['title']) ?></a>
               <span class="rel-list__ver"><?= h(tr('release.version', ['version' => $re['version']])) ?> · <?= fmt_date($re['date']) ?><?= $isStaff && (!$re['published'] || !$re['version_published']) ? ' · <span class="tag tag--draft">nepublikováno</span>' : '' ?></span>
             </li>
           <?php endforeach; ?>
@@ -175,7 +175,7 @@ $reporter = $ticket['reporter_name'] ?: ($ticket['reporter_email'] ?: tr('ticket
         <dt><?= h(tr('ticket.product_version')) ?></dt><dd><?= h(option_label($ticket['product_version'])) ?></dd>
         <dt><?= h(tr('ticket.os')) ?></dt><dd><?= h(option_label($ticket['os'])) ?></dd>
         <?php if ($isStaff): ?>
-          <dt>Zákazník</dt><dd><a href="customers?id=<?= (int)$ticket['customer_id'] ?>"><?= h($ticket['customer_name']) ?></a></dd>
+          <dt>Zákazník</dt><dd><a href="customers.php?id=<?= (int)$ticket['customer_id'] ?>"><?= h($ticket['customer_name']) ?></a></dd>
         <?php endif; ?>
         <dt><?= h(tr('ticket.reporter')) ?></dt>
         <dd><?= h($reporter) ?><?php if ($isStaff && $ticket['reporter_email'] !== ''): ?><br><a href="mailto:<?= h($ticket['reporter_email']) ?>"><?= h($ticket['reporter_email']) ?></a><?php endif; ?></dd>
@@ -184,7 +184,7 @@ $reporter = $ticket['reporter_name'] ?: ($ticket['reporter_email'] ?: tr('ticket
         <dt><?= h(tr('ticket.updated')) ?></dt><dd><?= $fmt($ticket['updated_at']) ?></dd>
       </dl>
       <?php if ($isStaff): ?>
-        <a class="button button--ghost button--sm side-card__action" href="edit?ticket=<?= h(rawurlencode($ticket['key'])) ?>">+ Zapsat do release notes</a>
+        <a class="button button--ghost button--sm side-card__action" href="edit.php?ticket=<?= h(rawurlencode($ticket['key'])) ?>">+ Zapsat do release notes</a>
       <?php endif; ?>
     </div>
 

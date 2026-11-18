@@ -14,17 +14,17 @@ if ($isAdminArea && is_admin()) {
     $tStats = ticket_stats();
     $waitingOnUs = $tStats['open'];
     $adminNav = $adminSection === 'help' ? [
-        ['manual', 'Manuály', ['manual.php', 'docs.php'], 0],
+        ['manual.php', 'Manuály', ['manual.php', 'docs.php'], 0],
     ] : ($adminSection === 'support' ? [
-        ['tickets',   'Požadavky', ['tickets.php', 'ticket.php'], $tStats['open'] + $tStats['in_progress'] + $tStats['waiting']],
-        ['customers', 'Zákazníci a přístupy', ['customers.php'], 0],
-        ['downloads', 'Ke stažení', ['downloads.php'], 0],
-        ['admins',    'Administrátoři', ['admins.php'], 0],
+        ['tickets.php',   'Požadavky', ['tickets.php', 'ticket.php'], $tStats['open'] + $tStats['in_progress'] + $tStats['waiting']],
+        ['customers.php', 'Zákazníci a přístupy', ['customers.php'], 0],
+        ['downloads.php', 'Ke stažení', ['downloads.php'], 0],
+        ['admins.php',    'Administrátoři', ['admins.php'], 0],
     ] : [
         ['./',          'Záznamy',    ['index.php', 'edit.php'], 0],
-        ['versions',    'Verze',      ['versions.php'], 0],
-        ['modules',     'Moduly',     ['modules.php'], 0],
-        ['subscribers', 'Odběratelé', ['subscribers.php'], 0],
+        ['versions.php',    'Verze',      ['versions.php'], 0],
+        ['modules.php',     'Moduly',     ['modules.php'], 0],
+        ['subscribers.php', 'Odběratelé', ['subscribers.php'], 0],
     ]);
 }
 ?><!doctype html>
@@ -44,14 +44,14 @@ if ($isAdminArea && is_admin()) {
   <link rel="stylesheet" href="<?= $base ?>assets/style.css?v=15">
   <?php if ($isAdminArea || $isPortal): ?><link rel="stylesheet" href="<?= $base ?>assets/tickets.css?v=25"><?php endif; ?>
   <?php if ($isAdminArea): ?><link rel="stylesheet" href="<?= $base ?>assets/admin.css?v=2"><?php endif; ?>
-  <link rel="alternate" type="application/atom+xml" title="<?= h(tr('site.name')) ?>" href="<?= $base ?>feed.xml">
+  <link rel="alternate" type="application/atom+xml" title="<?= h(tr('site.name')) ?>" href="<?= $base ?>feed.php">
   <?= $headExtra ?? '' ?>
   <?= analytics_script() ?>
 </head>
 <body class="<?= $isAdminArea ? 'is-admin is-admin--' . $adminSection : ($isPortal ? 'is-portal' : '') ?>">
 <header class="header">
   <nav class="navbar container">
-    <a class="navbar__logo" href="<?= $isAdminArea && is_admin() ? $base . ($adminSection === 'support' ? 'admin/tickets' : 'admin/') : ($isPortal ? $base . 'portal/' : $base . './') ?>">
+    <a class="navbar__logo" href="<?= $isAdminArea && is_admin() ? $base . ($adminSection === 'support' ? 'admin/tickets.php' : 'admin/') : ($isPortal ? $base . 'portal/' : $base . './') ?>">
       <img src="<?= $base ?>assets/img/zoty-logo.png" width="130" alt="<?= h(tr('nav.logo_alt')) ?>">
       <span class="navbar__product"><?= $isAdminArea ? 'Administrace' : ($isPortal ? h(tr('nav.support')) : h(tr('site.product'))) ?></span>
     </a>
@@ -65,20 +65,20 @@ if ($isAdminArea && is_admin()) {
         <?php else: ?>
           <li><a href="<?= $base ?>./" target="_blank" rel="noopener">Veřejný web ↗</a></li>
         <?php endif; ?>
-        <li><a href="<?= $base ?>admin/manual" <?= in_array($self, ['manual.php', 'docs.php'], true) ? 'aria-current="page"' : '' ?>>Manuál</a></li>
-        <li class="nav-user"><a href="<?= $base ?>admin/admins" title="Přihlášený administrátor – správa administrátorů" class="nav-user__name"><?= h((string)($_SESSION['zoty_admin'] ?? '')) ?></a> <a href="<?= $base ?>admin/logout">Odhlásit</a></li>
+        <li><a href="<?= $base ?>admin/manual.php" <?= in_array($self, ['manual.php', 'docs.php'], true) ? 'aria-current="page"' : '' ?>>Manuál</a></li>
+        <li class="nav-user"><a href="<?= $base ?>admin/admins.php" title="Přihlášený administrátor – správa administrátorů" class="nav-user__name"><?= h((string)($_SESSION['zoty_admin'] ?? '')) ?></a> <a href="<?= $base ?>admin/logout.php">Odhlásit</a></li>
       <?php elseif ($isPortal && $portalUser): ?>
         <li><a href="<?= $base ?>portal/" <?= in_array($self, ['index.php', 'ticket.php'], true) ? 'aria-current="page"' : '' ?>><?= h(tr('portal.my_requests')) ?></a></li>
-        <li><a href="<?= $base ?>portal/help" <?= $self === 'help.php' ? 'aria-current="page"' : '' ?>><?= h(tr('nav.help')) ?></a></li>
-        <li><a href="<?= $base ?>portal/downloads" <?= $self === 'downloads.php' ? 'aria-current="page"' : '' ?>><?= h(tr('downloads.title')) ?></a></li>
+        <li><a href="<?= $base ?>portal/help.php" <?= $self === 'help.php' ? 'aria-current="page"' : '' ?>><?= h(tr('nav.help')) ?></a></li>
+        <li><a href="<?= $base ?>portal/downloads.php" <?= $self === 'downloads.php' ? 'aria-current="page"' : '' ?>><?= h(tr('downloads.title')) ?></a></li>
         <li class="lang-switch" role="group" aria-label="<?= h(tr('lang.switch')) ?>">
           <?php foreach (LANGS as $code): ?>
             <a href="<?= h(lang_url($code)) ?>" hreflang="<?= $code ?>" lang="<?= $code ?>" title="<?= h(tr('lang.name', [], $code)) ?>"
                <?= $code === $L ? 'aria-current="true"' : '' ?>><?= strtoupper($code) ?></a>
           <?php endforeach; ?>
         </li>
-        <li class="nav-user"><span title="<?= h($portalUser['email']) ?>"><?= h($portalUser['customer_name']) ?></span> <a href="<?= $base ?>portal/logout"><?= h(tr('portal.logout')) ?></a></li>
-        <li><a class="button button--green" href="<?= $base ?>portal/new"><?= h(tr('portal.new_request')) ?></a></li>
+        <li class="nav-user"><span title="<?= h($portalUser['email']) ?>"><?= h($portalUser['customer_name']) ?></span> <a href="<?= $base ?>portal/logout.php"><?= h(tr('portal.logout')) ?></a></li>
+        <li><a class="button button--green" href="<?= $base ?>portal/new.php"><?= h(tr('portal.new_request')) ?></a></li>
       <?php else: ?>
         <li><a href="<?= $base ?>portal/"><?= h(tr('nav.support')) ?></a></li>
         <li><a href="https://zoty.cz/nase-reseni/"><?= h(tr('nav.solutions')) ?></a></li>
@@ -101,7 +101,7 @@ if ($isAdminArea && is_admin()) {
       <nav class="ws-switch" aria-label="Sekce administrace">
         <a href="<?= $base ?>admin/" <?= $adminSection === 'releases' ? 'aria-current="true"' : '' ?>>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Release notes</a>
-        <a href="<?= $base ?>admin/tickets" <?= $adminSection === 'support' ? 'aria-current="true"' : '' ?>>
+        <a href="<?= $base ?>admin/tickets.php" <?= $adminSection === 'support' ? 'aria-current="true"' : '' ?>>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 13a8 8 0 0 1 16 0v4a2 2 0 0 1-2 2h-1v-6h3M4 13v4a2 2 0 0 0 2 2h1v-6H4"/></svg>Podpora<?php if ($waitingOnUs): ?><span class="nav-count" title="Nové nebo s odpovědí zákazníka"><?= $waitingOnUs ?></span><?php endif; ?></a>
       </nav>
       <ul class="subnav__links">
@@ -111,9 +111,9 @@ if ($isAdminArea && is_admin()) {
       </ul>
       <?php if ($adminSection === 'help'): ?>
       <?php elseif ($adminSection === 'support'): ?>
-        <a class="button button--primary button--sm subnav__cta" href="<?= $base ?>admin/customers#new">+ Nový zákazník</a>
+        <a class="button button--primary button--sm subnav__cta" href="<?= $base ?>admin/customers.php#new">+ Nový zákazník</a>
       <?php else: ?>
-        <a class="button button--green button--sm subnav__cta" href="<?= $base ?>admin/edit">+ Nový záznam</a>
+        <a class="button button--green button--sm subnav__cta" href="<?= $base ?>admin/edit.php">+ Nový záznam</a>
       <?php endif; ?>
     </div>
   </div>

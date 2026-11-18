@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($target) {
             flash('Modul ' . $target['name'] . ' nelze smazat – používají ho záznamy. Nejdřív jim modul změňte.');
         }
-        header('Location: modules');
+        header('Location: modules.php');
         exit;
     }
     if ($action === 'save') {
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$errors) {
             save_module($name, $editing['id'] ?? 0);
             flash($editing ? 'Modul byl přejmenován na ' . $name . '.' : 'Modul ' . $name . ' byl přidán.');
-            header('Location: modules');
+            header('Location: modules.php');
             exit;
         }
     }
@@ -54,7 +54,7 @@ require __DIR__ . '/../partials/header.php';
 
   <?php if ($errors): ?><div class="flash flash--error"><?= implode('<br>', array_map('h', $errors)) ?></div><?php endif; ?>
 
-  <form class="card" method="post" action="modules<?= $editing ? '?id=' . $editing['id'] : '' ?>" id="form">
+  <form class="card" method="post" action="modules.php<?= $editing ? '?id=' . $editing['id'] : '' ?>" id="form">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="save">
     <h2 class="card__title"><?= $editing ? 'Přejmenovat modul ' . h($editing['name']) : 'Nový modul' ?></h2>
@@ -67,7 +67,7 @@ require __DIR__ . '/../partials/header.php';
     </div>
     <div class="form-actions">
       <button class="button button--primary" type="submit"><?= $editing ? 'Uložit' : 'Přidat modul' ?></button>
-      <?php if ($editing): ?><a class="button button--ghost" href="modules">Zrušit</a><?php endif; ?>
+      <?php if ($editing): ?><a class="button button--ghost" href="modules.php">Zrušit</a><?php endif; ?>
     </div>
   </form>
 
@@ -82,11 +82,11 @@ require __DIR__ . '/../partials/header.php';
       <?php endif; ?>
       <?php foreach ($modules as $row): ?>
         <tr<?= $editing && $editing['id'] === $row['id'] ? ' class="is-current"' : '' ?>>
-          <td class="cell-title" data-label="Modul"><a href="modules?id=<?= $row['id'] ?>#form"><?= h($row['name']) ?></a></td>
+          <td class="cell-title" data-label="Modul"><a href="modules.php?id=<?= $row['id'] ?>#form"><?= h($row['name']) ?></a></td>
           <td data-label="Záznamů"><a href="./?module=<?= urlencode($row['name']) ?>"><?= $row['entry_count'] ?></a></td>
           <td class="cell-actions">
             <div class="row-actions">
-              <a class="button button--ghost button--sm" href="modules?id=<?= $row['id'] ?>#form">Přejmenovat</a>
+              <a class="button button--ghost button--sm" href="modules.php?id=<?= $row['id'] ?>#form">Přejmenovat</a>
               <?php if ($row['entry_count'] === 0): ?>
                 <form method="post" onsubmit="return confirm(<?= h(json_encode('Opravdu smazat modul ' . $row['name'] . '?', JSON_UNESCAPED_UNICODE)) ?>)">
                   <?= csrf_field() ?><input type="hidden" name="id" value="<?= $row['id'] ?>"><input type="hidden" name="action" value="delete">

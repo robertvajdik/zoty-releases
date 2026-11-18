@@ -182,7 +182,7 @@ function migrate_ticket_share_token(PDO $pdo, string $driver): void
             $pdo->exec("ALTER TABLE $tk ADD COLUMN share_token TEXT NULL");
             $pdo->exec("CREATE UNIQUE INDEX IF NOT EXISTS {$tk}_share_token ON $tk (share_token)");
         } else {
-            $pdo->exec("ALTER TABLE `$tk` ADD COLUMN share_token CHAR(48) NULL COMMENT 'read-only link portal/shared?t=<token>', ADD UNIQUE KEY uq_share_token (share_token)");
+            $pdo->exec("ALTER TABLE `$tk` ADD COLUMN share_token CHAR(48) NULL COMMENT 'read-only link portal/shared.php?t=<token>', ADD UNIQUE KEY uq_share_token (share_token)");
         }
     }
 }
@@ -241,7 +241,7 @@ function migrate_downloads(PDO $pdo, string $driver): void
 
 /**
  * v5: a request can be shared with anyone by e-mail. A colleague with a portal account signs in as usual,
- * anyone else opens the request read-only through their personal link portal/shared?t=<token>.
+ * anyone else opens the request read-only through their personal link portal/shared.php?t=<token>.
  */
 function migrate_ticket_participants(PDO $pdo, string $driver): void
 {
@@ -527,7 +527,7 @@ function require_portal_user(): array
     $u = portal_user();
     if (!$u) {
         $back = (string)($_SERVER['REQUEST_URI'] ?? '');
-        header('Location: login' . ($back !== '' ? '?next=' . rawurlencode($back) : ''));
+        header('Location: login.php' . ($back !== '' ? '?next=' . rawurlencode($back) : ''));
         exit;
     }
     return $u;
@@ -837,13 +837,13 @@ function ticket_share_link(array $ticket, bool $renew = false): string
         $token = bin2hex(random_bytes(24));
         db()->prepare('UPDATE ' . t('changelog_tickets') . ' SET share_token = ? WHERE id = ?')->execute([$token, $ticket['id']]);
     }
-    return site_url('portal/shared?t=' . $token);
+    return site_url('portal/shared.php?t=' . $token);
 }
 
 /** Where a participant opens the ticket: the portal for colleagues with an account, the personal link for guests. */
 function participant_url(array $ticket, array $p): string
 {
-    return $p['member'] ? site_url('portal/ticket?key=' . rawurlencode($ticket['key'])) : site_url('portal/shared?t=' . $p['token']);
+    return $p['member'] ? site_url('portal/ticket.php?key=' . rawurlencode($ticket['key'])) : site_url('portal/shared.php?t=' . $p['token']);
 }
 
 /* ---------------------------------------------------------------- attachments */
@@ -1039,7 +1039,7 @@ function link_ticket_refs(string $html): string
     if (!$re) return $html;
     return preg_replace_callback($re, function ($m) {
         $key = $m[1] . '-' . $m[2];
-        return '<a class="ticket-ref" href="' . h(site_url('portal/ticket?key=' . rawurlencode($key))) . '" title="' . h(tr('ticket.ref_title')) . '">' . $key . '</a>';
+        return '<a class="ticket-ref" href="' . h(site_url('portal/ticket.php?key=' . rawurlencode($key))) . '" title="' . h(tr('ticket.ref_title')) . '">' . $key . '</a>';
     }, $html);
 }
 
@@ -1158,7 +1158,7 @@ function notify_staff(array $ticket, string $what, string $body = ''): void
 {
     $to = ticket_staff_emails();
     if (!$to) return;
-    $url = site_url('admin/ticket?key=' . rawurlencode($ticket['key']));
+    $url = site_url('admin/ticket.php?key=' . rawurlencode($ticket['key']));
     $subject = '[' . $ticket['key'] . '] ' . ($what === 'new' ? 'Nový požadavek: ' : 'Nový komentář: ') . $ticket['summary'];
     $meta = $ticket['customer_name'] . ' · ' . ticket_type_label($ticket['type'], 'cs') . ' · ' . severity_label($ticket['severity'], 'cs')
           . ' · ' . ($ticket['reporter_name'] ?: $ticket['reporter_email']);
@@ -1176,7 +1176,7 @@ function notify_customer(array $ticket, string $body = '', string $newStatus = '
 {
     $to = [];
     if (filter_var($ticket['reporter_email'], FILTER_VALIDATE_EMAIL)) {
-        $to[mb_strtolower($ticket['reporter_email'])] = [$ticket['reporter_email'], (string)($ticket['reporter_lang'] ?? ''), site_url('portal/ticket?key=' . rawurlencode($ticket['key']))];
+        $to[mb_strtolower($ticket['reporter_email'])] = [$ticket['reporter_email'], (string)($ticket['reporter_lang'] ?? ''), site_url('portal/ticket.php?key=' . rawurlencode($ticket['key']))];
     }
     foreach (ticket_participants($ticket) as $p) if (!$p['blocked']) $to[$p['email']] ??= [$p['email'], $p['lang'], participant_url($ticket, $p)];
     if (!$to) return;

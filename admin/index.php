@@ -36,9 +36,9 @@ require __DIR__ . '/../partials/header.php';
   <div class="admin__head">
     <h1>Záznamy changelogu</h1>
     <div class="admin__actions">
-      <a class="button button--ghost" href="export<?= $qs ? '?' . h($qs) : '' ?>">Stáhnout MD (publikované)</a>
-      <a class="button button--ghost" href="export?<?= h(http_build_query($filters + ['drafts' => 1])) ?>">Stáhnout MD (vč. konceptů)</a>
-      <a class="button button--ghost" href="versions">Verze</a>
+      <a class="button button--ghost" href="export.php<?= $qs ? '?' . h($qs) : '' ?>">Stáhnout MD (publikované)</a>
+      <a class="button button--ghost" href="export.php?<?= h(http_build_query($filters + ['drafts' => 1])) ?>">Stáhnout MD (vč. konceptů)</a>
+      <a class="button button--ghost" href="versions.php">Verze</a>
     </div>
   </div>
 
@@ -76,7 +76,7 @@ require __DIR__ . '/../partials/header.php';
       </thead>
       <tbody>
       <?php if (!$list): ?>
-        <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Žádné záznamy. <a href="edit">Vytvořit první záznam</a></td></tr>
+        <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Žádné záznamy. <a href="edit.php">Vytvořit první záznam</a></td></tr>
       <?php endif; ?>
       <?php foreach ($list as $e): ?>
         <tr>
@@ -84,11 +84,11 @@ require __DIR__ . '/../partials/header.php';
           <td class="nowrap" data-label="Verze"><?= h($e["version"]) ?><?= $e["version_published"] ? "" : " <span class=\"tag tag--draft\" title=\"Verze není publikovaná\">skrytá</span>" ?></td>
           <td data-label="Typ"><span class="tag tag--<?= h($e["type"]) ?>"><?= h(TYPES[$e['type']]['label'] ?? $e['type']) ?></span></td>
           <td data-label="Modul"><?= h($e["module"]) ?></td>
-          <td class="cell-title" data-label="Název"><a href="edit?id=<?= $e["id"] ?>"><?= h($e["title"]) ?></a></td>
+          <td class="cell-title" data-label="Název"><a href="edit.php?id=<?= $e["id"] ?>"><?= h($e["title"]) ?></a></td>
           <td data-label="Stav"><?= !empty($e["published"]) ? '<span class="tag tag--new">Publikováno</span>' : '<span class="tag tag--draft">Koncept</span>' ?></td>
           <td class="cell-actions">
             <div class="row-actions">
-              <a class="button button--ghost button--sm" href="edit?id=<?= h($e['id']) ?>">Upravit</a>
+              <a class="button button--ghost button--sm" href="edit.php?id=<?= h($e['id']) ?>">Upravit</a>
               <form method="post">
                 <?= csrf_field() ?><input type="hidden" name="id" value="<?= h($e['id']) ?>"><input type="hidden" name="action" value="toggle">
                 <button class="button button--ghost button--sm" type="submit"><?= !empty($e['published']) ? 'Skrýt' : 'Publikovat' ?></button>

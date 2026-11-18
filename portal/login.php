@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (auth_verify(trim((string)($_POST['user'] ?? '')), (string)($_POST['password'] ?? ''), false)) {
         // the administrator's account typed into the customer portal
         $error = tr('portal.login_is_admin');
-        $errorLink = ['href' => '../admin/login', 'text' => tr('portal.login_admin_link')];
+        $errorLink = ['href' => '../admin/login.php', 'text' => tr('portal.login_admin_link')];
     } else {
         $error = tr('portal.login_error');
     }

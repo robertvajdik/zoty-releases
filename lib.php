@@ -1004,7 +1004,7 @@ function is_admin(): bool
 function require_admin(): void
 {
     if (!is_admin()) {
-        header('Location: login');
+        header('Location: login.php');
         exit;
     }
 }
@@ -1152,7 +1152,7 @@ function subscriber_add(string $email): string
             ->execute([$email, $token, $now, substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45)]);
     }
 
-    $link = with_lang(site_url('subscribe?confirm=' . $token));
+    $link = with_lang(site_url('subscribe.php?confirm=' . $token));
     $text = tr('mail.confirm.hello') . "\r\n\r\n" . tr('mail.confirm.intro_text') . "\r\n\r\n"
           . $link . "\r\n\r\n" . tr('mail.confirm.ignore') . "\r\n\r\n" . tr('mail.confirm.signature');
     $html = mail_layout(tr('mail.confirm.title'),
@@ -1252,7 +1252,7 @@ function notify_subscribers(array $version): array
     @set_time_limit(0);
     $messages = [];
     foreach ($subs as $s) {
-        $unsub = site_url('unsubscribe?t=' . $s['token']);
+        $unsub = site_url('unsubscribe.php?t=' . $s['token']);
         [$subject, $text, $html] = version_email($version, $entries, $unsub);
         $messages[] = ['to' => $s['email'], 'subject' => $subject, 'text' => $text, 'html' => $html, 'unsubscribe' => $unsub, 'tag' => 'Verze ' . $version['version']];
     }
@@ -1556,7 +1556,7 @@ function atom_feed(int $limit = 30): string
          . '  <title>Zoty – přehled změn</title>' . "\n"
          . '  <subtitle>Přehled novinek, vylepšení a oprav v aplikaci Zoty.</subtitle>' . "\n"
          . '  <link rel="alternate" type="text/html" href="' . $x($home) . '"/>' . "\n"
-         . '  <link rel="self" type="application/atom+xml" href="' . $x(site_url('feed.xml')) . '"/>' . "\n"
+         . '  <link rel="self" type="application/atom+xml" href="' . $x(site_url('feed.php')) . '"/>' . "\n"
          . '  <id>' . $x($home) . '</id>' . "\n"
          . '  <updated>' . date(DATE_ATOM, $updated ? strtotime($updated) : time()) . '</updated>' . "\n"
          . '  <author><name>Robert Vajdik</name></author>' . "\n"

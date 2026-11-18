@@ -72,9 +72,9 @@ require __DIR__ . '/../partials/header.php';
       <thead><tr><th>Klíč</th><th>Shrnutí</th><th>Zákazník</th><th>Stav</th><th>Závažnost</th><th>Stáří</th><th>Aktualizováno</th></tr></thead>
       <tbody>
       <?php if (!$tickets): ?>
-        <tr><td colspan="7" class="cell-empty"><?= $customers ? 'Žádné požadavky pro tento filtr.' : 'Zatím žádní zákazníci. <a href="customers">Založte prvního zákazníka</a> a pošlete mu přístup do portálu.' ?></td></tr>
+        <tr><td colspan="7" class="cell-empty"><?= $customers ? 'Žádné požadavky pro tento filtr.' : 'Zatím žádní zákazníci. <a href="customers.php">Založte prvního zákazníka</a> a pošlete mu přístup do portálu.' ?></td></tr>
       <?php endif; ?>
-      <?php foreach ($tickets as $t): $url = 'ticket?key=' . rawurlencode($t['key']); ?>
+      <?php foreach ($tickets as $t): $url = 'ticket.php?key=' . rawurlencode($t['key']); ?>
         <tr>
           <td class="nowrap" data-label="Klíč"><a class="tkey" href="<?= h($url) ?>"><?= h($t['key']) ?></a></td>
           <td class="cell-title"><a class="tsum" href="<?= h($url) ?>"><span class="rt rt--<?= h($t['type']) ?>" title="<?= h(ticket_type_label($t['type'])) ?>"></span><?= h($t['summary']) ?></a>

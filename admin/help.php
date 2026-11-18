@@ -1,4 +1,4 @@
 <?php
-// Old address: /admin/help -> /admin/manual (keeps ?doc=&lang=)
+// Old address: /admin/help.php -> /admin/manual.php (keeps ?doc=&lang=)
 $qs = (string)($_SERVER['QUERY_STRING'] ?? '');
-header('Location: manual' . ($qs !== '' ? '?' . $qs : ''), true, 301);
+header('Location: manual.php' . ($qs !== '' ? '?' . $qs : ''), true, 301);

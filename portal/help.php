@@ -24,7 +24,7 @@ require __DIR__ . '/../partials/header.php';
   <?php if (count($docs) > 1): ?>
     <nav class="tabs" aria-label="<?= h(tr('nav.help')) ?>">
       <?php foreach ($docs as $s): ?>
-        <a href="help?doc=<?= h($s) ?>" <?= $s === $slug ? 'aria-current="page"' : '' ?>><?= h($docLabel($s)) ?></a>
+        <a href="help.php?doc=<?= h($s) ?>" <?= $s === $slug ? 'aria-current="page"' : '' ?>><?= h($docLabel($s)) ?></a>
       <?php endforeach; ?>
     </nav>
   <?php endif; ?>

@@ -22,13 +22,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             flash('Verzi ' . $target['version'] . ' nelze smazat – obsahuje záznamy. Nejdřív je smažte nebo přesuňte do jiné verze.');
         }
-        header('Location: versions');
+        header('Location: versions.php');
         exit;
     }
     if ($action === 'toggle' && $target) {
         set_version_published($target['id'], !$target['published']);
         flash('Verze ' . $target['version'] . (!$target['published'] ? ' je publikovaná.' : ' je skrytá – její záznamy se na webu nezobrazí.'));
-        header('Location: versions');
+        header('Location: versions.php');
         exit;
     }
     if ($action === 'notify' && $target) {
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 flash('E-mail nebyl odeslán: ' . ($r['error'] ?? 'neznámá chyba') . '.');
             }
         }
-        header('Location: versions');
+        header('Location: versions.php');
         exit;
     }
     if ($action === 'save') {
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$errors) {
             $newId = save_version($v);
             flash($editing ? 'Verze ' . $v['version'] . ' byla uložena.' : 'Verze ' . $v['version'] . ' byla vytvořena.');
-            header('Location: ' . (isset($_POST['add_entry']) ? 'edit?version_id=' . $newId : 'versions'));
+            header('Location: ' . (isset($_POST['add_entry']) ? 'edit.php?version_id=' . $newId : 'versions'));
             exit;
         }
     }
@@ -84,7 +84,7 @@ require __DIR__ . '/../partials/header.php';
 
   <?php if ($errors): ?><div class="flash flash--error"><?= implode('<br>', array_map('h', $errors)) ?></div><?php endif; ?>
 
-  <form class="card" method="post" action="versions<?= $editing ? '?id=' . $editing['id'] : '' ?>" id="form">
+  <form class="card" method="post" action="versions.php<?= $editing ? '?id=' . $editing['id'] : '' ?>" id="form">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="save">
     <h2 class="card__title"><?= $editing ? 'Upravit verzi ' . h($editing['version']) : 'Nová verze' ?></h2>
@@ -112,7 +112,7 @@ require __DIR__ . '/../partials/header.php';
     <div class="form-actions">
       <button class="button button--primary" type="submit"><?= $editing ? 'Uložit verzi' : 'Vytvořit verzi' ?></button>
       <?php if (!$editing): ?><button class="button button--ghost" type="submit" name="add_entry" value="1">Vytvořit a přidat záznam</button><?php endif; ?>
-      <?php if ($editing): ?><a class="button button--ghost" href="versions">Zrušit</a><?php endif; ?>
+      <?php if ($editing): ?><a class="button button--ghost" href="versions.php">Zrušit</a><?php endif; ?>
     </div>
   </form>
 
@@ -127,15 +127,15 @@ require __DIR__ . '/../partials/header.php';
       <?php endif; ?>
       <?php foreach ($versions as $row): ?>
         <tr<?= $editing && $editing['id'] === $row['id'] ? ' class="is-current"' : '' ?>>
-          <td class="cell-title" data-label="Verze"><a href="versions?id=<?= $row['id'] ?>#form"><?= h($row['version']) ?></a></td>
+          <td class="cell-title" data-label="Verze"><a href="versions.php?id=<?= $row['id'] ?>#form"><?= h($row['version']) ?></a></td>
           <td class="nowrap" data-label="Datum"><?= h(date('d.m.Y', strtotime($row['date']))) ?></td>
           <td data-label="Název"><?= h($row['title']) ?></td>
           <td data-label="Záznamů"><a href="./?version=<?= urlencode($row['version']) ?>"><?= $row['entry_count'] ?></a></td>
           <td data-label="Stav"><?= $row['published'] ? '<span class="tag tag--new">Publikováno</span>' : '<span class="tag tag--draft">Skrytá</span>' ?></td>
           <td class="cell-actions">
             <div class="row-actions">
-              <a class="button button--primary button--sm" href="edit?version_id=<?= $row['id'] ?>">+ Záznam</a>
-              <a class="button button--ghost button--sm" href="versions?id=<?= $row['id'] ?>#form">Upravit</a>
+              <a class="button button--primary button--sm" href="edit.php?version_id=<?= $row['id'] ?>">+ Záznam</a>
+              <a class="button button--ghost button--sm" href="versions.php?id=<?= $row['id'] ?>#form">Upravit</a>
               <?php if ($row['published'] && $row['entry_count'] > 0): $sentInfo = $mailings[$row['id']] ?? null; ?>
                 <form method="post" onsubmit="return confirm(<?= h(json_encode(($sentInfo ? 'Verze ' . $row['version'] . ' už byla rozeslána ' . date('d.m.Y', strtotime($sentInfo['created_at'])) . '. Poslat znovu' : 'Rozeslat verzi ' . $row['version']) . ' ' . $subscriberCount . ' odběratelům?', JSON_UNESCAPED_UNICODE)) ?>)">
                   <?= csrf_field() ?><input type="hidden" name="id" value="<?= $row['id'] ?>"><input type="hidden" name="action" value="notify">

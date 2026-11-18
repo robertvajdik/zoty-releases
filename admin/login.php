@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (customer_login($user, $pass)['status'] !== 'invalid') {
             // a customer's portal account typed into the administration
             $error = 'Toto je účet zákaznického portálu, ne administrace.';
-            $errorLink = ['href' => '../portal/login', 'text' => 'Přihlásit se do portálu'];
+            $errorLink = ['href' => '../portal/login.php', 'text' => 'Přihlásit se do portálu'];
         }
     }
 }

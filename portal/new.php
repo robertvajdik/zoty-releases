@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$_POST && !empty($_SERVER['CONTENT
         $ticket = get_ticket($id);
         notify_staff($ticket, 'new');
         flash(tr('portal.created', ['key' => $ticket['key']]));
-        header('Location: ticket?key=' . rawurlencode($ticket['key']));
+        header('Location: ticket.php?key=' . rawurlencode($ticket['key']));
         exit;
     }
 }
@@ -52,7 +52,7 @@ require __DIR__ . '/../partials/header.php';
 <main class="container portal">
   <nav class="crumbs" aria-label="<?= h(tr('ticket.breadcrumb')) ?>">
     <a href="./"><?= h(tr('portal.my_requests')) ?></a><span aria-hidden="true">/</span>
-    <?php if ($type): ?><a href="new"><?= h(tr('portal.new_request')) ?></a><span aria-hidden="true">/</span><span aria-current="page"><?= h(ticket_type_label($type)) ?></span>
+    <?php if ($type): ?><a href="new.php"><?= h(tr('portal.new_request')) ?></a><span aria-hidden="true">/</span><span aria-current="page"><?= h(ticket_type_label($type)) ?></span>
     <?php else: ?><span aria-current="page"><?= h(tr('portal.new_request')) ?></span><?php endif; ?>
   </nav>
 
@@ -63,7 +63,7 @@ require __DIR__ . '/../partials/header.php';
     </div></div>
     <div class="rtypes tform">
       <?php foreach (TICKET_TYPES as $t): ?>
-        <a class="rtype" href="new?type=<?= $t ?>">
+        <a class="rtype" href="new.php?type=<?= $t ?>">
           <span class="rt-icon rt-icon--<?= $t ?>"><?= $icons[$t] ?></span>
           <span><span class="rtype__title"><?= h(ticket_type_label($t)) ?></span><span class="rtype__desc"><?= h(tr('ticket.type_desc.' . $t)) ?></span></span>
         </a>
@@ -77,7 +77,7 @@ require __DIR__ . '/../partials/header.php';
       <div class="rtype rtype--chosen">
         <span class="rt-icon rt-icon--<?= $type ?>"><?= $icons[$type] ?></span>
         <span><span class="rtype__title"><?= h(ticket_type_label($type)) ?></span>
-          <span class="rtype__desc"><?= h(tr('ticket.type_desc.' . $type)) ?> <a class="rtype__change" href="new"><?= h(tr('portal.change_type')) ?></a></span></span>
+          <span class="rtype__desc"><?= h(tr('ticket.type_desc.' . $type)) ?> <a class="rtype__change" href="new.php"><?= h(tr('portal.change_type')) ?></a></span></span>
       </div>
 
       <?php if ($err || $fileErr): ?>

@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         save_entry($e);
         flash(($existing ? 'Záznam byl uložen.' : 'Záznam byl vytvořen.') . ($choice === 'new' ? ' Vytvořena verze ' . $nv['version'] . '.' : '')
             . ($dateChanged ? ' Datum vydání verze ' . $selectedVersion['version'] . ' změněno na ' . date('d.m.Y', strtotime($releaseDate)) . '.' : ''));
-        header('Location: ' . (isset($_POST['save_new']) ? 'edit?version_id=' . $e['version_id'] : './'));
+        header('Location: ' . (isset($_POST['save_new']) ? 'edit.php?version_id=' . $e['version_id'] : './'));
         exit;
     }
 }
@@ -85,7 +85,7 @@ require __DIR__ . '/../partials/header.php';
   </div>
 
   <?php if ($errors): ?><div class="flash flash--error"><?= implode('<br>', array_map('h', $errors)) ?></div><?php endif; ?>
-  <?php if ($fromTicket): ?><div class="flash">Předvyplněno z požadavku <a href="ticket?key=<?= h(rawurlencode($fromTicket['key'])) ?>"><?= h($fromTicket['key']) ?></a> (<?= h($fromTicket['customer_name']) ?>). Klíč v popisu propojí záznam s požadavkem.</div><?php endif; ?>
+  <?php if ($fromTicket): ?><div class="flash">Předvyplněno z požadavku <a href="ticket.php?key=<?= h(rawurlencode($fromTicket['key'])) ?>"><?= h($fromTicket['key']) ?></a> (<?= h($fromTicket['customer_name']) ?>). Klíč v popisu propojí záznam s požadavkem.</div><?php endif; ?>
 
   <form class="card" method="post">
     <?= csrf_field() ?>
@@ -129,7 +129,7 @@ require __DIR__ . '/../partials/header.php';
             <input id="new_title" name="new_title" maxlength="255" value="<?= h($nv['title']) ?>" placeholder="volitelné, např. Podzimní aktualizace">
           </div>
         </div>
-        <small>Popis a další údaje verze upravíte v sekci <a href="versions">Verze</a>.</small>
+        <small>Popis a další údaje verze upravíte v sekci <a href="versions.php">Verze</a>.</small>
       </fieldset>
 
       <div class="field">
@@ -147,7 +147,7 @@ require __DIR__ . '/../partials/header.php';
           <?php endforeach; ?>
           <?php if (!$modules && !$legacy): ?><small>Zatím žádné moduly.</small><?php endif; ?>
         </div>
-        <small>Můžete vybrat více modulů, nebo žádný. <a href="modules">Spravovat moduly</a></small>
+        <small>Můžete vybrat více modulů, nebo žádný. <a href="modules.php">Spravovat moduly</a></small>
       </div>
       <div class="field full">
         <label for="body">Popis</label>
@@ -215,7 +215,7 @@ require __DIR__ . '/../partials/header.php';
         var fd = new FormData();
         fd.append('csrf', csrf);
         fd.append('image', f, f.name && f.name !== 'image.png' ? f.name : 'obrazek-' + Date.now() + '.' + (f.type.split('/')[1] || 'png'));
-        fetch('upload', { method: 'POST', body: fd, credentials: 'same-origin' })
+        fetch('upload.php', { method: 'POST', body: fd, credentials: 'same-origin' })
           .then(function (r) { return r.json(); })
           .then(function (j) {
             if (j.error) throw new Error(j.error);

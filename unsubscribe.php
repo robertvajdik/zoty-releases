@@ -29,7 +29,7 @@ require __DIR__ . '/partials/header.php';
     <?php elseif ($sub): ?>
       <h1><?= h(tr('unsub.ask_title')) ?></h1>
       <p><?= trh('unsub.ask_text', [], ['email' => '<strong>' . h($sub['email']) . '</strong>']) ?></p>
-      <form method="post" action="unsubscribe">
+      <form method="post" action="unsubscribe.php">
         <input type="hidden" name="t" value="<?= h($token) ?>">
         <div class="form-actions">
           <button class="button button--primary" type="submit"><?= h(tr('unsub.confirm')) ?></button>

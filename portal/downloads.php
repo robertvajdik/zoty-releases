@@ -27,7 +27,7 @@ require __DIR__ . '/../partials/header.php';
     <ul class="download__files">
       <?php foreach ($docs as $d): ?>
         <li>
-          <a href="document?id=<?= (int)$d['id'] ?>"><?= h($d['title']) ?></a>
+          <a href="document.php?id=<?= (int)$d['id'] ?>"><?= h($d['title']) ?></a>
           <span class="download__meta">PDF · <?= h(fmt_bytes((int)$d['size'])) ?> · <?= fmt_date(substr((string)$d['created_at'], 0, 10)) ?></span>
         </li>
       <?php endforeach; ?>

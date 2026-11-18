@@ -85,10 +85,10 @@ require __DIR__ . '/../partials/header.php';
       <?php if (!$tickets): ?>
         <tr><td colspan="6" class="cell-empty">
           <?= h(tr($f['q'] !== '' || $f['type'] !== '' || $mine ? 'portal.empty_filter' : 'portal.empty')) ?>
-          <?php if ($tab === 'open' && !$openCount): ?><br><a href="new"><?= h(tr('portal.create_first')) ?></a><?php endif; ?>
+          <?php if ($tab === 'open' && !$openCount): ?><br><a href="new.php"><?= h(tr('portal.create_first')) ?></a><?php endif; ?>
         </td></tr>
       <?php endif; ?>
-      <?php foreach ($tickets as $t): $url = 'ticket?key=' . rawurlencode($t['key']); ?>
+      <?php foreach ($tickets as $t): $url = 'ticket.php?key=' . rawurlencode($t['key']); ?>
         <tr>
           <td class="nowrap" data-label="<?= h(tr('ticket.key')) ?>"><a class="tkey" href="<?= h($url) ?>"><?= h($t['key']) ?></a></td>
           <td class="cell-title"><a class="tsum" href="<?= h($url) ?>"><span class="rt rt--<?= h($t['type']) ?>" title="<?= h(ticket_type_label($t['type'])) ?>"></span><?= h($t['summary']) ?></a>

@@ -60,7 +60,7 @@ require __DIR__ . '/partials/header.php';
     </select>
     <?php if (!empty($filters['type'])): ?><input type="hidden" name="type" value="<?= h($filters['type']) ?>"><?php endif; ?>
     <button class="button button--primary" type="submit"><?= h(tr('filter.submit')) ?></button>
-    <a class="button button--ghost" href="export<?= $qs ? '?' . h($qs) : '' ?>" title="<?= h(tr('filter.download_title')) ?>">
+    <a class="button button--ghost" href="export.php<?= $qs ? '?' . h($qs) : '' ?>" title="<?= h(tr('filter.download_title')) ?>">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
       <?= h(tr('filter.download')) ?>
     </a>
@@ -94,7 +94,7 @@ require __DIR__ . '/partials/header.php';
       <aside class="release__meta">
         <time property="datePublished" datetime="<?= h($g['date']) ?>"><?= fmt_date($g['date']) ?></time>
         <a class="release__version" property="url" href="?version=<?= urlencode($g['version']) ?>"><?= h(tr('release.version', ['version' => $g['version']])) ?></a>
-        <a class="release__export" href="export?version=<?= urlencode($g['version']) ?>"><?= h(tr('release.download')) ?></a>
+        <a class="release__export" href="export.php?version=<?= urlencode($g['version']) ?>"><?= h(tr('release.download')) ?></a>
       </aside>
       <div class="release__entries">
         <?php if ($g['title'] !== '' || trim($g['summary']) !== ''): ?>
@@ -124,13 +124,13 @@ require __DIR__ . '/partials/header.php';
       <h2 id="subscribe-title"><?= h(tr('subscribe.title')) ?></h2>
       <p><?= h(tr('subscribe.lead')) ?></p>
     </div>
-    <form class="subscribe__form" method="post" action="subscribe">
+    <form class="subscribe__form" method="post" action="subscribe.php">
       <?= csrf_field() ?>
       <label class="visually-hidden" for="sub-email"><?= h(tr('subscribe.email_label')) ?></label>
       <input id="sub-email" type="email" name="email" required maxlength="190" placeholder="<?= h(tr('subscribe.placeholder')) ?>" autocomplete="email" inputmode="email">
       <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
       <button class="button button--green" type="submit"><?= h(tr('subscribe.button')) ?></button>
-      <p class="subscribe__note"><?= h(tr('subscribe.note')) ?> · <a href="feed.xml"><?= h(tr('subscribe.feed')) ?></a></p>
+      <p class="subscribe__note"><?= h(tr('subscribe.note')) ?> · <a href="feed.php"><?= h(tr('subscribe.feed')) ?></a></p>
       <?= recaptcha_field('subscribe') ?>
     </form>
   </section>

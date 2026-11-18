@@ -81,7 +81,7 @@ function doc_img_file(string $name): ?string
 
 function doc_img_url(string $name): string
 {
-    return site_url('manual-img?f=' . rawurlencode($name));
+    return site_url('manual-img.php?f=' . rawurlencode($name));
 }
 
 /**

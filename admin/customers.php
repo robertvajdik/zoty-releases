@@ -32,7 +32,7 @@ function send_access(array $user, string $password): bool
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $action = (string)($_POST['action'] ?? '');
-    $back = 'customers' . ($customer ? '?id=' . $customer['id'] : '');
+    $back = 'customers.php' . ($customer ? '?id=' . $customer['id'] : '');
 
     if ($action === 'save_customer') {
         $cf['name'] = trim(preg_replace('/\s+/u', ' ', (string)($_POST['name'] ?? '')));
@@ -49,12 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$errors) {
             $newId = save_customer($cf['name'], $cf['code'], $customer['id'] ?? 0, $cf['contract']);
             flash($customer ? 'Zákazník byl uložen.' : 'Zákazník ' . $cf['name'] . ' byl založen. Teď mu přidejte uživatele.');
-            header('Location: customers?id=' . $newId);
+            header('Location: customers.php?id=' . $newId);
             exit;
         }
     } elseif ($action === 'delete_customer' && $customer) {
         flash(delete_customer($customer['id']) ? 'Zákazník ' . $customer['name'] . ' byl smazán.' : 'Zákazníka nelze smazat, protože má požadavky.');
-        header('Location: customers');
+        header('Location: customers.php');
         exit;
     } elseif ($action === 'toggle_customer' && $customer) {
         $on = !(int)$customer['active'];
@@ -127,8 +127,8 @@ require __DIR__ . '/../partials/header.php';
     <h1><?= $customer ? h($customer['name']) . ' <span class="code-tag">' . h($customer['code']) . '</span>' . ((int)$customer['active'] ? '' : ' <span class="tag tag--draft">Deaktivován</span>') : 'Zákazníci' ?></h1>
     <div class="admin__actions">
       <?php if ($customer): ?>
-        <a class="button button--ghost" href="tickets?status=all&amp;customer=<?= $customer['id'] ?>">Požadavky zákazníka</a>
-        <a class="button button--ghost" href="customers">← Všichni zákazníci</a>
+        <a class="button button--ghost" href="tickets.php?status=all&amp;customer=<?= $customer['id'] ?>">Požadavky zákazníka</a>
+        <a class="button button--ghost" href="customers.php">← Všichni zákazníci</a>
       <?php endif; ?>
     </div>
   </div>
@@ -144,7 +144,7 @@ require __DIR__ . '/../partials/header.php';
           <?php if (!$customers): ?><tr><td colspan="6" class="cell-empty">Zatím žádní zákazníci.</td></tr><?php endif; ?>
           <?php foreach ($customers as $c): ?>
             <tr>
-              <td class="cell-title"><a href="customers?id=<?= (int)$c['id'] ?>"><?= h($c['name']) ?></a></td>
+              <td class="cell-title"><a href="customers.php?id=<?= (int)$c['id'] ?>"><?= h($c['name']) ?></a></td>
               <td data-label="Klíč"><span class="code-tag"><?= h($c['code']) ?></span></td>
               <td data-label="Smlouva"><?= ($c['contract'] ?? '') !== '' ? h($c['contract']) : '<span class="muted">—</span>' ?></td>
               <td data-label="Stav"><?= (int)$c['active'] ? '<span class="tag tag--new">Aktivní</span>' : '<span class="tag tag--draft">Deaktivován</span>' ?></td>
@@ -200,7 +200,7 @@ require __DIR__ . '/../partials/header.php';
                 <td class="cell-muted" data-label="Přihlášení"><?= $u['last_login'] ? h(date('d.m.Y H:i', strtotime($u['last_login']))) : '—' ?></td>
                 <td class="cell-actions">
                   <div class="row-actions">
-                    <a class="button button--ghost button--sm" href="customers?id=<?= $customer['id'] ?>&amp;user=<?= (int)$u['id'] ?>#user-form">Upravit</a>
+                    <a class="button button--ghost button--sm" href="customers.php?id=<?= $customer['id'] ?>&amp;user=<?= (int)$u['id'] ?>#user-form">Upravit</a>
                     <form method="post">
                       <?= csrf_field() ?><input type="hidden" name="action" value="toggle_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
                       <button class="button button--ghost button--sm" type="submit"><?= (int)$u['active'] ? 'Zablokovat' : 'Odblokovat' ?></button>
@@ -244,7 +244,7 @@ require __DIR__ . '/../partials/header.php';
           </div>
           <div class="form-actions">
             <button class="button button--primary" type="submit"><?= $uf['id'] ? 'Uložit uživatele' : 'Přidat uživatele' ?></button>
-            <?php if ($uf['id']): ?><a class="button button--ghost" href="customers?id=<?= $customer['id'] ?>#users">Zrušit</a><?php endif; ?>
+            <?php if ($uf['id']): ?><a class="button button--ghost" href="customers.php?id=<?= $customer['id'] ?>#users">Zrušit</a><?php endif; ?>
           </div>
         </form>
       </section>

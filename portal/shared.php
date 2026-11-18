@@ -21,7 +21,7 @@ if (!$found) {
 
 // a colleague with a portal account signs in and gets the full request (with replying)
 if ($guest['member']) {
-    header('Location: ticket?key=' . rawurlencode($ticket['key']));
+    header('Location: ticket.php?key=' . rawurlencode($ticket['key']));
     exit;
 }
 
@@ -32,7 +32,7 @@ $participants = ticket_participants($ticket);
 $isStaff = false;
 $readOnly = true;
 $listUrl = '';
-$fileUrl = 'file?t=' . $token . '&id=';
+$fileUrl = 'file.php?t=' . $token . '&id=';
 $errors = [];
 $draft = '';
 
