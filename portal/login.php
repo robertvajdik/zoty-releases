@@ -55,7 +55,7 @@ $keyIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/login.css?v=4">
+  <link rel="stylesheet" href="../assets/login.css?v=5">
   <link rel="stylesheet" href="../assets/tickets.css?v=1">
   <?= analytics_script() ?>
 </head>

@@ -62,12 +62,12 @@ $keyIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="
   <meta name="theme-color" content="#6c7ae0">
   <meta name="author" content="Robert Vajdik">
   <meta name="robots" content="noindex">
-  <title><?= $setup ? 'Nastavení administrace' : 'Přihlášení' ?> – Zoty</title>
+  <title><?= $setup ? 'Nastavení administrace' : 'Přihlášení do administrace' ?> – Zoty</title>
   <link rel="icon" type="image/png" href="../assets/img/favicon-32.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/login.css?v=4">
+  <link rel="stylesheet" href="../assets/login.css?v=5">
   <?= analytics_script() ?>
 </head>
 <body class="auth">
@@ -76,6 +76,7 @@ $keyIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="
       <div class="auth__logo" role="img" aria-label="Zoty">
         <img src="../assets/img/zoty-logo.png" alt="">
       </div>
+      <p class="auth__note auth__note--area">Administrace</p>
 
       <?php if ($setup): ?>
         <p class="auth__note">První spuštění: vytvořte účet administrátora changelogu.</p>

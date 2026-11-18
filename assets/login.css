@@ -166,3 +166,7 @@ body.auth {
 .recaptcha-note a { color: inherit; }
 
 .auth__msg a { color: inherit; font-weight: 600; text-decoration: underline; }
+
+/* area name under the logo ("Administrace") */
+.auth__note--area { color: #6144a3; font: 600 13px/1.4 Montserrat, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+.auth__note + .auth__note { margin-top: -20px; }
