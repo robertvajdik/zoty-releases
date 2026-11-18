@@ -469,3 +469,6 @@ select.tf__plain { appearance: auto; }
 .age--warn { background: #fff4d6; color: #7a5300; }
 .age--old { background: #fde4e4; color: #a12020; }
 .age--done { background: none; padding: 0; color: var(--muted); font-weight: 500; }
+
+/* full-width action at the bottom of a side card (admin: "+ Zapsat do release notes") */
+.side-card__action { display: flex; justify-content: center; width: 100%; margin-top: 16px; white-space: normal; text-align: center; }

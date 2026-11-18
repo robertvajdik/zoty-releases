@@ -155,10 +155,6 @@ $reporter = $ticket['reporter_name'] ?: ($ticket['reporter_email'] ?: tr('ticket
         <?php endif; ?>
       </div>
       <dl class="details">
-        <?php if ($isStaff): ?>
-          <dt>Release notes</dt>
-          <dd><a class="button button--ghost button--sm" href="edit?ticket=<?= h(rawurlencode($ticket['key'])) ?>">+ Zapsat do release notes</a></dd>
-        <?php endif; ?>
         <dt><?= h(tr('ticket.request_type')) ?></dt>
         <dd><span class="rt rt--<?= h($ticket['type']) ?>" aria-hidden="true"></span><?= h(ticket_type_label($ticket['type'])) ?></dd>
         <dt><?= h(tr('ticket.severity')) ?></dt>
@@ -187,6 +183,9 @@ $reporter = $ticket['reporter_name'] ?: ($ticket['reporter_email'] ?: tr('ticket
         <?php if ($isStaff): ?><dt>Stáří</dt><dd><?= ticket_age_badge($ticket) ?></dd><?php endif; ?>
         <dt><?= h(tr('ticket.updated')) ?></dt><dd><?= $fmt($ticket['updated_at']) ?></dd>
       </dl>
+      <?php if ($isStaff): ?>
+        <a class="button button--ghost button--sm side-card__action" href="edit?ticket=<?= h(rawurlencode($ticket['key'])) ?>">+ Zapsat do release notes</a>
+      <?php endif; ?>
     </div>
 
     <?php if (!$readOnly): ?>
