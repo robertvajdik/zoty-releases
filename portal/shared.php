@@ -40,7 +40,9 @@ $pageTitle = $ticket['key'] . ' ' . $ticket['summary'];
 require __DIR__ . '/../partials/header.php';
 ?>
 <main class="container portal">
-  <div class="flash"><?= h(tr('ticket.share.guest_note', ['email' => $guest['email'], 'customer' => $ticket['customer_name']])) ?></div>
+  <div class="flash"><?= h($guest['email'] !== ''
+      ? tr('ticket.share.guest_note', ['email' => $guest['email'], 'customer' => $ticket['customer_name']])
+      : tr('ticket.share.link_note', ['customer' => $ticket['customer_name']])) ?></div>
   <?php require __DIR__ . '/../partials/ticket-view.php'; ?>
 </main>
 <?php require __DIR__ . '/../partials/footer.php'; ?>

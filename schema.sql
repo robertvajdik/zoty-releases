@@ -110,7 +110,9 @@ CREATE TABLE IF NOT EXISTS `changelog_tickets` (
   `status`          VARCHAR(20)  NOT NULL DEFAULT 'open' COMMENT 'open | in_progress | waiting | resolved | closed',
   `created_at`      DATETIME     NOT NULL,
   `updated_at`      DATETIME     NOT NULL,
+  `share_token`     CHAR(48)     NULL COMMENT 'read-only link portal/shared?t=<token> (Copy link)',
   UNIQUE KEY `uq_customer_number` (`customer_id`, `number`),
+  UNIQUE KEY `uq_share_token` (`share_token`),
   KEY `idx_status` (`status`),
   KEY `idx_updated` (`updated_at`),
   CONSTRAINT `fk_changelog_tickets_customer` FOREIGN KEY (`customer_id`) REFERENCES `changelog_customers` (`id`) ON DELETE RESTRICT

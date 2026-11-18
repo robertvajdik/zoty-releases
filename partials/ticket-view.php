@@ -234,7 +234,15 @@ $reporter = $ticket['reporter_name'] ?: ($ticket['reporter_email'] ?: tr('ticket
         <?php if ($shareError !== ''): ?><p class="share__err" id="share-err" role="alert"><?= h($shareError) ?></p><?php endif; ?>
         <p class="share__hint"><?= h(tr('ticket.share.hint')) ?></p>
         <?php if ($shareUrl !== ''): ?>
-          <button class="button button--ghost button--sm share__copy" type="button" data-copy="<?= h($shareUrl) ?>"><?= h(tr('ticket.share.copy_link')) ?></button>
+          <div class="share__link">
+            <button class="button button--ghost button--sm share__copy" type="button" data-copy="<?= h($shareUrl) ?>"><?= h(tr('ticket.share.copy_link')) ?></button>
+            <form method="post" class="side-form">
+              <?= csrf_field() ?>
+              <input type="hidden" name="action" value="reset_link">
+              <button class="share__reset" type="submit" title="<?= h(tr('ticket.share.reset_hint')) ?>"><?= h(tr('ticket.share.reset_link')) ?></button>
+            </form>
+          </div>
+          <p class="share__hint"><?= h(tr('ticket.share.copy_hint')) ?></p>
         <?php endif; ?>
       <?php endif; ?>
     </section>

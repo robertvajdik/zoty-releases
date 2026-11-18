@@ -459,3 +459,7 @@ select.tf__plain { appearance: auto; }
 .share__form input { flex: 1; min-width: 0; padding: 5px 8px; font-size: 14px; }
 .share__err { margin: 6px 0 0; color: #c62828; font-size: 13px; }
 .share__hint { margin: 10px 0 12px; color: var(--muted); font-size: 12.5px; line-height: 1.5; }
+.share__link { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.share__reset { border: 0; background: none; padding: 2px 0; color: var(--muted); font-size: 12.5px; text-decoration: underline; cursor: pointer; }
+.share__reset:hover, .share__reset:focus-visible { color: var(--text); }
+.share__link + .share__hint { margin-bottom: 0; }

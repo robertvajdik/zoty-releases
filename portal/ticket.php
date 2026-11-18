@@ -49,6 +49,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$_POST && !empty($_SERVER['CONTENT
         }
         $shareError = tr($err);
     }
+    if ($action === 'reset_link') {
+        // a new copied link; whoever has the old one loses access
+        ticket_share_link($ticket, true);
+        flash(tr('portal.link_reset'));
+        header('Location: ' . $selfUrl);
+        exit;
+    }
     if ($action === 'unshare') {
         if ($email = ticket_unshare($ticket, (int)($_POST['participant'] ?? 0), $me)) flash(tr('portal.unshared', ['name' => $email]));
         header('Location: ' . $selfUrl);
@@ -82,7 +89,7 @@ $files = ticket_files($ticket['id']);
 $releaseEntries = entries_for_ticket($ticket['key'], true);
 $participants = ticket_participants($ticket);
 $shareCandidates = ticket_share_candidates($ticket, $participants);
-$shareUrl = site_url('portal/' . $selfUrl);
+$shareUrl = ticket_share_link($ticket);   // unique token link, opens the request read-only without signing in
 $isStaff = false;
 $listUrl = './';
 $fileUrl = 'file?id=';

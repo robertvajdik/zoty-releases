@@ -94,6 +94,7 @@ function migrate_tickets(PDO $pdo, string $driver): void
         migrate_customer_contract($pdo, $driver);
         migrate_customer_active($pdo, $driver);
         migrate_ticket_participants($pdo, $driver);
+        migrate_ticket_share_token($pdo, $driver);
         return;
     }
     $opts = 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci';
@@ -167,6 +168,23 @@ function migrate_tickets(PDO $pdo, string $driver): void
     migrate_customer_active($pdo, $driver);
     migrate_downloads($pdo, $driver);
     migrate_ticket_participants($pdo, $driver);
+    migrate_ticket_share_token($pdo, $driver);
+}
+
+/** v6: one share link per ticket ("Copy link") – anyone with it can read the request without signing in. */
+function migrate_ticket_share_token(PDO $pdo, string $driver): void
+{
+    $tk = t('changelog_tickets');
+    try {
+        $pdo->query("SELECT share_token FROM $tk WHERE 1 = 0");
+    } catch (PDOException $ex) {
+        if ($driver === 'sqlite') {
+            $pdo->exec("ALTER TABLE $tk ADD COLUMN share_token TEXT NULL");
+            $pdo->exec("CREATE UNIQUE INDEX IF NOT EXISTS {$tk}_share_token ON $tk (share_token)");
+        } else {
+            $pdo->exec("ALTER TABLE `$tk` ADD COLUMN share_token CHAR(48) NULL COMMENT 'read-only link portal/shared?t=<token>', ADD UNIQUE KEY uq_share_token (share_token)");
+        }
+    }
 }
 
 /** v2: number of the customer's maintenance (support) contract, shown in the portal. */
@@ -782,18 +800,38 @@ function ticket_unshare(array $ticket, int $participantId, array $by): ?string
     return null;
 }
 
-/** Guest access: [ticket, participant] for a personal share link token, or null. */
+/**
+ * Guest access: [ticket, participant] for a share link token, or null. The token is either a person's own link
+ * (participant) or the ticket's copied link – then the participant is ['id' => 0, 'email' => '', 'member' => 0, ...].
+ */
 function ticket_by_share_token(string $token): ?array
 {
     if (!preg_match('/^[0-9a-f]{48}$/', $token)) return null;
     $st = db()->prepare('SELECT ticket_id, id FROM ' . t('changelog_ticket_participants') . ' WHERE token = ?');
     $st->execute([$token]);
     $r = $st->fetch();
+    if (!$r) {
+        $st = db()->prepare('SELECT id AS ticket_id, 0 AS id FROM ' . t('changelog_tickets') . ' WHERE share_token = ?');
+        $st->execute([$token]);
+        $r = $st->fetch();
+    }
     $ticket = $r ? get_ticket((int)$r['ticket_id']) : null;
     $customer = $ticket ? get_customer($ticket['customer_id']) : null;
     if (!$ticket || !$customer || !(int)$customer['active']) return null;   // a deactivated customer: nobody gets in
+    if (!(int)$r['id']) return [$ticket, ['id' => 0, 'email' => '', 'name' => '', 'lang' => '', 'member' => 0, 'blocked' => 0, 'token' => $token]];
     foreach (ticket_participants($ticket) as $p) if ((int)$p['id'] === (int)$r['id']) return $p['blocked'] ? null : [$ticket, $p];
     return null;
+}
+
+/** The ticket's own share link ("Copy link"), created on first use; $renew replaces it so the old link stops working. */
+function ticket_share_link(array $ticket, bool $renew = false): string
+{
+    $token = (string)($ticket['share_token'] ?? '');
+    if ($token === '' || $renew) {
+        $token = bin2hex(random_bytes(24));
+        db()->prepare('UPDATE ' . t('changelog_tickets') . ' SET share_token = ? WHERE id = ?')->execute([$token, $ticket['id']]);
+    }
+    return site_url('portal/shared?t=' . $token);
 }
 
 /** Where a participant opens the ticket: the portal for colleagues with an account, the personal link for guests. */
