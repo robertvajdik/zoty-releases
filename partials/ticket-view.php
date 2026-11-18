@@ -184,6 +184,7 @@ $reporter = $ticket['reporter_name'] ?: ($ticket['reporter_email'] ?: tr('ticket
         <dt><?= h(tr('ticket.reporter')) ?></dt>
         <dd><?= h($reporter) ?><?php if ($isStaff && $ticket['reporter_email'] !== ''): ?><br><a href="mailto:<?= h($ticket['reporter_email']) ?>"><?= h($ticket['reporter_email']) ?></a><?php endif; ?></dd>
         <dt><?= h(tr('ticket.created')) ?></dt><dd><?= $fmt($ticket['created_at']) ?></dd>
+        <?php if ($isStaff): ?><dt>Stáří</dt><dd><?= ticket_age_badge($ticket) ?></dd><?php endif; ?>
         <dt><?= h(tr('ticket.updated')) ?></dt><dd><?= $fmt($ticket['updated_at']) ?></dd>
       </dl>
     </div>

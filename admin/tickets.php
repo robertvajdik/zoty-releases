@@ -69,10 +69,10 @@ require __DIR__ . '/../partials/header.php';
 
   <div class="table-wrap card">
     <table class="table table--cards">
-      <thead><tr><th>Klíč</th><th>Shrnutí</th><th>Zákazník</th><th>Stav</th><th>Závažnost</th><th>Aktualizováno</th></tr></thead>
+      <thead><tr><th>Klíč</th><th>Shrnutí</th><th>Zákazník</th><th>Stav</th><th>Závažnost</th><th>Stáří</th><th>Aktualizováno</th></tr></thead>
       <tbody>
       <?php if (!$tickets): ?>
-        <tr><td colspan="6" class="cell-empty"><?= $customers ? 'Žádné požadavky pro tento filtr.' : 'Zatím žádní zákazníci. <a href="customers">Založte prvního zákazníka</a> a pošlete mu přístup do portálu.' ?></td></tr>
+        <tr><td colspan="7" class="cell-empty"><?= $customers ? 'Žádné požadavky pro tento filtr.' : 'Zatím žádní zákazníci. <a href="customers">Založte prvního zákazníka</a> a pošlete mu přístup do portálu.' ?></td></tr>
       <?php endif; ?>
       <?php foreach ($tickets as $t): $url = 'ticket?key=' . rawurlencode($t['key']); ?>
         <tr>
@@ -82,6 +82,7 @@ require __DIR__ . '/../partials/header.php';
           <td class="cell-muted" data-label="Zákazník"><?= h($t['customer_name']) ?></td>
           <td data-label="Stav"><?= status_lozenge($t['status']) ?></td>
           <td data-label="Závažnost"><?= severity_badge($t['severity']) ?></td>
+          <td class="nowrap" data-label="Stáří"><?= ticket_age_badge($t) ?></td>
           <td class="cell-muted" data-label="Aktualizováno"><?= h(date('d.m.Y H:i', strtotime($t['updated_at']))) ?></td>
         </tr>
       <?php endforeach; ?>

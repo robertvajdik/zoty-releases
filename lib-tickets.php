@@ -781,11 +781,17 @@ function ticket_share(array $ticket, string $email, array $by): array
     $list = ticket_participants($ticket);
     foreach ($list as $p) if ($p['email'] === $email) return [null, 'ticket.share.err_exists'];
     if (count($list) >= TICKET_SHARE_MAX) return [null, 'ticket.share.err_max'];
+    $token = bin2hex(random_bytes(24));
     db()->prepare('INSERT INTO ' . t('changelog_ticket_participants') . ' (ticket_id, email, token, shared_by, created_at) VALUES (?, ?, ?, ?, ?)')
-        ->execute([$ticket['id'], $email, bin2hex(random_bytes(24)), $by['email'], now()]);
+        ->execute([$ticket['id'], $email, $token, $by['email'], now()]);
+    $id = (int)db()->lastInsertId();
     ticket_add_comment($ticket['id'], '', $by, '', mb_substr('shared:' . $email, 0, 60));
-    foreach (ticket_participants($ticket) as $p) if ($p['email'] === $email) return [$p, ''];
-    return [null, 'ticket.share.err_email'];
+    // the new row, with what the participant list knows (member, name, lang) – no need to reload the list
+    $u = null;
+    foreach (fetch_customer_users($ticket['customer_id']) as $cu) if (mb_strtolower($cu['email']) === $email) $u = $cu;
+    $active = $u ? (int)$u['active'] : null;
+    return [['id' => $id, 'email' => $email, 'token' => $token, 'created_at' => now(), 'name' => (string)($u['name'] ?? ''), 'lang' => (string)($u['lang'] ?? ''),
+             'active' => $active, 'member' => (int)$active, 'blocked' => (int)($active !== null && !$active)], ''];
 }
 
 /** Stops sharing the ticket with one participant (by participant id); returns their e-mail, or null. */
@@ -1017,11 +1023,13 @@ function ticket_codes(): array
 /** Regex matching a ticket key of an existing customer ("NBU_ZOTY-12"), or null when there are no customers. */
 function ticket_ref_regex(): ?string
 {
+    static $re = false;   // built once per request: it is used for every rendered entry
+    if ($re !== false) return $re;
     $codes = ticket_codes();
-    if (!$codes) return null;
+    if (!$codes) return $re = null;
     $alt = implode('|', array_map(fn($c) => preg_quote($c, '/'), $codes));
     // not part of a word, URL, query string or markdown link text
-    return '/(?<![\w\-\/=?&#\[])(' . $alt . ')-(\d{1,9})(?![\w\-])/u';
+    return $re = '/(?<![\w\-\/=?&#\[])(' . $alt . ')-(\d{1,9})(?![\w\-])/u';
 }
 
 /** In already escaped HTML, turns ticket keys into links to the customer portal. */
@@ -1073,6 +1081,32 @@ function ticket_type_label(string $s, ?string $lang = null): string { return tr(
 function status_lozenge(string $s): string
 {
     return '<span class="lozenge lozenge--' . h($s) . '">' . h(status_label($s)) . '</span>';
+}
+
+/** Short age for the admin ("45 min", "5 h", "12 d", "3 měs.", "2 r."). */
+function fmt_age(int $seconds): string
+{
+    $m = intdiv(max(0, $seconds), 60);
+    if ($m < 60) return max(1, $m) . ' min';
+    if ($m < 48 * 60) return intdiv($m, 60) . ' h';
+    $d = intdiv($m, 1440);
+    if ($d < 60) return $d . ' d';
+    return $d < 730 ? intdiv($d, 30) . ' měs.' : intdiv($d, 365) . ' r.';
+}
+
+/**
+ * How old the ticket is (admin). Unresolved: since it was raised, highlighted after 7 and 30 days.
+ * Resolved / closed: how long it took (until its last change), muted.
+ */
+function ticket_age_badge(array $t): string
+{
+    $created = strtotime($t['created_at']);
+    $done = in_array($t['status'], TICKET_DONE, true);
+    $sec = ($done ? strtotime($t['updated_at']) : time()) - $created;
+    $days = $sec / 86400;
+    $cls = $done ? 'age--done' : ($days >= 30 ? 'age--old' : ($days >= 7 ? 'age--warn' : ''));
+    $title = 'Založeno ' . date('d.m.Y H:i', $created) . ($done ? ' · vyřešeno za ' . fmt_age($sec) : '');
+    return '<span class="age ' . $cls . '" title="' . h($title) . '">' . h(fmt_age($sec)) . '</span>';
 }
 
 function severity_badge(string $s): string

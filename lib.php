@@ -159,8 +159,17 @@ function db(): PDO
         http_response_code(500);
         exit('Nepodařilo se připojit k databázi.');
     }
+    if ($c['driver'] === 'sqlite') $pdo->exec('PRAGMA foreign_keys = ON');   // per connection
     if (!empty(config()['auto_migrate'])) {
-        migrate($pdo, $c['driver']);
+        // ~30 DDL statements and column probes: run them only when the code that defines the schema has changed
+        $libs = [__FILE__, __DIR__ . '/lib-tickets.php', __DIR__ . '/lib-docs.php'];
+        $stamp = md5(json_encode([$c['driver'], $c['host'] ?? '', $c['name'] ?? '', $c['path'] ?? '', $c['prefix'] ?? '',
+            array_map(fn($f) => @filemtime($f) . ':' . @filesize($f), $libs)]));
+        $marker = __DIR__ . '/data/.migrated-' . substr(md5(($c['driver'] ?? '') . ($c['name'] ?? '') . ($c['path'] ?? '') . ($c['prefix'] ?? '')), 0, 12);
+        if (@file_get_contents($marker) !== $stamp) {
+            migrate($pdo, $c['driver']);
+            @file_put_contents($marker, $stamp, LOCK_EX);   // not writable: simply migrate on every request as before
+        }
     }
     return $pdo;
 }
@@ -199,7 +208,6 @@ function migrate(PDO $pdo, string $driver): void
             version_id INTEGER NOT NULL,
             recipients INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL)");
-        $pdo->exec('PRAGMA foreign_keys = ON');
         $pdo->exec("CREATE TABLE IF NOT EXISTS $v (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             version TEXT NOT NULL UNIQUE,
@@ -598,7 +606,14 @@ function fetch_modules(): array
 
 function module_names(): array
 {
-    return array_column(fetch_modules(), 'name');
+    // names only: fetch_modules() would also count usage by scanning every entry
+    try {
+        $names = db()->query('SELECT name FROM ' . t('changelog_modules'))->fetchAll(PDO::FETCH_COLUMN);
+    } catch (PDOException $ex) {
+        return [];   // table missing (auto_migrate off and schema.sql not applied)
+    }
+    usort($names, 'strnatcasecmp');
+    return $names;
 }
 
 function get_module(int $id): ?array
