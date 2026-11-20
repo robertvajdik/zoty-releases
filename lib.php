@@ -182,12 +182,12 @@ function t(string $name): string
 /** Creates tables if they do not exist (same structure as schema.sql). */
 function migrate(PDO $pdo, string $driver): void
 {
-    $v = t('changelog_versions');
-    $e = t('changelog_entries');
-    $u = t('changelog_users');
-    $s = t('changelog_subscribers');
-    $m = t('changelog_mailings');
-    $md = t('changelog_modules');
+    $v = t('zotyczportal_versions');
+    $e = t('zotyczportal_entries');
+    $u = t('zotyczportal_users');
+    $s = t('zotyczportal_subscribers');
+    $m = t('zotyczportal_mailings');
+    $md = t('zotyczportal_modules');
     try {
         $pdo->query("SELECT 1 FROM $md WHERE 1 = 0");
         $modulesExisted = true;
@@ -356,8 +356,8 @@ function normalize_version(array $r): array
 /** All versions, newest first, with their entry counts. */
 function fetch_versions(bool $publishedOnly = false): array
 {
-    $sql = 'SELECT ' . VERSION_COLS . ', (SELECT COUNT(*) FROM ' . t('changelog_entries') . ' e WHERE e.version_id = v.id) AS entry_count'
-         . ' FROM ' . t('changelog_versions') . ' v'
+    $sql = 'SELECT ' . VERSION_COLS . ', (SELECT COUNT(*) FROM ' . t('zotyczportal_entries') . ' e WHERE e.version_id = v.id) AS entry_count'
+         . ' FROM ' . t('zotyczportal_versions') . ' v'
          . ($publishedOnly ? ' WHERE v.published = 1' : '')
          . ' ORDER BY v.release_date DESC, v.id DESC';
     return array_map('normalize_version', db()->query($sql)->fetchAll());
@@ -365,7 +365,7 @@ function fetch_versions(bool $publishedOnly = false): array
 
 function get_version(int $id): ?array
 {
-    $st = db()->prepare('SELECT ' . VERSION_COLS . ' FROM ' . t('changelog_versions') . ' v WHERE v.id = ?');
+    $st = db()->prepare('SELECT ' . VERSION_COLS . ' FROM ' . t('zotyczportal_versions') . ' v WHERE v.id = ?');
     $st->execute([$id]);
     $row = $st->fetch();
     return $row ? normalize_version($row) : null;
@@ -373,7 +373,7 @@ function get_version(int $id): ?array
 
 function find_version_by_number(string $version): ?array
 {
-    $st = db()->prepare('SELECT ' . VERSION_COLS . ' FROM ' . t('changelog_versions') . ' v WHERE v.version = ?');
+    $st = db()->prepare('SELECT ' . VERSION_COLS . ' FROM ' . t('zotyczportal_versions') . ' v WHERE v.version = ?');
     $st->execute([$version]);
     $row = $st->fetch();
     return $row ? normalize_version($row) : null;
@@ -408,12 +408,12 @@ function save_version(array $v): int
     $now = date('Y-m-d H:i:s');
     $vals = [$v['version'], $v['date'], $v['title'] ?? '', $v['summary'] ?? '', !empty($v['published']) ? 1 : 0];
     if (!empty($v['id'])) {
-        db()->prepare('UPDATE ' . t('changelog_versions')
+        db()->prepare('UPDATE ' . t('zotyczportal_versions')
             . ' SET version = ?, release_date = ?, title = ?, summary = ?, published = ?, updated_at = ? WHERE id = ?')
             ->execute([...$vals, $now, (int)$v['id']]);
         return (int)$v['id'];
     }
-    db()->prepare('INSERT INTO ' . t('changelog_versions')
+    db()->prepare('INSERT INTO ' . t('zotyczportal_versions')
         . ' (version, release_date, title, summary, published, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
         ->execute([...$vals, $now, $now]);
     return (int)db()->lastInsertId();
@@ -422,16 +422,16 @@ function save_version(array $v): int
 /** Deletes a version only when it has no entries. */
 function delete_version(int $id): bool
 {
-    $st = db()->prepare('SELECT COUNT(*) FROM ' . t('changelog_entries') . ' WHERE version_id = ?');
+    $st = db()->prepare('SELECT COUNT(*) FROM ' . t('zotyczportal_entries') . ' WHERE version_id = ?');
     $st->execute([$id]);
     if ((int)$st->fetchColumn() > 0) return false;
-    db()->prepare('DELETE FROM ' . t('changelog_versions') . ' WHERE id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('zotyczportal_versions') . ' WHERE id = ?')->execute([$id]);
     return true;
 }
 
 function set_version_published(int $id, bool $published): void
 {
-    db()->prepare('UPDATE ' . t('changelog_versions') . ' SET published = ?, updated_at = ? WHERE id = ?')
+    db()->prepare('UPDATE ' . t('zotyczportal_versions') . ' SET published = ?, updated_at = ? WHERE id = ?')
         ->execute([$published ? 1 : 0, date('Y-m-d H:i:s'), $id]);
 }
 
@@ -464,8 +464,8 @@ function fetch_entries(array $f = [], bool $includeDrafts = false): array
         $where[] = "(e.title LIKE ? ESCAPE '!' OR e.body LIKE ? ESCAPE '!' OR e.module LIKE ? ESCAPE '!' OR v.version LIKE ? ESCAPE '!' OR v.title LIKE ? ESCAPE '!')";
         array_push($args, $like, $like, $like, $like, $like);
     }
-    $sql = 'SELECT ' . ENTRY_COLS . ' FROM ' . t('changelog_entries') . ' e'
-         . ' JOIN ' . t('changelog_versions') . ' v ON v.id = e.version_id'
+    $sql = 'SELECT ' . ENTRY_COLS . ' FROM ' . t('zotyczportal_entries') . ' e'
+         . ' JOIN ' . t('zotyczportal_versions') . ' v ON v.id = e.version_id'
          . ($where ? ' WHERE ' . implode(' AND ', $where) : '')
          . " ORDER BY v.release_date DESC, v.id DESC,"
          . " CASE e.type WHEN 'new' THEN 1 WHEN 'improved' THEN 2 WHEN 'fixed' THEN 3 ELSE 4 END, e.id";
@@ -476,8 +476,8 @@ function fetch_entries(array $f = [], bool $includeDrafts = false): array
 
 function get_entry(int $id): ?array
 {
-    $st = db()->prepare('SELECT ' . ENTRY_COLS . ' FROM ' . t('changelog_entries') . ' e'
-        . ' JOIN ' . t('changelog_versions') . ' v ON v.id = e.version_id WHERE e.id = ?');
+    $st = db()->prepare('SELECT ' . ENTRY_COLS . ' FROM ' . t('zotyczportal_entries') . ' e'
+        . ' JOIN ' . t('zotyczportal_versions') . ' v ON v.id = e.version_id WHERE e.id = ?');
     $st->execute([$id]);
     $row = $st->fetch();
     return $row ? normalize_entry($row) : null;
@@ -500,12 +500,12 @@ function save_entry(array $e): int
     $now = date('Y-m-d H:i:s');
     $vals = [(int)$e['version_id'], $e['type'], $e['module'], $e['title'], $e['body'], $e['published'] ? 1 : 0];
     if (!empty($e['id'])) {
-        db()->prepare('UPDATE ' . t('changelog_entries')
+        db()->prepare('UPDATE ' . t('zotyczportal_entries')
             . ' SET version_id = ?, type = ?, module = ?, title = ?, body = ?, published = ?, updated_at = ? WHERE id = ?')
             ->execute([...$vals, $now, (int)$e['id']]);
         return (int)$e['id'];
     }
-    db()->prepare('INSERT INTO ' . t('changelog_entries')
+    db()->prepare('INSERT INTO ' . t('zotyczportal_entries')
         . ' (version_id, type, module, title, body, published, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
         ->execute([...$vals, $now, $now]);
     return (int)db()->lastInsertId();
@@ -513,19 +513,19 @@ function save_entry(array $e): int
 
 function delete_entry(int $id): void
 {
-    db()->prepare('DELETE FROM ' . t('changelog_entries') . ' WHERE id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('zotyczportal_entries') . ' WHERE id = ?')->execute([$id]);
 }
 
 function set_published(int $id, bool $published): void
 {
-    db()->prepare('UPDATE ' . t('changelog_entries') . ' SET published = ?, updated_at = ? WHERE id = ?')
+    db()->prepare('UPDATE ' . t('zotyczportal_entries') . ' SET published = ?, updated_at = ? WHERE id = ?')
         ->execute([$published ? 1 : 0, date('Y-m-d H:i:s'), $id]);
 }
 
 function entry_stats(): array
 {
-    $r = db()->query('SELECT COUNT(*) AS total, COALESCE(SUM(published), 0) AS published FROM ' . t('changelog_entries'))->fetch();
-    $r['versions'] = db()->query('SELECT COUNT(*) FROM ' . t('changelog_versions'))->fetchColumn();
+    $r = db()->query('SELECT COUNT(*) AS total, COALESCE(SUM(published), 0) AS published FROM ' . t('zotyczportal_entries'))->fetch();
+    $r['versions'] = db()->query('SELECT COUNT(*) FROM ' . t('zotyczportal_versions'))->fetchColumn();
     return array_map('intval', $r);
 }
 
@@ -534,15 +534,15 @@ function distinct_values(string $field, bool $publishedOnly = true): array
 {
     $pub = $publishedOnly ? ' AND e.published = 1 AND v.published = 1' : '';
     if ($field === 'version') {
-        $sql = 'SELECT DISTINCT v.version FROM ' . t('changelog_versions') . ' v'
-             . ($publishedOnly ? ' JOIN ' . t('changelog_entries') . ' e ON e.version_id = v.id WHERE 1 = 1' . $pub : '')
+        $sql = 'SELECT DISTINCT v.version FROM ' . t('zotyczportal_versions') . ' v'
+             . ($publishedOnly ? ' JOIN ' . t('zotyczportal_entries') . ' e ON e.version_id = v.id WHERE 1 = 1' . $pub : '')
              . ' ORDER BY v.version';
         $vals = db()->query($sql)->fetchAll(PDO::FETCH_COLUMN);
         usort($vals, fn($a, $b) => version_compare((string)$b, (string)$a));
         return $vals;
     }
     if ($field === 'module') {
-        $sql = 'SELECT DISTINCT e.module FROM ' . t('changelog_entries') . ' e JOIN ' . t('changelog_versions') . " v ON v.id = e.version_id WHERE e.module <> ''" . $pub;
+        $sql = 'SELECT DISTINCT e.module FROM ' . t('zotyczportal_entries') . ' e JOIN ' . t('zotyczportal_versions') . " v ON v.id = e.version_id WHERE e.module <> ''" . $pub;
         $vals = [];
         foreach (db()->query($sql)->fetchAll(PDO::FETCH_COLUMN) as $v) {
             foreach (split_modules($v) as $name) $vals[$name] = $name;
@@ -580,7 +580,7 @@ function join_modules(array $names): string
 function module_usage(): array
 {
     $counts = [];
-    foreach (db()->query('SELECT module FROM ' . t('changelog_entries') . " WHERE module <> ''")->fetchAll(PDO::FETCH_COLUMN) as $v) {
+    foreach (db()->query('SELECT module FROM ' . t('zotyczportal_entries') . " WHERE module <> ''")->fetchAll(PDO::FETCH_COLUMN) as $v) {
         foreach (split_modules($v) as $m) $counts[$m] = ($counts[$m] ?? 0) + 1;
     }
     return $counts;
@@ -590,7 +590,7 @@ function module_usage(): array
 function fetch_modules(): array
 {
     try {
-        $rows = db()->query('SELECT id, name FROM ' . t('changelog_modules'))->fetchAll();
+        $rows = db()->query('SELECT id, name FROM ' . t('zotyczportal_modules'))->fetchAll();
     } catch (PDOException $ex) {
         return [];   // table missing (auto_migrate off and schema.sql not applied)
     }
@@ -608,7 +608,7 @@ function module_names(): array
 {
     // names only: fetch_modules() would also count usage by scanning every entry
     try {
-        $names = db()->query('SELECT name FROM ' . t('changelog_modules'))->fetchAll(PDO::FETCH_COLUMN);
+        $names = db()->query('SELECT name FROM ' . t('zotyczportal_modules'))->fetchAll(PDO::FETCH_COLUMN);
     } catch (PDOException $ex) {
         return [];   // table missing (auto_migrate off and schema.sql not applied)
     }
@@ -638,10 +638,10 @@ function save_module(string $name, int $id = 0): void
 {
     if ($id) {
         $old = get_module($id);
-        db()->prepare('UPDATE ' . t('changelog_modules') . ' SET name = ? WHERE id = ?')->execute([$name, $id]);
+        db()->prepare('UPDATE ' . t('zotyczportal_modules') . ' SET name = ? WHERE id = ?')->execute([$name, $id]);
         if ($old && $old['name'] !== $name) {
-            $upd = db()->prepare('UPDATE ' . t('changelog_entries') . ' SET module = ? WHERE id = ?');
-            foreach (db()->query('SELECT id, module FROM ' . t('changelog_entries') . " WHERE module <> ''")->fetchAll() as $row) {
+            $upd = db()->prepare('UPDATE ' . t('zotyczportal_entries') . ' SET module = ? WHERE id = ?');
+            foreach (db()->query('SELECT id, module FROM ' . t('zotyczportal_entries') . " WHERE module <> ''")->fetchAll() as $row) {
                 $list = split_modules($row['module']);
                 if (!in_array($old['name'], $list, true)) continue;
                 $list = array_map(fn($m) => $m === $old['name'] ? $name : $m, $list);
@@ -650,7 +650,7 @@ function save_module(string $name, int $id = 0): void
         }
         return;
     }
-    db()->prepare('INSERT INTO ' . t('changelog_modules') . ' (name, created_at) VALUES (?, ?)')->execute([$name, date('Y-m-d H:i:s')]);
+    db()->prepare('INSERT INTO ' . t('zotyczportal_modules') . ' (name, created_at) VALUES (?, ?)')->execute([$name, date('Y-m-d H:i:s')]);
 }
 
 /** Deletes a module only when no entry uses it. */
@@ -658,7 +658,7 @@ function delete_module(int $id): bool
 {
     $m = get_module($id);
     if (!$m || $m['entry_count'] > 0) return false;
-    db()->prepare('DELETE FROM ' . t('changelog_modules') . ' WHERE id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('zotyczportal_modules') . ' WHERE id = ?')->execute([$id]);
     return true;
 }
 
@@ -914,35 +914,35 @@ function current_filters(array $src): array
     return $f;
 }
 
-/* ---------------------------------------------------------------- auth (table changelog_users) */
+/* ---------------------------------------------------------------- auth (table zotyczportal_users) */
 
 function auth_configured(): bool
 {
-    return (int)db()->query('SELECT COUNT(*) FROM ' . t('changelog_users'))->fetchColumn() > 0;
+    return (int)db()->query('SELECT COUNT(*) FROM ' . t('zotyczportal_users'))->fetchColumn() > 0;
 }
 
 /** Returns the username on success, null otherwise. */
 function auth_verify(string $user, string $password, bool $touch = true): ?string
 {
-    $st = db()->prepare('SELECT username, password_hash FROM ' . t('changelog_users') . ' WHERE username = ?');
+    $st = db()->prepare('SELECT username, password_hash FROM ' . t('zotyczportal_users') . ' WHERE username = ?');
     $st->execute([$user]);
     $row = $st->fetch();
     // verify against a dummy hash when the user is unknown, so timing does not leak usernames
     $hash = $row['password_hash'] ?? password_hash('dummy-password', PASSWORD_DEFAULT);
     if (!(password_matches($password, $hash) && $row)) return null;
-    if ($touch) db()->prepare('UPDATE ' . t('changelog_users') . ' SET last_login = ? WHERE username = ?')->execute([date('Y-m-d H:i:s'), $row['username']]);
+    if ($touch) db()->prepare('UPDATE ' . t('zotyczportal_users') . ' SET last_login = ? WHERE username = ?')->execute([date('Y-m-d H:i:s'), $row['username']]);
     return $row['username'];
 }
 
 /** All administrators, oldest first. */
 function admin_list(): array
 {
-    return db()->query('SELECT id, username, notify_tickets, created_at, last_login FROM ' . t('changelog_users') . ' ORDER BY id')->fetchAll();
+    return db()->query('SELECT id, username, notify_tickets, created_at, last_login FROM ' . t('zotyczportal_users') . ' ORDER BY id')->fetchAll();
 }
 
 function admin_get(int $id): ?array
 {
-    $st = db()->prepare('SELECT id, username, notify_tickets, created_at, last_login FROM ' . t('changelog_users') . ' WHERE id = ?');
+    $st = db()->prepare('SELECT id, username, notify_tickets, created_at, last_login FROM ' . t('zotyczportal_users') . ' WHERE id = ?');
     $st->execute([$id]);
     return $st->fetch() ?: null;
 }
@@ -953,7 +953,7 @@ function validate_admin(string $email, string $password): array
     $err = [];
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 80) $err[] = 'Zadejte platný e-mail (max. 80 znaků).';
     if (mb_strlen($password) < 8) $err[] = 'Heslo musí mít alespoň 8 znaků.';
-    $st = db()->prepare('SELECT 1 FROM ' . t('changelog_users') . ' WHERE LOWER(username) = ?');
+    $st = db()->prepare('SELECT 1 FROM ' . t('zotyczportal_users') . ' WHERE LOWER(username) = ?');
     $st->execute([mb_strtolower($email)]);
     if ($st->fetch()) $err[] = 'Administrátor ' . $email . ' už existuje.';
     return $err;
@@ -961,24 +961,24 @@ function validate_admin(string $email, string $password): array
 
 function admin_set_password(int $id, string $password): void
 {
-    db()->prepare('UPDATE ' . t('changelog_users') . ' SET password_hash = ? WHERE id = ?')->execute([password_hash($password, PASSWORD_DEFAULT), $id]);
+    db()->prepare('UPDATE ' . t('zotyczportal_users') . ' SET password_hash = ? WHERE id = ?')->execute([password_hash($password, PASSWORD_DEFAULT), $id]);
 }
 
 function admin_set_notify(int $id, bool $on): void
 {
-    db()->prepare('UPDATE ' . t('changelog_users') . ' SET notify_tickets = ? WHERE id = ?')->execute([$on ? 1 : 0, $id]);
+    db()->prepare('UPDATE ' . t('zotyczportal_users') . ' SET notify_tickets = ? WHERE id = ?')->execute([$on ? 1 : 0, $id]);
 }
 
 function admin_delete(int $id): void
 {
-    db()->prepare('DELETE FROM ' . t('changelog_users') . ' WHERE id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('zotyczportal_users') . ' WHERE id = ?')->execute([$id]);
 }
 
 /** E-mail addresses of the administrators who want the e-mails about tickets. */
 function admin_notify_emails(): array
 {
     $out = [];
-    foreach (db()->query('SELECT username FROM ' . t('changelog_users') . ' WHERE notify_tickets = 1') as $r) {
+    foreach (db()->query('SELECT username FROM ' . t('zotyczportal_users') . ' WHERE notify_tickets = 1') as $r) {
         if (filter_var($r['username'], FILTER_VALIDATE_EMAIL)) $out[] = (string)$r['username'];
     }
     return $out;
@@ -986,7 +986,7 @@ function admin_notify_emails(): array
 
 function auth_create(string $user, string $password): void
 {
-    db()->prepare('INSERT INTO ' . t('changelog_users') . ' (username, password_hash, created_at) VALUES (?, ?, ?)')
+    db()->prepare('INSERT INTO ' . t('zotyczportal_users') . ' (username, password_hash, created_at) VALUES (?, ?, ?)')
         ->execute([$user, password_hash($password, PASSWORD_DEFAULT), date('Y-m-d H:i:s')]);
 }
 
@@ -996,7 +996,7 @@ function is_admin(): bool
     static $ok = null;
     if (empty($_SESSION['zoty_admin'])) return false;
     if ($ok === null) {
-        $st = db()->prepare('SELECT 1 FROM ' . t('changelog_users') . ' WHERE username = ?');
+        $st = db()->prepare('SELECT 1 FROM ' . t('zotyczportal_users') . ' WHERE username = ?');
         $st->execute([(string)$_SESSION['zoty_admin']]);
         $ok = (bool)$st->fetchColumn();
         if (!$ok) unset($_SESSION['zoty_admin']);
@@ -1131,13 +1131,13 @@ function flash(?string $msg = null): ?string
     return $m;
 }
 
-/* ---------------------------------------------------------------- subscribers (table changelog_subscribers) */
+/* ---------------------------------------------------------------- subscribers (table zotyczportal_subscribers) */
 
 /** Adds (or re-sends confirmation to) a subscriber. Returns 'sent', 'exists' or 'error'. */
 function subscriber_add(string $email): string
 {
     $email = mb_strtolower(trim($email));
-    $tbl = t('changelog_subscribers');
+    $tbl = t('zotyczportal_subscribers');
     $st = db()->prepare("SELECT * FROM $tbl WHERE email = ?");
     $st->execute([$email]);
     $row = $st->fetch();
@@ -1175,7 +1175,7 @@ function subscriber_add(string $email): string
 function subscriber_confirm(string $token): ?string
 {
     if (!preg_match('/^[0-9a-f]{32}$/', $token)) return null;
-    $tbl = t('changelog_subscribers');
+    $tbl = t('zotyczportal_subscribers');
     $st = db()->prepare("SELECT id, email FROM $tbl WHERE token = ?");
     $st->execute([$token]);
     if (!$row = $st->fetch()) return null;
@@ -1187,7 +1187,7 @@ function subscriber_confirm(string $token): ?string
 /** Is $email a confirmed subscriber? */
 function subscriber_active(string $email): bool
 {
-    $st = db()->prepare('SELECT confirmed FROM ' . t('changelog_subscribers') . ' WHERE email = ?');
+    $st = db()->prepare('SELECT confirmed FROM ' . t('zotyczportal_subscribers') . ' WHERE email = ?');
     $st->execute([mb_strtolower(trim($email))]);
     return (bool)$st->fetchColumn();
 }
@@ -1199,7 +1199,7 @@ function subscriber_active(string $email): bool
 function subscriber_set(string $email, bool $on): void
 {
     $email = mb_strtolower(trim($email));
-    $tbl = t('changelog_subscribers');
+    $tbl = t('zotyczportal_subscribers');
     if (!$on) {
         db()->prepare("DELETE FROM $tbl WHERE email = ?")->execute([$email]);
         return;
@@ -1218,19 +1218,19 @@ function subscriber_set(string $email, bool $on): void
 function subscriber_by_token(string $token): ?array
 {
     if (!preg_match('/^[0-9a-f]{32}$/', $token)) return null;
-    $st = db()->prepare('SELECT * FROM ' . t('changelog_subscribers') . ' WHERE token = ?');
+    $st = db()->prepare('SELECT * FROM ' . t('zotyczportal_subscribers') . ' WHERE token = ?');
     $st->execute([$token]);
     return $st->fetch() ?: null;
 }
 
 function subscriber_delete(int $id): void
 {
-    db()->prepare('DELETE FROM ' . t('changelog_subscribers') . ' WHERE id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('zotyczportal_subscribers') . ' WHERE id = ?')->execute([$id]);
 }
 
 function fetch_subscribers(bool $confirmedOnly = false): array
 {
-    return db()->query('SELECT * FROM ' . t('changelog_subscribers')
+    return db()->query('SELECT * FROM ' . t('zotyczportal_subscribers')
         . ($confirmedOnly ? ' WHERE confirmed = 1' : '') . ' ORDER BY created_at DESC, id DESC')->fetchAll();
 }
 
@@ -1238,7 +1238,7 @@ function fetch_subscribers(bool $confirmedOnly = false): array
 function fetch_mailings(): array
 {
     $out = [];
-    foreach (db()->query('SELECT version_id, recipients, created_at FROM ' . t('changelog_mailings') . ' ORDER BY id') as $r) {
+    foreach (db()->query('SELECT version_id, recipients, created_at FROM ' . t('zotyczportal_mailings') . ' ORDER BY id') as $r) {
         $out[(int)$r['version_id']] = $r;
     }
     return $out;
@@ -1261,7 +1261,7 @@ function notify_subscribers(array $version): array
     }
     $res = mail_send($messages);
     if ($res['sent']) {
-        db()->prepare('INSERT INTO ' . t('changelog_mailings') . ' (version_id, recipients, created_at) VALUES (?, ?, ?)')
+        db()->prepare('INSERT INTO ' . t('zotyczportal_mailings') . ' (version_id, recipients, created_at) VALUES (?, ?, ?)')
             ->execute([(int)$version['id'], $res['sent'], date('Y-m-d H:i:s')]);
     }
     return $res;

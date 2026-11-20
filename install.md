@@ -8,15 +8,15 @@ The changelog and admin accounts are stored in a database (MySQL/MariaDB through
 1. Create a MySQL/MariaDB database and a user for it.
 2. Fill in the credentials in `config.php` (the template is `config.sample.php`).
 3. With `'auto_migrate' => true`, the tables are created on the first visit. You can also create them yourself from `schema.sql`.
-4. Open `/admin/`. On the first visit you create the admin account (it's stored in the `changelog_users` table).
+4. Open `/admin/`. On the first visit you create the admin account (it's stored in the `zotyczportal_users` table).
 
 Requirements: PHP 8.0+ with the `pdo_mysql` extension (or `pdo_sqlite` for local development).
 
 ## Database tables
 
-- `changelog_versions`: id, version (unique), release_date, title, summary, published, created_at, updated_at
-- `changelog_entries`: id, version_id (→ versions), type (new/improved/fixed/security), module, title, body, published, created_at, updated_at
-- `changelog_users`: id, username, password_hash, created_at
+- `zotyczportal_versions`: id, version (unique), release_date, title, summary, published, created_at, updated_at
+- `zotyczportal_entries`: id, version_id (→ versions), type (new/improved/fixed/security), module, title, body, published, created_at, updated_at
+- `zotyczportal_users`: id, username, password_hash, created_at
 
 Use `'prefix'` in `config.php` to add a table prefix.
 

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 /**
  * Zoty – manuals (help pages) editable in the admin.
- * Table changelog_docs: one Markdown document per (slug, lang). A missing document is created
+ * Table zotyczportal_docs: one Markdown document per (slug, lang). A missing document is created
  * from its seed file the first time it is requested (Zoty Release Notes & Customer Support.md, docs/*.md).
  */
 
@@ -35,7 +35,7 @@ function doc_langs(string $slug): array
     static $db = null;
     if ($db === null) {
         $db = [];
-        foreach (db()->query('SELECT slug, lang FROM ' . t('changelog_docs')) as $r) $db[$r['slug']][] = $r['lang'];
+        foreach (db()->query('SELECT slug, lang FROM ' . t('zotyczportal_docs')) as $r) $db[$r['slug']][] = $r['lang'];
     }
     $have = array_merge(DOCS[$slug]['langs'] ?? [], $db[$slug] ?? []);
     return array_values(array_filter(LANGS, fn($l) => in_array($l, $have, true)));
@@ -108,7 +108,7 @@ function doc_normalize(string $md): string
 
 function migrate_docs(PDO $pdo, string $driver): void
 {
-    $d = t('changelog_docs');
+    $d = t('zotyczportal_docs');
     if ($driver === 'sqlite') {
         $pdo->exec("CREATE TABLE IF NOT EXISTS $d (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -147,7 +147,7 @@ function doc_name(string $slug, string $lang): string
     static $names = null;
     if ($names === null) {
         $names = [];
-        foreach (db()->query('SELECT slug, lang, title FROM ' . t('changelog_docs')) as $r) {
+        foreach (db()->query('SELECT slug, lang, title FROM ' . t('zotyczportal_docs')) as $r) {
             $names[$r['slug']][$r['lang']] = (string)$r['title'];
         }
     }
@@ -166,7 +166,7 @@ function doc_seed(string $slug, string $lang): ?string
 function doc_get(string $slug, string $lang): ?array
 {
     if (!isset(DOCS[$slug])) return null;
-    $st = db()->prepare('SELECT * FROM ' . t('changelog_docs') . ' WHERE slug = ? AND lang = ?');
+    $st = db()->prepare('SELECT * FROM ' . t('zotyczportal_docs') . ' WHERE slug = ? AND lang = ?');
     $st->execute([$slug, $lang]);
     if ($row = $st->fetch()) return $row;
     $seed = doc_seed($slug, $lang);
@@ -188,13 +188,13 @@ function doc_for(string $slug, string $lang): ?array
 /** Renames one language version (empty = default name). */
 function doc_rename(string $slug, string $lang, string $title): void
 {
-    db()->prepare('UPDATE ' . t('changelog_docs') . ' SET title = ? WHERE slug = ? AND lang = ?')->execute([$title, $slug, $lang]);
+    db()->prepare('UPDATE ' . t('zotyczportal_docs') . ' SET title = ? WHERE slug = ? AND lang = ?')->execute([$title, $slug, $lang]);
 }
 
 /** Saves the text (and the name, unless $title is null). */
 function doc_save(string $slug, string $lang, string $body, string $by, ?string $title = null): void
 {
-    $tbl = t('changelog_docs');
+    $tbl = t('zotyczportal_docs');
     if ($title !== null) {
         $st = db()->prepare("UPDATE $tbl SET body = ?, title = ?, updated_at = ?, updated_by = ? WHERE slug = ? AND lang = ?");
         $st->execute([$body, $title, now(), $by, $slug, $lang]);

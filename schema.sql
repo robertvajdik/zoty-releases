@@ -1,7 +1,7 @@
 -- Zoty Release Notes – MySQL / MariaDB schema
 -- (the app also creates these tables itself when 'auto_migrate' => true)
 
-CREATE TABLE IF NOT EXISTS `changelog_versions` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_versions` (
   `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `version`      VARCHAR(50)  NOT NULL,
   `release_date` DATE         NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `changelog_versions` (
   KEY `idx_release_date` (`release_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
-CREATE TABLE IF NOT EXISTS `changelog_entries` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_entries` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `version_id` INT UNSIGNED NOT NULL,
   `type`       VARCHAR(20)  NOT NULL COMMENT 'new | improved | fixed | security',
@@ -26,10 +26,10 @@ CREATE TABLE IF NOT EXISTS `changelog_entries` (
   `updated_at` DATETIME     NOT NULL,
   KEY `idx_version_id` (`version_id`),
   KEY `idx_published` (`published`),
-  CONSTRAINT `fk_changelog_entries_version` FOREIGN KEY (`version_id`) REFERENCES `changelog_versions` (`id`) ON DELETE RESTRICT
+  CONSTRAINT `fk_zotyczportal_entries_version` FOREIGN KEY (`version_id`) REFERENCES `zotyczportal_versions` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
-CREATE TABLE IF NOT EXISTS `changelog_users` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_users` (
   `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `username`      VARCHAR(80)  NOT NULL UNIQUE COMMENT 'e-mail',
   `password_hash` VARCHAR(255) NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `changelog_users` (
   `last_login`    DATETIME     NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
-CREATE TABLE IF NOT EXISTS `changelog_subscribers` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_subscribers` (
   `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `email`        VARCHAR(190) NOT NULL,
   `token`        CHAR(32)     NOT NULL,
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `changelog_subscribers` (
   UNIQUE KEY `uq_token` (`token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
-CREATE TABLE IF NOT EXISTS `changelog_mailings` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_mailings` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `version_id` INT UNSIGNED NOT NULL,
   `recipients` INT UNSIGNED NOT NULL DEFAULT 0,
@@ -58,19 +58,19 @@ CREATE TABLE IF NOT EXISTS `changelog_mailings` (
   KEY `idx_version_id` (`version_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
-CREATE TABLE IF NOT EXISTS `changelog_modules` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_modules` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `name`       VARCHAR(80)  NOT NULL,
   `created_at` DATETIME     NOT NULL,
   UNIQUE KEY `uq_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
-INSERT IGNORE INTO `changelog_modules` (`name`, `created_at`) VALUES
+INSERT IGNORE INTO `zotyczportal_modules` (`name`, `created_at`) VALUES
   ('DataLink', NOW()), ('Audit', NOW()), ('Reporty', NOW());
 
 -- ---------------------------------------------------------------- customer support (portal/)
 
-CREATE TABLE IF NOT EXISTS `changelog_customers` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_customers` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `name`       VARCHAR(160) NOT NULL,
   `code`       VARCHAR(10)  NOT NULL COMMENT 'ticket key prefix, e.g. ACME -> ACME-12',
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS `changelog_customers` (
   UNIQUE KEY `uq_code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
-CREATE TABLE IF NOT EXISTS `changelog_customer_users` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_customer_users` (
   `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `customer_id`   INT UNSIGNED NOT NULL,
   `email`         VARCHAR(190) NOT NULL,
@@ -92,10 +92,10 @@ CREATE TABLE IF NOT EXISTS `changelog_customer_users` (
   `last_login`    DATETIME     NULL,
   UNIQUE KEY `uq_email` (`email`),
   KEY `idx_customer` (`customer_id`),
-  CONSTRAINT `fk_changelog_customer_users_customer` FOREIGN KEY (`customer_id`) REFERENCES `changelog_customers` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_zotyczportal_customer_users_customer` FOREIGN KEY (`customer_id`) REFERENCES `zotyczportal_customers` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
-CREATE TABLE IF NOT EXISTS `changelog_tickets` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_tickets` (
   `id`              INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `customer_id`     INT UNSIGNED NOT NULL,
   `number`          INT UNSIGNED NOT NULL COMMENT 'per customer: ACME-1, ACME-2, ...',
@@ -115,10 +115,10 @@ CREATE TABLE IF NOT EXISTS `changelog_tickets` (
   UNIQUE KEY `uq_share_token` (`share_token`),
   KEY `idx_status` (`status`),
   KEY `idx_updated` (`updated_at`),
-  CONSTRAINT `fk_changelog_tickets_customer` FOREIGN KEY (`customer_id`) REFERENCES `changelog_customers` (`id`) ON DELETE RESTRICT
+  CONSTRAINT `fk_zotyczportal_tickets_customer` FOREIGN KEY (`customer_id`) REFERENCES `zotyczportal_customers` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
-CREATE TABLE IF NOT EXISTS `changelog_ticket_comments` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_ticket_comments` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `ticket_id`  INT UNSIGNED NOT NULL,
   `user_id`    INT UNSIGNED NULL COMMENT 'NULL = support staff',
@@ -127,10 +127,10 @@ CREATE TABLE IF NOT EXISTS `changelog_ticket_comments` (
   `event`      VARCHAR(60)  NOT NULL DEFAULT '' COMMENT 'e.g. status:open>waiting (activity line)',
   `created_at` DATETIME     NOT NULL,
   KEY `idx_ticket` (`ticket_id`),
-  CONSTRAINT `fk_changelog_ticket_comments_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `changelog_tickets` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_zotyczportal_ticket_comments_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `zotyczportal_tickets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
-CREATE TABLE IF NOT EXISTS `changelog_ticket_files` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_ticket_files` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `ticket_id`  INT UNSIGNED NOT NULL,
   `comment_id` INT UNSIGNED NULL,
@@ -140,10 +140,10 @@ CREATE TABLE IF NOT EXISTS `changelog_ticket_files` (
   `size`       INT UNSIGNED NOT NULL DEFAULT 0,
   `created_at` DATETIME     NOT NULL,
   KEY `idx_ticket` (`ticket_id`),
-  CONSTRAINT `fk_changelog_ticket_files_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `changelog_tickets` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_zotyczportal_ticket_files_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `zotyczportal_tickets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
-CREATE TABLE IF NOT EXISTS `changelog_ticket_participants` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_ticket_participants` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `ticket_id`  INT UNSIGNED NOT NULL,
   `email`      VARCHAR(190) NOT NULL COMMENT 'anyone; a portal user of the customer signs in, others use the token link',
@@ -152,12 +152,12 @@ CREATE TABLE IF NOT EXISTS `changelog_ticket_participants` (
   `created_at` DATETIME     NOT NULL,
   UNIQUE KEY `uq_ticket_email` (`ticket_id`, `email`),
   UNIQUE KEY `uq_token` (`token`),
-  CONSTRAINT `fk_changelog_ticket_participants_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `changelog_tickets` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_zotyczportal_ticket_participants_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `zotyczportal_tickets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
 -- ---------------------------------------------------------------- manuals (admin/help, portal/help)
 
-CREATE TABLE IF NOT EXISTS `changelog_docs` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_docs` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `slug`       VARCHAR(40)  NOT NULL COMMENT 'admin | portal',
   `lang`       VARCHAR(5)   NOT NULL,
@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS `changelog_docs` (
 
 -- ---------------------------------------------------------------- download center (admin/downloads, portal/downloads)
 
-CREATE TABLE IF NOT EXISTS `changelog_downloads` (
+CREATE TABLE IF NOT EXISTS `zotyczportal_downloads` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `title`      VARCHAR(160) NOT NULL,
   `lang`       VARCHAR(5)   NOT NULL DEFAULT '' COMMENT 'cs | en | empty = every language',

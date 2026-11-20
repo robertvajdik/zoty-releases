@@ -50,29 +50,29 @@ The environment variable ZOTY_CONFIG can point to a different config file.
 DATABASE TABLES
 ---------------
 
-changelog_versions     id, version (unique), release_date, title, summary,
+zotyczportal_versions     id, version (unique), release_date, title, summary,
                        published, created_at, updated_at
-changelog_entries      id, version_id (-> versions), type, module, title,
+zotyczportal_entries      id, version_id (-> versions), type, module, title,
                        body, published, created_at, updated_at
                        type: new | improved | fixed | security
-changelog_modules      id, name (unique), created_at
+zotyczportal_modules      id, name (unique), created_at
                        seeded with DataLink, Audit, Reporty
-changelog_users        id, username, password_hash, created_at
-changelog_subscribers  id, email, token, confirmed, created_at,
+zotyczportal_users        id, username, password_hash, created_at
+zotyczportal_subscribers  id, email, token, confirmed, created_at,
                        confirmed_at, ip
-changelog_mailings     id, version_id, recipients, created_at
-changelog_customers    id, name, code (ticket key prefix, unique), created_at
-changelog_customer_users  id, customer_id, email (unique), name,
+zotyczportal_mailings     id, version_id, recipients, created_at
+zotyczportal_customers    id, name, code (ticket key prefix, unique), created_at
+zotyczportal_customer_users  id, customer_id, email (unique), name,
                        password_hash, active, lang, created_at, last_login
-changelog_tickets      id, customer_id, number (per customer), user_id, type,
+zotyczportal_tickets      id, customer_id, number (per customer), user_id, type,
                        product, product_version, os, summary, description,
                        severity, status, created_at, updated_at
-changelog_ticket_comments  id, ticket_id, user_id (NULL = support),
+zotyczportal_ticket_comments  id, ticket_id, user_id (NULL = support),
                        staff_name, body, event, created_at
-changelog_docs         id, slug (admin | portal), lang, body (Markdown),
+zotyczportal_docs         id, slug (admin | portal), lang, body (Markdown),
                        updated_at, updated_by – manuals, seeded from
                        "Zoty Release Notes & Customer Support.md" and docs/portal.*.md on first view
-changelog_ticket_files id, ticket_id, comment_id, name, path, mime, size,
+zotyczportal_ticket_files id, ticket_id, comment_id, name, path, mime, size,
                        created_at (files in data/tickets/<ticket_id>/)
 
 

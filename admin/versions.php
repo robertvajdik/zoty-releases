@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$errors) {
             $newId = save_version($v);
             flash($editing ? 'Verze ' . $v['version'] . ' byla uložena.' : 'Verze ' . $v['version'] . ' byla vytvořena.');
-            header('Location: ' . (isset($_POST['add_entry']) ? 'edit.php?version_id=' . $newId : 'versions'));
+            header('Location: ' . (isset($_POST['add_entry']) ? 'edit.php?version_id=' . $newId : 'versions.php'));
             exit;
         }
     }

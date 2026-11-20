@@ -2,10 +2,10 @@
 declare(strict_types=1);
 /**
  * Zoty Release Notes – support tickets (customer portal + admin queue).
- * Loaded from lib.php. Tables: changelog_customers, changelog_customer_users,
- * changelog_tickets, changelog_ticket_comments, changelog_ticket_files, changelog_ticket_participants.
+ * Loaded from lib.php. Tables: zotyczportal_customers, zotyczportal_customer_users,
+ * zotyczportal_tickets, zotyczportal_ticket_comments, zotyczportal_ticket_files, zotyczportal_ticket_participants.
  * Attachments live in data/tickets/<ticket id>/ (not web-accessible) and are served by portal/file.php.
- * Download-center PDFs (changelog_downloads) live in data/downloads/ and are served by portal/document.php.
+ * Download-center PDFs (zotyczportal_downloads) live in data/downloads/ and are served by portal/document.php.
  */
 
 const TICKET_TYPES      = ['incident', 'question', 'feature'];
@@ -33,11 +33,11 @@ function support_config(): array
 
 function migrate_tickets(PDO $pdo, string $driver): void
 {
-    $c  = t('changelog_customers');
-    $cu = t('changelog_customer_users');
-    $tk = t('changelog_tickets');
-    $cm = t('changelog_ticket_comments');
-    $fl = t('changelog_ticket_files');
+    $c  = t('zotyczportal_customers');
+    $cu = t('zotyczportal_customer_users');
+    $tk = t('zotyczportal_tickets');
+    $cm = t('zotyczportal_ticket_comments');
+    $fl = t('zotyczportal_ticket_files');
     if ($driver === 'sqlite') {
         $pdo->exec("CREATE TABLE IF NOT EXISTS $c (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -174,7 +174,7 @@ function migrate_tickets(PDO $pdo, string $driver): void
 /** v6: one share link per ticket ("Copy link") – anyone with it can read the request without signing in. */
 function migrate_ticket_share_token(PDO $pdo, string $driver): void
 {
-    $tk = t('changelog_tickets');
+    $tk = t('zotyczportal_tickets');
     try {
         $pdo->query("SELECT share_token FROM $tk WHERE 1 = 0");
     } catch (PDOException $ex) {
@@ -190,7 +190,7 @@ function migrate_ticket_share_token(PDO $pdo, string $driver): void
 /** v2: number of the customer's maintenance (support) contract, shown in the portal. */
 function migrate_customer_contract(PDO $pdo, string $driver): void
 {
-    $c = t('changelog_customers');
+    $c = t('zotyczportal_customers');
     try {
         $pdo->query("SELECT contract FROM $c WHERE 1 = 0");
     } catch (PDOException $ex) {
@@ -203,7 +203,7 @@ function migrate_customer_contract(PDO $pdo, string $driver): void
 /** v3: a customer can be deactivated – none of its users can sign in to the portal. */
 function migrate_customer_active(PDO $pdo, string $driver): void
 {
-    $c = t('changelog_customers');
+    $c = t('zotyczportal_customers');
     try {
         $pdo->query("SELECT active FROM $c WHERE 1 = 0");
     } catch (PDOException $ex) {
@@ -216,7 +216,7 @@ function migrate_customer_active(PDO $pdo, string $driver): void
 /** v4: PDF documents (e.g. installation manual) offered in the portal download center. */
 function migrate_downloads(PDO $pdo, string $driver): void
 {
-    $d = t('changelog_downloads');
+    $d = t('zotyczportal_downloads');
     if ($driver === 'sqlite') {
         $pdo->exec("CREATE TABLE IF NOT EXISTS $d (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -245,8 +245,8 @@ function migrate_downloads(PDO $pdo, string $driver): void
  */
 function migrate_ticket_participants(PDO $pdo, string $driver): void
 {
-    $p  = t('changelog_ticket_participants');
-    $tk = t('changelog_tickets');
+    $p  = t('zotyczportal_ticket_participants');
+    $tk = t('zotyczportal_tickets');
     $carry = [];
     try {
         $pdo->query("SELECT token FROM $p WHERE 1 = 0");
@@ -254,7 +254,7 @@ function migrate_ticket_participants(PDO $pdo, string $driver): void
     } catch (PDOException $ex) {
         // missing, or the first version keyed by user_id (colleagues only) – keep its shares, then recreate it
         try {
-            $carry = $pdo->query("SELECT p.ticket_id, u.email, p.created_at FROM $p p JOIN " . t('changelog_customer_users') . ' u ON u.id = p.user_id')->fetchAll();
+            $carry = $pdo->query("SELECT p.ticket_id, u.email, p.created_at FROM $p p JOIN " . t('zotyczportal_customer_users') . ' u ON u.id = p.user_id')->fetchAll();
             $pdo->exec($driver === 'sqlite' ? "DROP TABLE $p" : "DROP TABLE `$p`");
         } catch (PDOException $ex) {
             // no table yet
@@ -296,7 +296,7 @@ function download_dir(): string
 /** Documents, newest first; $lang limits to that language plus the language-neutral ones. */
 function fetch_downloads(?string $lang = null): array
 {
-    $sql = 'SELECT * FROM ' . t('changelog_downloads');
+    $sql = 'SELECT * FROM ' . t('zotyczportal_downloads');
     $args = [];
     if ($lang !== null) { $sql .= " WHERE lang = '' OR lang = ?"; $args[] = $lang; }
     try {
@@ -310,7 +310,7 @@ function fetch_downloads(?string $lang = null): array
 
 function get_download(int $id): ?array
 {
-    $st = db()->prepare('SELECT * FROM ' . t('changelog_downloads') . ' WHERE id = ?');
+    $st = db()->prepare('SELECT * FROM ' . t('zotyczportal_downloads') . ' WHERE id = ?');
     $st->execute([$id]);
     return $st->fetch() ?: null;
 }
@@ -343,7 +343,7 @@ function add_download(string $title, string $lang, ?array $f): array
     $stored = bin2hex(random_bytes(12)) . '.pdf';
     if (!move_uploaded_file($f['tmp_name'], $dir . '/' . $stored)) return ['Soubor se nepodařilo uložit.'];
     @chmod($dir . '/' . $stored, 0640);
-    db()->prepare('INSERT INTO ' . t('changelog_downloads') . ' (title, lang, name, path, size, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+    db()->prepare('INSERT INTO ' . t('zotyczportal_downloads') . ' (title, lang, name, path, size, created_at) VALUES (?, ?, ?, ?, ?, ?)')
         ->execute([mb_substr($title, 0, 160), $lang, mb_substr($name, 0, 255), $stored, (int)$f['size'], now()]);
     return [];
 }
@@ -353,30 +353,30 @@ function rename_download(int $id, string $title, string $lang): void
     $title = trim(preg_replace('/\s+/u', ' ', $title));
     if ($title === '') return;
     if (!in_array($lang, LANGS, true)) $lang = '';
-    db()->prepare('UPDATE ' . t('changelog_downloads') . ' SET title = ?, lang = ? WHERE id = ?')->execute([mb_substr($title, 0, 160), $lang, $id]);
+    db()->prepare('UPDATE ' . t('zotyczportal_downloads') . ' SET title = ?, lang = ? WHERE id = ?')->execute([mb_substr($title, 0, 160), $lang, $id]);
 }
 
 function delete_download(int $id): void
 {
     if ($d = get_download($id)) @unlink(download_path($d));
-    db()->prepare('DELETE FROM ' . t('changelog_downloads') . ' WHERE id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('zotyczportal_downloads') . ' WHERE id = ?')->execute([$id]);
 }
 
 /* ---------------------------------------------------------------- customers & their users */
 
 function fetch_customers(): array
 {
-    $c = t('changelog_customers');
+    $c = t('zotyczportal_customers');
     return db()->query("SELECT c.*,
-            (SELECT COUNT(*) FROM " . t('changelog_customer_users') . " u WHERE u.customer_id = c.id) AS user_count,
-            (SELECT COUNT(*) FROM " . t('changelog_tickets') . " k WHERE k.customer_id = c.id AND k.status NOT IN ('resolved','closed')) AS open_count,
-            (SELECT COUNT(*) FROM " . t('changelog_tickets') . " k WHERE k.customer_id = c.id) AS ticket_count
+            (SELECT COUNT(*) FROM " . t('zotyczportal_customer_users') . " u WHERE u.customer_id = c.id) AS user_count,
+            (SELECT COUNT(*) FROM " . t('zotyczportal_tickets') . " k WHERE k.customer_id = c.id AND k.status NOT IN ('resolved','closed')) AS open_count,
+            (SELECT COUNT(*) FROM " . t('zotyczportal_tickets') . " k WHERE k.customer_id = c.id) AS ticket_count
         FROM $c c ORDER BY c.name")->fetchAll();
 }
 
 function get_customer(int $id): ?array
 {
-    $st = db()->prepare('SELECT * FROM ' . t('changelog_customers') . ' WHERE id = ?');
+    $st = db()->prepare('SELECT * FROM ' . t('zotyczportal_customers') . ' WHERE id = ?');
     $st->execute([$id]);
     return $st->fetch() ?: null;
 }
@@ -387,7 +387,7 @@ function validate_customer(string $name, string $code, int $id = 0, string $cont
     if (mb_strlen($contract) > 60) $err[] = 'Číslo smlouvy může mít max. 60 znaků.';
     if ($name === '' || mb_strlen($name) > 160) $err[] = 'Vyplňte název zákazníka (max. 160 znaků).';
     if (!preg_match('/^[A-Z][A-Z0-9_]{0,8}[A-Z0-9]$/', $code)) $err[] = 'Klíč musí mít 2–10 znaků A–Z, 0–9 nebo _, začínat písmenem a nekončit _ (např. ACME nebo NBU_ZOTY).';
-    $st = db()->prepare('SELECT id FROM ' . t('changelog_customers') . ' WHERE code = ? AND id <> ?');
+    $st = db()->prepare('SELECT id FROM ' . t('zotyczportal_customers') . ' WHERE code = ? AND id <> ?');
     $st->execute([$code, $id]);
     if ($st->fetch()) $err[] = 'Klíč ' . $code . ' už používá jiný zákazník.';
     return $err;
@@ -396,40 +396,40 @@ function validate_customer(string $name, string $code, int $id = 0, string $cont
 function save_customer(string $name, string $code, int $id = 0, string $contract = ''): int
 {
     if ($id) {
-        db()->prepare('UPDATE ' . t('changelog_customers') . ' SET name = ?, code = ?, contract = ? WHERE id = ?')->execute([$name, $code, $contract, $id]);
+        db()->prepare('UPDATE ' . t('zotyczportal_customers') . ' SET name = ?, code = ?, contract = ? WHERE id = ?')->execute([$name, $code, $contract, $id]);
         return $id;
     }
-    db()->prepare('INSERT INTO ' . t('changelog_customers') . ' (name, code, contract, created_at) VALUES (?, ?, ?, ?)')->execute([$name, $code, $contract, now()]);
+    db()->prepare('INSERT INTO ' . t('zotyczportal_customers') . ' (name, code, contract, created_at) VALUES (?, ?, ?, ?)')->execute([$name, $code, $contract, now()]);
     return (int)db()->lastInsertId();
 }
 
 function customer_set_active(int $id, bool $active): void
 {
-    db()->prepare('UPDATE ' . t('changelog_customers') . ' SET active = ? WHERE id = ?')->execute([$active ? 1 : 0, $id]);
+    db()->prepare('UPDATE ' . t('zotyczportal_customers') . ' SET active = ? WHERE id = ?')->execute([$active ? 1 : 0, $id]);
 }
 
 /** A customer can be deleted only while it has no tickets (its users go with it). */
 function delete_customer(int $id): bool
 {
-    $st = db()->prepare('SELECT COUNT(*) FROM ' . t('changelog_tickets') . ' WHERE customer_id = ?');
+    $st = db()->prepare('SELECT COUNT(*) FROM ' . t('zotyczportal_tickets') . ' WHERE customer_id = ?');
     $st->execute([$id]);
     if ((int)$st->fetchColumn() > 0) return false;
-    db()->prepare('DELETE FROM ' . t('changelog_customer_users') . ' WHERE customer_id = ?')->execute([$id]);
-    db()->prepare('DELETE FROM ' . t('changelog_customers') . ' WHERE id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('zotyczportal_customer_users') . ' WHERE customer_id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('zotyczportal_customers') . ' WHERE id = ?')->execute([$id]);
     return true;
 }
 
 function fetch_customer_users(int $customerId): array
 {
-    $st = db()->prepare('SELECT * FROM ' . t('changelog_customer_users') . ' WHERE customer_id = ? ORDER BY name, email');
+    $st = db()->prepare('SELECT * FROM ' . t('zotyczportal_customer_users') . ' WHERE customer_id = ? ORDER BY name, email');
     $st->execute([$customerId]);
     return $st->fetchAll();
 }
 
 function get_customer_user(int $id): ?array
 {
-    $st = db()->prepare('SELECT u.*, c.name AS customer_name, c.code AS customer_code, c.contract AS customer_contract, c.active AS customer_active FROM ' . t('changelog_customer_users') . ' u'
-        . ' JOIN ' . t('changelog_customers') . ' c ON c.id = u.customer_id WHERE u.id = ?');
+    $st = db()->prepare('SELECT u.*, c.name AS customer_name, c.code AS customer_code, c.contract AS customer_contract, c.active AS customer_active FROM ' . t('zotyczportal_customer_users') . ' u'
+        . ' JOIN ' . t('zotyczportal_customers') . ' c ON c.id = u.customer_id WHERE u.id = ?');
     $st->execute([$id]);
     return $st->fetch() ?: null;
 }
@@ -440,7 +440,7 @@ function validate_customer_user(string $email, string $name, ?string $password, 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 190) $err[] = 'Zadejte platný e-mail.';
     if (mb_strlen($name) > 160) $err[] = 'Jméno je příliš dlouhé.';
     if ($password !== null && mb_strlen($password) < 8) $err[] = 'Heslo musí mít alespoň 8 znaků.';
-    $st = db()->prepare('SELECT id FROM ' . t('changelog_customer_users') . ' WHERE email = ? AND id <> ?');
+    $st = db()->prepare('SELECT id FROM ' . t('zotyczportal_customer_users') . ' WHERE email = ? AND id <> ?');
     $st->execute([$email, $id]);
     if ($st->fetch()) $err[] = 'E-mail ' . $email . ' už má jiný uživatel.';
     return $err;
@@ -448,7 +448,7 @@ function validate_customer_user(string $email, string $name, ?string $password, 
 
 function save_customer_user(int $customerId, string $email, string $name, ?string $password, int $id = 0): int
 {
-    $tbl = t('changelog_customer_users');
+    $tbl = t('zotyczportal_customer_users');
     if ($id) {
         db()->prepare("UPDATE $tbl SET email = ?, name = ? WHERE id = ? AND customer_id = ?")->execute([$email, $name, $id, $customerId]);
         if ($password !== null) customer_user_set_password($id, $password);
@@ -461,18 +461,18 @@ function save_customer_user(int $customerId, string $email, string $name, ?strin
 
 function customer_user_set_password(int $id, string $password): void
 {
-    db()->prepare('UPDATE ' . t('changelog_customer_users') . ' SET password_hash = ? WHERE id = ?')
+    db()->prepare('UPDATE ' . t('zotyczportal_customer_users') . ' SET password_hash = ? WHERE id = ?')
         ->execute([password_hash($password, PASSWORD_DEFAULT), $id]);
 }
 
 function customer_user_set_active(int $id, bool $active): void
 {
-    db()->prepare('UPDATE ' . t('changelog_customer_users') . ' SET active = ? WHERE id = ?')->execute([$active ? 1 : 0, $id]);
+    db()->prepare('UPDATE ' . t('zotyczportal_customer_users') . ' SET active = ? WHERE id = ?')->execute([$active ? 1 : 0, $id]);
 }
 
 function delete_customer_user(int $id): void
 {
-    db()->prepare('DELETE FROM ' . t('changelog_customer_users') . ' WHERE id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('zotyczportal_customer_users') . ' WHERE id = ?')->execute([$id]);
 }
 
 /* ---------------------------------------------------------------- customer login (portal) */
@@ -491,14 +491,14 @@ function password_matches(string $password, string $hash): bool
  */
 function customer_login(string $email, string $password): array
 {
-    $st = db()->prepare('SELECT u.id, u.password_hash, u.active, c.active AS customer_active FROM ' . t('changelog_customer_users') . ' u'
-        . ' JOIN ' . t('changelog_customers') . ' c ON c.id = u.customer_id WHERE u.email = ?');
+    $st = db()->prepare('SELECT u.id, u.password_hash, u.active, c.active AS customer_active FROM ' . t('zotyczportal_customer_users') . ' u'
+        . ' JOIN ' . t('zotyczportal_customers') . ' c ON c.id = u.customer_id WHERE u.email = ?');
     $st->execute([mb_strtolower(trim($email))]);
     $row = $st->fetch();
     $hash = $row['password_hash'] ?? password_hash('dummy-password', PASSWORD_DEFAULT);
     if (!password_matches($password, $hash) || !$row) return ['status' => 'invalid'];
     if (!(int)$row['active'] || !(int)$row['customer_active']) return ['status' => 'inactive'];
-    db()->prepare('UPDATE ' . t('changelog_customer_users') . ' SET last_login = ?, lang = ? WHERE id = ?')->execute([now(), lang(), $row['id']]);
+    db()->prepare('UPDATE ' . t('zotyczportal_customer_users') . ' SET last_login = ?, lang = ? WHERE id = ?')->execute([now(), lang(), $row['id']]);
     return ['status' => 'ok', 'user' => get_customer_user((int)$row['id'])];
 }
 
@@ -539,8 +539,8 @@ const TICKET_COLS = 'k.*, c.code AS customer_code, c.name AS customer_name, u.na
 
 function ticket_from(): string
 {
-    return t('changelog_tickets') . ' k JOIN ' . t('changelog_customers') . ' c ON c.id = k.customer_id'
-         . ' LEFT JOIN ' . t('changelog_customer_users') . ' u ON u.id = k.user_id';
+    return t('zotyczportal_tickets') . ' k JOIN ' . t('zotyczportal_customers') . ' c ON c.id = k.customer_id'
+         . ' LEFT JOIN ' . t('zotyczportal_customer_users') . ' u ON u.id = k.user_id';
 }
 
 function ticket_key(array $t): string
@@ -582,7 +582,7 @@ function fetch_tickets(array $f = []): array
             array_push($args, $like, $like);
         }
     }
-    $sql = 'SELECT ' . TICKET_COLS . ', (SELECT COUNT(*) FROM ' . t('changelog_ticket_comments') . " m WHERE m.ticket_id = k.id AND m.body <> '') AS comment_count"
+    $sql = 'SELECT ' . TICKET_COLS . ', (SELECT COUNT(*) FROM ' . t('zotyczportal_ticket_comments') . " m WHERE m.ticket_id = k.id AND m.body <> '') AS comment_count"
          . ' FROM ' . ticket_from() . ($where ? ' WHERE ' . implode(' AND ', $where) : '')
          . " ORDER BY CASE WHEN k.status IN ('resolved','closed') THEN 1 ELSE 0 END, k.updated_at DESC";
     $st = db()->prepare($sql);
@@ -611,7 +611,7 @@ function get_ticket_by_key(string $key, int $customerId = 0): ?array
 
 function ticket_stats(int $customerId = 0): array
 {
-    $sql = 'SELECT status, COUNT(*) AS n FROM ' . t('changelog_tickets') . ($customerId ? ' WHERE customer_id = ?' : '') . ' GROUP BY status';
+    $sql = 'SELECT status, COUNT(*) AS n FROM ' . t('zotyczportal_tickets') . ($customerId ? ' WHERE customer_id = ?' : '') . ' GROUP BY status';
     $st = db()->prepare($sql);
     $st->execute($customerId ? [$customerId] : []);
     $out = array_fill_keys(TICKET_STATUSES, 0);
@@ -622,13 +622,13 @@ function ticket_stats(int $customerId = 0): array
 /** Numbers for the admin support overview. */
 function support_overview(): array
 {
-    $tk = t('changelog_tickets');
+    $tk = t('zotyczportal_tickets');
     $one = function (string $sql, array $args = []): int { $st = db()->prepare($sql); $st->execute($args); return (int)$st->fetchColumn(); };
     return [
         'crisis'   => $one("SELECT COUNT(*) FROM $tk WHERE severity = 'crisis' AND status NOT IN ('resolved','closed')"),
         'resolved' => $one("SELECT COUNT(*) FROM $tk WHERE status IN ('resolved','closed') AND updated_at >= ?", [date('Y-m-d H:i:s', time() - 7 * 86400)]),
         'new_week' => $one("SELECT COUNT(*) FROM $tk WHERE created_at >= ?", [date('Y-m-d H:i:s', time() - 7 * 86400)]),
-        'customers'=> $one('SELECT COUNT(*) FROM ' . t('changelog_customers')),
+        'customers'=> $one('SELECT COUNT(*) FROM ' . t('zotyczportal_customers')),
     ];
 }
 
@@ -673,7 +673,7 @@ function validate_ticket(array $in): array
 /** Creates a ticket with the customer's next number; returns its id. */
 function create_ticket(array $user, array $d): int
 {
-    $tbl = t('changelog_tickets');
+    $tbl = t('zotyczportal_tickets');
     for ($try = 0; ; $try++) {
         $st = db()->prepare("SELECT COALESCE(MAX(number), 0) + 1 FROM $tbl WHERE customer_id = ?");
         $st->execute([$user['customer_id']]);
@@ -692,14 +692,14 @@ function create_ticket(array $user, array $d): int
 
 function ticket_touch(int $id): void
 {
-    db()->prepare('UPDATE ' . t('changelog_tickets') . ' SET updated_at = ? WHERE id = ?')->execute([now(), $id]);
+    db()->prepare('UPDATE ' . t('zotyczportal_tickets') . ' SET updated_at = ? WHERE id = ?')->execute([now(), $id]);
 }
 
 /** Changes the status and logs it in the activity; returns false when nothing changed. */
 function ticket_set_status(array $ticket, string $status, ?array $user, string $staff = ''): bool
 {
     if (!in_array($status, TICKET_STATUSES, true) || $status === $ticket['status']) return false;
-    db()->prepare('UPDATE ' . t('changelog_tickets') . ' SET status = ?, updated_at = ? WHERE id = ?')->execute([$status, now(), $ticket['id']]);
+    db()->prepare('UPDATE ' . t('zotyczportal_tickets') . ' SET status = ?, updated_at = ? WHERE id = ?')->execute([$status, now(), $ticket['id']]);
     ticket_add_comment($ticket['id'], '', $user, $staff, 'status:' . $ticket['status'] . '>' . $status);
     return true;
 }
@@ -707,7 +707,7 @@ function ticket_set_status(array $ticket, string $status, ?array $user, string $
 function ticket_set_severity(array $ticket, string $severity, string $staff): bool
 {
     if (!in_array($severity, TICKET_SEVERITIES, true) || $severity === $ticket['severity']) return false;
-    db()->prepare('UPDATE ' . t('changelog_tickets') . ' SET severity = ?, updated_at = ? WHERE id = ?')->execute([$severity, now(), $ticket['id']]);
+    db()->prepare('UPDATE ' . t('zotyczportal_tickets') . ' SET severity = ?, updated_at = ? WHERE id = ?')->execute([$severity, now(), $ticket['id']]);
     ticket_add_comment($ticket['id'], '', null, $staff, 'severity:' . $ticket['severity'] . '>' . $severity);
     return true;
 }
@@ -715,7 +715,7 @@ function ticket_set_severity(array $ticket, string $severity, string $staff): bo
 /** Adds a comment (or, with $event, an activity line). Pass $user for a customer, $staff for support staff. */
 function ticket_add_comment(int $ticketId, string $body, ?array $user, string $staff = '', string $event = ''): int
 {
-    db()->prepare('INSERT INTO ' . t('changelog_ticket_comments') . ' (ticket_id, user_id, staff_name, body, event, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+    db()->prepare('INSERT INTO ' . t('zotyczportal_ticket_comments') . ' (ticket_id, user_id, staff_name, body, event, created_at) VALUES (?, ?, ?, ?, ?, ?)')
         ->execute([$ticketId, $user['id'] ?? null, $user ? '' : $staff, $body, $event, now()]);
     $id = (int)db()->lastInsertId();
     ticket_touch($ticketId);
@@ -724,8 +724,8 @@ function ticket_add_comment(int $ticketId, string $body, ?array $user, string $s
 
 function ticket_comments(int $ticketId): array
 {
-    $st = db()->prepare('SELECT m.*, u.name AS user_name, u.email AS user_email FROM ' . t('changelog_ticket_comments') . ' m'
-        . ' LEFT JOIN ' . t('changelog_customer_users') . ' u ON u.id = m.user_id WHERE m.ticket_id = ? ORDER BY m.created_at, m.id');
+    $st = db()->prepare('SELECT m.*, u.name AS user_name, u.email AS user_email FROM ' . t('zotyczportal_ticket_comments') . ' m'
+        . ' LEFT JOIN ' . t('zotyczportal_customer_users') . ' u ON u.id = m.user_id WHERE m.ticket_id = ? ORDER BY m.created_at, m.id');
     $st->execute([$ticketId]);
     return $st->fetchAll();
 }
@@ -735,10 +735,10 @@ function delete_ticket(int $id): void
 {
     foreach (ticket_files($id) as $f) @unlink(ticket_file_path($f));
     @rmdir(__DIR__ . '/data/tickets/' . $id);
-    db()->prepare('DELETE FROM ' . t('changelog_ticket_files') . ' WHERE ticket_id = ?')->execute([$id]);
-    db()->prepare('DELETE FROM ' . t('changelog_ticket_participants') . ' WHERE ticket_id = ?')->execute([$id]);
-    db()->prepare('DELETE FROM ' . t('changelog_ticket_comments') . ' WHERE ticket_id = ?')->execute([$id]);
-    db()->prepare('DELETE FROM ' . t('changelog_tickets') . ' WHERE id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('zotyczportal_ticket_files') . ' WHERE ticket_id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('zotyczportal_ticket_participants') . ' WHERE ticket_id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('zotyczportal_ticket_comments') . ' WHERE ticket_id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM ' . t('zotyczportal_tickets') . ' WHERE id = ?')->execute([$id]);
 }
 
 /* ---------------------------------------------------------------- sharing (participants) */
@@ -752,8 +752,8 @@ const TICKET_SHARE_MAX = 30;   // people per ticket
  */
 function ticket_participants(array $ticket): array
 {
-    $st = db()->prepare('SELECT p.id, p.email, p.token, p.created_at, u.name, u.lang, u.active FROM ' . t('changelog_ticket_participants') . ' p'
-        . ' LEFT JOIN ' . t('changelog_customer_users') . ' u ON LOWER(u.email) = p.email AND u.customer_id = ?'
+    $st = db()->prepare('SELECT p.id, p.email, p.token, p.created_at, u.name, u.lang, u.active FROM ' . t('zotyczportal_ticket_participants') . ' p'
+        . ' LEFT JOIN ' . t('zotyczportal_customer_users') . ' u ON LOWER(u.email) = p.email AND u.customer_id = ?'
         . ' WHERE p.ticket_id = ? ORDER BY p.created_at, p.id');
     $st->execute([$ticket['customer_id'], $ticket['id']]);
     return array_map(fn($r) => ['name' => (string)$r['name'], 'lang' => (string)($r['lang'] ?? ''), 'member' => (int)($r['active'] ?? 0),
@@ -782,7 +782,7 @@ function ticket_share(array $ticket, string $email, array $by): array
     foreach ($list as $p) if ($p['email'] === $email) return [null, 'ticket.share.err_exists'];
     if (count($list) >= TICKET_SHARE_MAX) return [null, 'ticket.share.err_max'];
     $token = bin2hex(random_bytes(24));
-    db()->prepare('INSERT INTO ' . t('changelog_ticket_participants') . ' (ticket_id, email, token, shared_by, created_at) VALUES (?, ?, ?, ?, ?)')
+    db()->prepare('INSERT INTO ' . t('zotyczportal_ticket_participants') . ' (ticket_id, email, token, shared_by, created_at) VALUES (?, ?, ?, ?, ?)')
         ->execute([$ticket['id'], $email, $token, $by['email'], now()]);
     $id = (int)db()->lastInsertId();
     ticket_add_comment($ticket['id'], '', $by, '', mb_substr('shared:' . $email, 0, 60));
@@ -799,7 +799,7 @@ function ticket_unshare(array $ticket, int $participantId, array $by): ?string
 {
     foreach (ticket_participants($ticket) as $p) {
         if ((int)$p['id'] !== $participantId) continue;
-        db()->prepare('DELETE FROM ' . t('changelog_ticket_participants') . ' WHERE id = ?')->execute([$participantId]);
+        db()->prepare('DELETE FROM ' . t('zotyczportal_ticket_participants') . ' WHERE id = ?')->execute([$participantId]);
         ticket_add_comment($ticket['id'], '', $by, '', mb_substr('unshared:' . $p['email'], 0, 60));
         return $p['email'];
     }
@@ -813,11 +813,11 @@ function ticket_unshare(array $ticket, int $participantId, array $by): ?string
 function ticket_by_share_token(string $token): ?array
 {
     if (!preg_match('/^[0-9a-f]{48}$/', $token)) return null;
-    $st = db()->prepare('SELECT ticket_id, id FROM ' . t('changelog_ticket_participants') . ' WHERE token = ?');
+    $st = db()->prepare('SELECT ticket_id, id FROM ' . t('zotyczportal_ticket_participants') . ' WHERE token = ?');
     $st->execute([$token]);
     $r = $st->fetch();
     if (!$r) {
-        $st = db()->prepare('SELECT id AS ticket_id, 0 AS id FROM ' . t('changelog_tickets') . ' WHERE share_token = ?');
+        $st = db()->prepare('SELECT id AS ticket_id, 0 AS id FROM ' . t('zotyczportal_tickets') . ' WHERE share_token = ?');
         $st->execute([$token]);
         $r = $st->fetch();
     }
@@ -835,7 +835,7 @@ function ticket_share_link(array $ticket, bool $renew = false): string
     $token = (string)($ticket['share_token'] ?? '');
     if ($token === '' || $renew) {
         $token = bin2hex(random_bytes(24));
-        db()->prepare('UPDATE ' . t('changelog_tickets') . ' SET share_token = ? WHERE id = ?')->execute([$token, $ticket['id']]);
+        db()->prepare('UPDATE ' . t('zotyczportal_tickets') . ' SET share_token = ? WHERE id = ?')->execute([$token, $ticket['id']]);
     }
     return site_url('portal/shared.php?t=' . $token);
 }
@@ -850,14 +850,14 @@ function participant_url(array $ticket, array $p): string
 
 function ticket_files(int $ticketId): array
 {
-    $st = db()->prepare('SELECT * FROM ' . t('changelog_ticket_files') . ' WHERE ticket_id = ? ORDER BY id');
+    $st = db()->prepare('SELECT * FROM ' . t('zotyczportal_ticket_files') . ' WHERE ticket_id = ? ORDER BY id');
     $st->execute([$ticketId]);
     return $st->fetchAll();
 }
 
 function get_ticket_file(int $id): ?array
 {
-    $st = db()->prepare('SELECT * FROM ' . t('changelog_ticket_files') . ' WHERE id = ?');
+    $st = db()->prepare('SELECT * FROM ' . t('zotyczportal_ticket_files') . ' WHERE id = ?');
     $st->execute([$id]);
     return $st->fetch() ?: null;
 }
@@ -925,7 +925,7 @@ function store_ticket_files(int $ticketId, ?int $commentId, array $files): void
         if (!move_uploaded_file($f['tmp_name'], $dir . '/' . $stored)) throw new RuntimeException('Přílohu se nepodařilo uložit.');
         @chmod($dir . '/' . $stored, 0640);
         $name = trim(preg_replace('/[\x00-\x1f"\\\\\/]+/u', '_', (string)$f['name'])) ?: 'file.' . $ext;
-        db()->prepare('INSERT INTO ' . t('changelog_ticket_files') . ' (ticket_id, comment_id, name, path, mime, size, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        db()->prepare('INSERT INTO ' . t('zotyczportal_ticket_files') . ' (ticket_id, comment_id, name, path, mime, size, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
             ->execute([$ticketId, $commentId, mb_substr($name, 0, 255), $stored, $mime, (int)$f['size'], now()]);
     }
 }
@@ -1011,7 +1011,7 @@ function ticket_codes(): array
     static $codes = null;
     if ($codes === null) {
         try {
-            $codes = db()->query('SELECT code FROM ' . t('changelog_customers'))->fetchAll(PDO::FETCH_COLUMN);
+            $codes = db()->query('SELECT code FROM ' . t('zotyczportal_customers'))->fetchAll(PDO::FETCH_COLUMN);
         } catch (PDOException $ex) {
             $codes = [];
         }
@@ -1055,7 +1055,7 @@ function ticket_refs_in(string $text): array
 function entries_for_ticket(string $key, bool $publishedOnly = true): array
 {
     $like = '%' . strtr($key, ['!' => '!!', '%' => '!%', '_' => '!_']) . '%';
-    $sql = 'SELECT ' . ENTRY_COLS . ' FROM ' . t('changelog_entries') . ' e JOIN ' . t('changelog_versions') . ' v ON v.id = e.version_id'
+    $sql = 'SELECT ' . ENTRY_COLS . ' FROM ' . t('zotyczportal_entries') . ' e JOIN ' . t('zotyczportal_versions') . ' v ON v.id = e.version_id'
          . " WHERE (e.title LIKE ? ESCAPE '!' OR e.body LIKE ? ESCAPE '!')"
          . ($publishedOnly ? ' AND e.published = 1 AND v.published = 1' : '')
          . ' ORDER BY v.release_date DESC, v.id DESC, e.id';

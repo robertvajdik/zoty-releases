@@ -4,8 +4,8 @@ require __DIR__ . '/lib.php';
 
 $rows = db()->query(
     'SELECT v.version, v.release_date, MAX(e.updated_at) AS updated'
-    . ' FROM ' . t('changelog_versions') . ' v'
-    . ' JOIN ' . t('changelog_entries') . ' e ON e.version_id = v.id AND e.published = 1'
+    . ' FROM ' . t('zotyczportal_versions') . ' v'
+    . ' JOIN ' . t('zotyczportal_entries') . ' e ON e.version_id = v.id AND e.published = 1'
     . ' WHERE v.published = 1'
     . ' GROUP BY v.id, v.version, v.release_date'
     . ' ORDER BY v.release_date DESC, v.id DESC'

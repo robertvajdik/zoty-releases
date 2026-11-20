@@ -1,7 +1,7 @@
 <?php
 /**
  * A rendered manual with a table of contents.
- * @var array $doc  row from changelog_docs   @var string $docTools  extra HTML for the toolbar (buttons)
+ * @var array $doc  row from zotyczportal_docs   @var string $docTools  extra HTML for the toolbar (buttons)
  * @var string $tocLabel   @var string $updatedLabel
  */
 $docHtml = doc_render($doc['body'], $toc);
